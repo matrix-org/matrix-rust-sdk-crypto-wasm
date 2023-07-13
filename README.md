@@ -21,7 +21,6 @@ Encryption](https://en.wikipedia.org/wiki/End-to-end_encryption)) for
 
     or:
 
-
     ```
     yarn add @matrix-org/matrix-sdk-crypto-wasm
     ```
