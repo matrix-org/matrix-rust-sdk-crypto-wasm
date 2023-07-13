@@ -38,7 +38,7 @@ TBD
 ## Documentation
 
 [The documentation can be found
-online](https://matrix-org.github.io/matrix-rust-sdk/bindings/matrix-sdk-crypto-js/).
+online](https://matrix-org.github.io/matrix-rust-sdk-crypto-web/).
 
 To generate the documentation locally, please run the following
 command:
