@@ -48,6 +48,7 @@ jobs:
 
       - name: Create the Github release
         uses: softprops/action-gh-release@v1
+        permissions:
+          contents: write
         with:
           draft: true
-          files: pkg/matrix-org-matrix-sdk-crypto-js-*.tgz
