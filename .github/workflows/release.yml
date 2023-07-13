@@ -1,7 +1,7 @@
-# This workflow releases the `matrix-sdk-crypto-js` project.
+# This workflow releases the `matrix-sdk-crypto-wasm` project.
 #
 # It is triggered when a new tag appears that matches
-# `matrix-sdk-crypto-js-[0-9]+.*`. This workflow builds the package
+# `v[0-9]+.*`. This workflow builds the package
 # for the bindings, runs its tests to ensure everything is still
 # correct, and publishes the package on NPM and on a newly created
 # Github release.
@@ -15,11 +15,11 @@ env:
 on:
   push:
     tags:
-      - matrix-sdk-crypto-js-[0-9]+.*
+      - v[0-9]+.*
 
 jobs:
-  publish-matrix-sdk-crypto-js:
-    name: Publish 🕸 [m]-crypto-js
+  publish-matrix-sdk-crypto-wasm:
+    name: Publish 🕸 [m]-crypto-wasm
     runs-on: ubuntu-latest
 
     steps:
@@ -50,4 +50,4 @@ jobs:
         uses: softprops/action-gh-release@v1
         with:
           draft: true
-          files: pkg/matrix-org-matrix-sdk-crypto-js-*.tgz
+          files: pkg/matrix-org-matrix-sdk-crypto-wasm-*.tgz
