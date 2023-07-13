@@ -1,4 +1,4 @@
-# `matrix-sdk-crypto-js`
+# `matrix-sdk-crypto-wasm`
 
 Welcome to the [WebAssembly] + JavaScript binding for the Rust
 [`matrix-sdk-crypto`] library! WebAssembly can run anywhere, but these
@@ -38,7 +38,7 @@ TBD
 ## Documentation
 
 [The documentation can be found
-online](https://matrix-org.github.io/matrix-rust-sdk-crypto-web/).
+online](https://matrix-org.github.io/matrix-rust-sdk-crypto-wasm/).
 
 To generate the documentation locally, please run the following
 command:

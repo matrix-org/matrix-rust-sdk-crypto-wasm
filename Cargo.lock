@@ -1130,7 +1130,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "matrix-sdk-crypto-js"
+name = "matrix-sdk-crypto-wasm"
 version = "0.1.0-alpha.0"
 dependencies = [
  "anyhow",
