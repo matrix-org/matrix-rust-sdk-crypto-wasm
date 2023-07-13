@@ -7,7 +7,7 @@ const {
     SignatureUploadRequest,
     RoomMessageRequest,
     KeysBackupRequest,
-} = require("../pkg/matrix_sdk_crypto_js");
+} = require("../pkg/matrix_sdk_crypto_wasm");
 
 describe("RequestType", () => {
     test("has the correct variant values", () => {

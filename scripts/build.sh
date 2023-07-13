@@ -21,19 +21,19 @@ RUSTFLAGS='-C opt-level=z' WASM_BINDGEN_WEAKREF=1 wasm-pack build --target nodej
 # Convert the Wasm into a JS file that exports the base64'ed Wasm.
 {
   printf 'module.exports = `'
-  base64 < pkg/matrix_sdk_crypto_js_bg.wasm
+  base64 < pkg/matrix_sdk_crypto_wasm_bg.wasm
   printf '`;'
-} > pkg/matrix_sdk_crypto_js_bg.wasm.js
+} > pkg/matrix_sdk_crypto_wasm_bg.wasm.js
 
 # In the JavaScript:
 #  1. Strip out the lines that load the WASM, and our new epilogue.
 #  2. Remove the imports of `TextDecoder` and `TextEncoder`. We rely on the global defaults.
 {
   sed -e '/Text..coder.*= require(.util.)/d' \
-      -e '/^const path = /,$d' pkg/matrix_sdk_crypto_js.js
+      -e '/^const path = /,$d' pkg/matrix_sdk_crypto_wasm.js
   cat scripts/epilogue.js
-} > pkg/matrix_sdk_crypto_js.js.new
-mv pkg/matrix_sdk_crypto_js.js.new pkg/matrix_sdk_crypto_js.js
+} > pkg/matrix_sdk_crypto_wasm.js.new
+mv pkg/matrix_sdk_crypto_wasm.js.new pkg/matrix_sdk_crypto_wasm.js
 
 # also extend the typescript
-cat scripts/epilogue.d.ts >> pkg/matrix_sdk_crypto_js.d.ts
+cat scripts/epilogue.d.ts >> pkg/matrix_sdk_crypto_wasm.d.ts

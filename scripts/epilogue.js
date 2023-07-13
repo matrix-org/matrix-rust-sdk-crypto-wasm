@@ -17,7 +17,7 @@ const __initSync = function () {
     if (initPromise) {
         throw new Error("Asynchronous initialisation already in progress: cannot initialise synchronously");
     }
-    const bytes = unbase64(require("./matrix_sdk_crypto_js_bg.wasm.js"));
+    const bytes = unbase64(require("./matrix_sdk_crypto_wasm_bg.wasm.js"));
     const mod = new WebAssembly.Module(bytes);
     const instance = new WebAssembly.Instance(mod, imports);
     wasm = instance.exports;
@@ -41,7 +41,7 @@ module.exports.initAsync = function () {
     }
     if (!initPromise) {
         initPromise = Promise.resolve()
-            .then(() => require("./matrix_sdk_crypto_js_bg.wasm.js"))
+            .then(() => require("./matrix_sdk_crypto_wasm_bg.wasm.js"))
             .then((b64) => WebAssembly.instantiate(unbase64(b64), imports))
             .then((result) => {
                 wasm = result.instance.exports;

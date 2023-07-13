@@ -1,15 +1,15 @@
 [package]
-name = "matrix-sdk-crypto-js"
+name = "matrix-sdk-crypto-wasm"
 description = "Matrix encryption library, for JavaScript"
 authors = ["Ivan Enderlin <ivane@element.io>"]
 edition = "2021"
-homepage = "https://github.com/matrix-org/matrix-rust-sdk"
+homepage = "https://github.com/matrix-org/matrix-rust-sdk-wasm"
 keywords = ["matrix", "chat", "messaging", "ruma", "nio"]
 license = "Apache-2.0"
 readme = "README.md"
-repository = "https://github.com/matrix-org/matrix-rust-sdk"
+repository = "https://github.com/matrix-org/matrix-rust-sdk-wasm"
 rust-version = "1.70"
-version = "0.1.0-alpha.0"
+version = "0.0.0"
 publish = false
 
 [package.metadata.docs.rs]
