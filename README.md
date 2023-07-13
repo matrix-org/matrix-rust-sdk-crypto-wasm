@@ -15,37 +15,36 @@ Encryption](https://en.wikipedia.org/wiki/End-to-end_encryption)) for
 
 1. Install in your project:
 
-   ```
-   npm install --save @matrix-org/matrix-sdk-crypto-wasm
-   ```
+    ```
+    npm install --save @matrix-org/matrix-sdk-crypto-wasm
+    ```
 
 2. Import the library into your project and initialise it.
 
-   It is recommended that you use a dynamic import, particularly in a Web
-   environment, because the WASM artifiact is large:
+    It is recommended that you use a dynamic import, particularly in a Web
+    environment, because the WASM artifiact is large:
 
-   ```javascript
-   async function loadCrypto(userId, deviceId) {
-      const matrixSdkCrypto = await import("@matrix-org/matrix-sdk-crypto-wasm");
-      await matrixSdkCrypto.initAsync();
+    ```javascript
+    async function loadCrypto(userId, deviceId) {
+        const matrixSdkCrypto = await import("@matrix-org/matrix-sdk-crypto-wasm");
+        await matrixSdkCrypto.initAsync();
 
-      // Optional: enable tracing in the rust-sdk
-      new matrixSdkCrypto.Tracing(matrixSdkCrypto.LoggerLevel.Trace).turnOn();
+        // Optional: enable tracing in the rust-sdk
+        new matrixSdkCrypto.Tracing(matrixSdkCrypto.LoggerLevel.Trace).turnOn();
 
-      // Create a new OlmMachine
-      //
-      // The following will use an in-memory store. It is recommended to use
-      // indexedDB where that is available.
-      // See https://matrix-org.github.io/matrix-rust-sdk-crypto-wasm/classes/OlmMachine.html#initialize
-      const olmMachine = await RustSdkCryptoJs.OlmMachine.initialize(
-        new RustSdkCryptoJs.UserId(userId),
-        new RustSdkCryptoJs.DeviceId(deviceId)
-      );
+        // Create a new OlmMachine
+        //
+        // The following will use an in-memory store. It is recommended to use
+        // indexedDB where that is available.
+        // See https://matrix-org.github.io/matrix-rust-sdk-crypto-wasm/classes/OlmMachine.html#initialize
+        const olmMachine = await RustSdkCryptoJs.OlmMachine.initialize(
+            new RustSdkCryptoJs.UserId(userId),
+            new RustSdkCryptoJs.DeviceId(deviceId),
+        );
 
-      return olmMachine;
-   }
-   ```
-
+        return olmMachine;
+    }
+    ```
 
 ## Building
 
