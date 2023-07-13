@@ -19,6 +19,13 @@ Encryption](https://en.wikipedia.org/wiki/End-to-end_encryption)) for
     npm install --save @matrix-org/matrix-sdk-crypto-wasm
     ```
 
+    or:
+
+
+    ```
+    yarn add @matrix-org/matrix-sdk-crypto-wasm
+    ```
+
 2. Import the library into your project and initialise it.
 
     It is recommended that you use a dynamic import, particularly in a Web
