@@ -46,9 +46,14 @@ jobs:
           access: public
           token: ${{ secrets.NPM_TOKEN }}
 
+  github-release:
+    name: Create the Github release
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
       - name: Create the Github release
         uses: softprops/action-gh-release@v1
-        permissions:
-          contents: write
         with:
           draft: true
