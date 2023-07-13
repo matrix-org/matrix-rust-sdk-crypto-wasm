@@ -1,4 +1,4 @@
-const { UserId, initAsync } = require("../pkg/matrix_sdk_crypto_js");
+const { UserId, initAsync } = require("../pkg/matrix_sdk_crypto_wasm");
 
 test("can instantiate rust objects with async initialiser", async () => {
     initUserId = () => new UserId("@foo:bar.org");

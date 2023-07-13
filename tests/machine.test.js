@@ -24,7 +24,7 @@ const {
     VerificationState,
     Versions,
     getVersions,
-} = require("../pkg/matrix_sdk_crypto_js");
+} = require("../pkg/matrix_sdk_crypto_wasm");
 const { addMachineToMachine } = require("./helper");
 require("fake-indexeddb/auto");
 
