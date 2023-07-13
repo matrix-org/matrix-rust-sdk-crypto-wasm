@@ -1,5 +1,6 @@
 //! Vodozemac types.
 
+use matrix_sdk_crypto::vodozemac;
 use wasm_bindgen::prelude::*;
 
 use crate::impl_from_to_inner;

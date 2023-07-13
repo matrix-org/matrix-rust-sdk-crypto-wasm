@@ -1,6 +1,7 @@
 //! `GET /_matrix/client/*/sync`
 
 use js_sys::Array;
+use matrix_sdk_common::ruma;
 use wasm_bindgen::prelude::*;
 
 use crate::{identifiers, js::downcast};

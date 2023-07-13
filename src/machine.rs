@@ -4,7 +4,7 @@ use std::{collections::BTreeMap, ops::Deref, time::Duration};
 
 use futures_util::StreamExt;
 use js_sys::{Array, Function, Map, Promise, Set};
-use ruma::{serde::Raw, DeviceKeyAlgorithm, OwnedTransactionId, UInt};
+use matrix_sdk_common::ruma::{self, serde::Raw, DeviceKeyAlgorithm, OwnedTransactionId, UInt};
 use serde_json::{json, Value as JsonValue};
 use tracing::warn;
 use wasm_bindgen::prelude::*;

@@ -1,6 +1,6 @@
 //! Types related to events.
 
-use ruma::events::room::history_visibility::HistoryVisibility as RumaHistoryVisibility;
+use matrix_sdk_common::ruma::events::room::history_visibility::HistoryVisibility as RumaHistoryVisibility;
 use wasm_bindgen::prelude::*;
 
 /// Who can see a room's history.
