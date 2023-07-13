@@ -37,13 +37,12 @@ jobs:
           node-version: 20.0
 
       - name: Install NPM dependencies
-        working-directory: ${{ env.PKG_PATH }}
         run: npm install
 
       - name: Publish the WebAssembly + JavaScript binding (imply building + testing)
         uses: JS-DevTools/npm-publish@v1
         with:
-          package: ${{env.PKG_PATH}}/package.json
+          package: package.json
           access: public
           token: ${{ secrets.NPM_TOKEN }}
 
@@ -51,4 +50,4 @@ jobs:
         uses: softprops/action-gh-release@v1
         with:
           draft: true
-          files: ${{ env.PKG_PATH }}/pkg/matrix-org-matrix-sdk-crypto-js-*.tgz
+          files: pkg/matrix-org-matrix-sdk-crypto-js-*.tgz
