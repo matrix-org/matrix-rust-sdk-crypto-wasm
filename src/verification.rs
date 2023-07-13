@@ -7,10 +7,10 @@ use futures_util::StreamExt;
 #[cfg(feature = "qrcode")]
 use js_sys::Uint8ClampedArray;
 use js_sys::{Array, Function, JsString, Promise};
-use matrix_sdk_crypto::{QrVerificationState, VerificationRequestState};
-use ruma::events::key::verification::{
+use matrix_sdk_common::ruma::events::key::verification::{
     cancel::CancelCode as RumaCancelCode, VerificationMethod as RumaVerificationMethod,
 };
+use matrix_sdk_crypto::{QrVerificationState, VerificationRequestState};
 use tracing::warn;
 use wasm_bindgen::prelude::*;
 use wasm_bindgen_futures::spawn_local;

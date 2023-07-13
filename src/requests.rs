@@ -1,6 +1,14 @@
 //! Types to handle requests.
 
 use js_sys::JsString;
+use matrix_sdk_common::ruma::{
+    api::client::keys::{
+        claim_keys::v3::Request as OriginalKeysClaimRequest,
+        upload_keys::v3::Request as OriginalKeysUploadRequest,
+        upload_signatures::v3::Request as OriginalSignatureUploadRequest,
+    },
+    events::EventContent,
+};
 use matrix_sdk_crypto::{
     requests::{
         KeysBackupRequest as OriginalKeysBackupRequest,
@@ -10,14 +18,6 @@ use matrix_sdk_crypto::{
         UploadSigningKeysRequest as OriginalUploadSigningKeysRequest,
     },
     OutgoingRequests,
-};
-use ruma::{
-    api::client::keys::{
-        claim_keys::v3::Request as OriginalKeysClaimRequest,
-        upload_keys::v3::Request as OriginalKeysUploadRequest,
-        upload_signatures::v3::Request as OriginalSignatureUploadRequest,
-    },
-    events::EventContent,
 };
 use wasm_bindgen::prelude::*;
 

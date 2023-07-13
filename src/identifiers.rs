@@ -1,6 +1,7 @@
 //! Types for [Matrix](https://matrix.org/) identifiers for devices,
 //! events, keys, rooms, servers, users and URIs.
 
+use matrix_sdk_common::ruma;
 use wasm_bindgen::prelude::*;
 
 use crate::impl_from_to_inner;
