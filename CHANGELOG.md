@@ -1,3 +1,8 @@
+# matrix-sdk-crypto-wasm v1.0.1
+
+No functional changes. Fixes for the release process which prevented v1.0.0
+being released.
+
 # matrix-sdk-crypto-wasm v1.0.0
 
 Project renamed to `matrix-sdk-crypto-wasm`. No functional changes.
