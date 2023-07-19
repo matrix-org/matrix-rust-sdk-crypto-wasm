@@ -1,4 +1,4 @@
-const { DeviceLists, UserId } = require("../pkg/matrix_sdk_crypto_js");
+const { DeviceLists, UserId } = require("../pkg/matrix_sdk_crypto_wasm");
 
 describe(DeviceLists.name, () => {
     test("can be empty", () => {

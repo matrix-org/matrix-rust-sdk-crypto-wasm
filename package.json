@@ -1,15 +1,15 @@
 {
-    "name": "@matrix-org/matrix-sdk-crypto-js",
-    "version": "0.1.0",
-    "homepage": "https://github.com/matrix-org/matrix-rust-sdk",
-    "description": "Matrix encryption library, for JavaScript",
+    "name": "@matrix-org/matrix-sdk-crypto-wasm",
+    "version": "1.0.1",
+    "homepage": "https://github.com/matrix-org/matrix-rust-sdk-wasm",
+    "description": "WebAssembly bindings of the matrix-sdk-crypto encryption library",
     "license": "Apache-2.0",
     "collaborators": [
         "Ivan Enderlin <ivane@element.io>"
     ],
     "repository": {
         "type": "git",
-        "url": "https://github.com/matrix-org/matrix-rust-sdk"
+        "url": "https://github.com/matrix-org/matrix-rust-sdk-wasm"
     },
     "keywords": [
         "matrix",
@@ -18,13 +18,13 @@
         "ruma",
         "nio"
     ],
-    "main": "pkg/matrix_sdk_crypto_js.js",
-    "types": "pkg/matrix_sdk_crypto_js.d.ts",
+    "main": "pkg/matrix_sdk_crypto_wasm.js",
+    "types": "pkg/matrix_sdk_crypto_wasm.d.ts",
     "files": [
-        "pkg/matrix_sdk_crypto_js_bg.wasm.js",
-        "pkg/matrix_sdk_crypto_js_bg.wasm.d.ts",
-        "pkg/matrix_sdk_crypto_js.js",
-        "pkg/matrix_sdk_crypto_js.d.ts"
+        "pkg/matrix_sdk_crypto_wasm_bg.wasm.js",
+        "pkg/matrix_sdk_crypto_wasm_bg.wasm.d.ts",
+        "pkg/matrix_sdk_crypto_wasm.js",
+        "pkg/matrix_sdk_crypto_wasm.d.ts"
     ],
     "devDependencies": {
         "cross-env": "^7.0.3",

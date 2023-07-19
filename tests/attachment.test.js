@@ -1,4 +1,4 @@
-const { Attachment, EncryptedAttachment } = require("../pkg/matrix_sdk_crypto_js");
+const { Attachment, EncryptedAttachment } = require("../pkg/matrix_sdk_crypto_wasm");
 
 describe(Attachment.name, () => {
     const originalData = "hello";

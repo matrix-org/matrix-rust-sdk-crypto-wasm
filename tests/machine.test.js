@@ -26,7 +26,7 @@ const {
     getVersions,
     SignatureState,
     BackupRecoveryKey,
-} = require("../pkg/matrix_sdk_crypto_js");
+} = require("../pkg/matrix_sdk_crypto_wasm");
 const { addMachineToMachine } = require("./helper");
 require("fake-indexeddb/auto");
 
@@ -65,7 +65,7 @@ describe(OlmMachine.name, () => {
         expect(databases).toHaveLength(2);
         expect(databases).toStrictEqual([
             { name: `${store_name}::matrix-sdk-crypto-meta`, version: 1 },
-            { name: `${store_name}::matrix-sdk-crypto`, version: 3 },
+            { name: `${store_name}::matrix-sdk-crypto`, version: 4 },
         ]);
 
         // Creating a new Olm machine, with the stored state.
@@ -156,7 +156,7 @@ describe(OlmMachine.name, () => {
         expect(databases).toHaveLength(2);
         expect(databases).toStrictEqual([
             { name: `${store_name}::matrix-sdk-crypto-meta`, version: 1 },
-            { name: `${store_name}::matrix-sdk-crypto`, version: 3 },
+            { name: `${store_name}::matrix-sdk-crypto`, version: 4 },
         ]);
 
         // Let's force to close the `OlmMachine`.
@@ -276,9 +276,17 @@ describe(OlmMachine.name, () => {
         }
     });
 
+    test("Can build a key query request", async () => {
+        const m = await machine();
+        const request = m.queryKeysForUsers([new UserId("@alice:example.org")]);
+        expect(request).toBeInstanceOf(KeysQueryRequest);
+        const body = JSON.parse(request.body);
+        expect(Object.keys(body.device_keys)).toContain("@alice:example.org");
+    });
+
     describe("setup workflow to mark requests as sent", () => {
         let m;
-        let ougoingRequests;
+        let outgoingRequests;
 
         beforeAll(async () => {
             m = await machine(new UserId("@alice:example.org"), new DeviceId("DEVICEID"));

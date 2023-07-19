@@ -1,9 +1,7 @@
 //! Types related to responses.
 
 use js_sys::{Array, JsString};
-use matrix_sdk_common::deserialized_responses::{AlgorithmInfo, EncryptionInfo};
-use matrix_sdk_crypto::IncomingResponse;
-pub(crate) use ruma::api::client::{
+pub(crate) use matrix_sdk_common::ruma::api::client::{
     backup::add_backup_keys::v3::Response as KeysBackupResponse,
     keys::{
         claim_keys::v3::Response as KeysClaimResponse, get_keys::v3::Response as KeysQueryResponse,
@@ -14,7 +12,11 @@ pub(crate) use ruma::api::client::{
     message::send_message_event::v3::Response as RoomMessageResponse,
     to_device::send_event_to_device::v3::Response as ToDeviceResponse,
 };
-use ruma::api::IncomingResponse as RumaIncomingResponse;
+use matrix_sdk_common::{
+    deserialized_responses::{AlgorithmInfo, EncryptionInfo},
+    ruma::{self, api::IncomingResponse as RumaIncomingResponse},
+};
+use matrix_sdk_crypto::IncomingResponse;
 use wasm_bindgen::prelude::*;
 
 use crate::{encryption, identifiers, requests::RequestType};

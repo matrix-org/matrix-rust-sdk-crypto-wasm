@@ -1,4 +1,4 @@
-const { Tracing, LoggerLevel, OlmMachine, UserId, DeviceId } = require("../pkg/matrix_sdk_crypto_js");
+const { Tracing, LoggerLevel, OlmMachine, UserId, DeviceId } = require("../pkg/matrix_sdk_crypto_wasm");
 
 describe("LoggerLevel", () => {
     test("has the correct variant values", () => {

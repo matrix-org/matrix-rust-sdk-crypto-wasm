@@ -1,4 +1,4 @@
-const { BackupRecoveryKey } = require("../pkg/matrix_sdk_crypto_js");
+const { BackupRecoveryKey } = require("../pkg/matrix_sdk_crypto_wasm");
 
 const aMegolmKey = {
     algorithm: "m.megolm.v1.aes-sha2",

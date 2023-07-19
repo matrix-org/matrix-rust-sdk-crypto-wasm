@@ -4,8 +4,8 @@ use std::{collections::BTreeMap, ops::Deref, time::Duration};
 
 use futures_util::StreamExt;
 use js_sys::{Array, Function, Map, Promise, Set};
+use matrix_sdk_common::ruma::{self, serde::Raw, DeviceKeyAlgorithm, OwnedTransactionId, UInt};
 use matrix_sdk_crypto::{backups::MegolmV1BackupKey, store::RecoveryKey, types::RoomKeyBackupInfo};
-use ruma::{serde::Raw, DeviceKeyAlgorithm, OwnedTransactionId, UInt};
 use serde_json::{json, Value as JsonValue};
 use serde_wasm_bindgen;
 use tracing::warn;
@@ -199,10 +199,7 @@ impl OlmMachine {
     /// Users that were already in the list are unaffected.
     #[wasm_bindgen(js_name = "updateTrackedUsers")]
     pub fn update_tracked_users(&self, users: &Array) -> Result<Promise, JsError> {
-        let users = users
-            .iter()
-            .map(|user| Ok(downcast::<identifiers::UserId>(&user, "UserId")?.inner.clone()))
-            .collect::<Result<Vec<ruma::OwnedUserId>, JsError>>()?;
+        let users = user_ids_to_owned_user_ids(users)?;
 
         let me = self.inner.clone();
 
@@ -220,6 +217,9 @@ impl OlmMachine {
     ///
     /// To decrypt an event from the room timeline call
     /// `decrypt_room_event`.
+    ///
+    /// Returns a list of JSON strings, containing the decrypted to-device
+    /// events.
     #[wasm_bindgen(js_name = "receiveSyncChanges")]
     pub fn receive_sync_changes(
         &self,
@@ -259,15 +259,19 @@ impl OlmMachine {
         let me = self.inner.clone();
 
         Ok(future_to_promise(async move {
-            Ok(serde_json::to_string(
-                &me.receive_sync_changes(
+            // we discard the list of updated room keys in the result; JS applications are
+            // expected to use register_room_key_updated_callback to receive updated room
+            // keys.
+            let (decrypted_to_device_events, _) = me
+                .receive_sync_changes(
                     to_device_events,
                     &changed_devices,
                     &one_time_key_counts,
                     unused_fallback_keys.as_deref(),
                 )
-                .await?,
-            )?)
+                .await?;
+
+            Ok(serde_json::to_string(&decrypted_to_device_events)?)
         }))
     }
 
@@ -411,7 +415,7 @@ impl OlmMachine {
         let me = self.inner.clone();
 
         future_to_promise(async move {
-            Ok(me.export_cross_signing_keys().await.map(store::CrossSigningKeyExport::from))
+            Ok(me.export_cross_signing_keys().await?.map(store::CrossSigningKeyExport::from))
         })
     }
 
@@ -526,10 +530,7 @@ impl OlmMachine {
         encryption_settings: &encryption::EncryptionSettings,
     ) -> Result<Promise, JsError> {
         let room_id = room_id.inner.clone();
-        let users = users
-            .iter()
-            .map(|user| Ok(downcast::<identifiers::UserId>(&user, "UserId")?.inner.clone()))
-            .collect::<Result<Vec<ruma::OwnedUserId>, JsError>>()?;
+        let users = user_ids_to_owned_user_ids(users)?;
         let encryption_settings =
             matrix_sdk_crypto::olm::EncryptionSettings::from(encryption_settings);
 
@@ -550,6 +551,26 @@ impl OlmMachine {
                 .map(|td| ToDeviceRequest::try_from(td.deref()).map(JsValue::from))
                 .collect::<Result<Array, _>>()?)
         }))
+    }
+
+    /// Generate an "out-of-band" key query request for the given set of users.
+    ///
+    /// This can be useful if we need the results from `getIdentity` or
+    /// `getUserDevices` to be as up-to-date as possible.
+    ///
+    /// Returns a `KeysQueryRequest` object. The response of the request should
+    /// be passed to the `OlmMachine` with the `mark_request_as_sent`.
+    #[wasm_bindgen(js_name = "queryKeysForUsers")]
+    pub fn query_keys_for_users(
+        &self,
+        users: &Array,
+    ) -> Result<requests::KeysQueryRequest, JsError> {
+        let users = user_ids_to_owned_user_ids(users)?;
+
+        let (request_id, request) =
+            self.inner.query_keys_for_users(users.iter().map(AsRef::as_ref));
+
+        Ok(requests::KeysQueryRequest::try_from((request_id.to_string(), &request))?)
     }
 
     /// Get the a key claiming request for the user/device pairs that
@@ -579,10 +600,7 @@ impl OlmMachine {
     /// empty iterator when calling this method between sync requests.
     #[wasm_bindgen(js_name = "getMissingSessions")]
     pub fn get_missing_sessions(&self, users: &Array) -> Result<Promise, JsError> {
-        let users = users
-            .iter()
-            .map(|user| Ok(downcast::<identifiers::UserId>(&user, "UserId")?.inner.clone()))
-            .collect::<Result<Vec<ruma::OwnedUserId>, JsError>>()?;
+        let users = user_ids_to_owned_user_ids(users)?;
 
         let me = self.inner.clone();
 
@@ -1020,4 +1038,13 @@ pub(crate) async fn promise_result_to_future(
             Err(e)
         }
     }
+}
+
+/// Helper function to take a Javascript array of `UserId`s and turn it into
+/// a Rust `Vec` of `OwnedUserId`s
+fn user_ids_to_owned_user_ids(users: &Array) -> Result<Vec<ruma::OwnedUserId>, JsError> {
+    users
+        .iter()
+        .map(|user| Ok(downcast::<identifiers::UserId>(&user, "UserId")?.inner.clone()))
+        .collect()
 }

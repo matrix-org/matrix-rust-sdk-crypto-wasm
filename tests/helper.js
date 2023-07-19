@@ -1,4 +1,4 @@
-const { DeviceLists, RequestType, KeysUploadRequest, KeysQueryRequest } = require("../pkg/matrix_sdk_crypto_js");
+const { DeviceLists, RequestType, KeysUploadRequest, KeysQueryRequest } = require("../pkg/matrix_sdk_crypto_wasm");
 
 function* zip(...arrays) {
     const len = Math.min(...arrays.map((array) => array.length));
