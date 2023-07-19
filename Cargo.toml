@@ -40,9 +40,9 @@ console_error_panic_hook = "0.1.7"
 futures-util = "0.3.27"
 http = "0.2.6"
 js-sys = "0.3.49"
-matrix-sdk-common = { git = "https://github.com/matrix-org/matrix-rust-sdk", rev = "51ba4483c08520b9763d2d860d7c918de0359f73", features = ["js"] }
-matrix-sdk-indexeddb = { git = "https://github.com/matrix-org/matrix-rust-sdk", rev = "51ba4483c08520b9763d2d860d7c918de0359f73" }
-matrix-sdk-qrcode = { git = "https://github.com/matrix-org/matrix-rust-sdk", rev = "51ba4483c08520b9763d2d860d7c918de0359f73", optional = true }
+matrix-sdk-common = { git = "https://github.com/matrix-org/matrix-rust-sdk", rev = "24e3ccfbb33b78bfbdc832e50acc43fa12b5a718", features = ["js"] }
+matrix-sdk-indexeddb = { git = "https://github.com/matrix-org/matrix-rust-sdk", rev = "24e3ccfbb33b78bfbdc832e50acc43fa12b5a718" }
+matrix-sdk-qrcode = { git = "https://github.com/matrix-org/matrix-rust-sdk", rev = "24e3ccfbb33b78bfbdc832e50acc43fa12b5a718", optional = true }
 serde_json = "1.0.91"
 tracing = { version = "0.1.36", default-features = false, features = ["std"] }
 tracing-subscriber = { version = "0.3.14", default-features = false, features = ["registry", "std"] }
@@ -52,6 +52,6 @@ zeroize = "1.3.0"
 
 [dependencies.matrix-sdk-crypto]
 git = "https://github.com/matrix-org/matrix-rust-sdk"
-rev = "51ba4483c08520b9763d2d860d7c918de0359f73"
+rev = "24e3ccfbb33b78bfbdc832e50acc43fa12b5a718"
 default_features = false
 features = ["js", "automatic-room-key-forwarding"]
