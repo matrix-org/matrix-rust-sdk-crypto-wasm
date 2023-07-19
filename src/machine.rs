@@ -787,17 +787,17 @@ impl OlmMachine {
         }))
     }
 
-    /// Store the recovery key in the crypto store.
+    /// Store the backup decryption key in the crypto store.
     ///
     /// This is useful if the client wants to support gossiping of the backup
     /// key.
-    #[wasm_bindgen(js_name = "saveBackupRecoveryKey")]
-    pub fn save_recovery_key(
+    #[wasm_bindgen(js_name = "saveBackupDecryptionKey")]
+    pub fn save_backup_decryption_key(
         &self,
-        recovery_key_base_58: String,
+        decryption_key_base58: String,
         version: String,
     ) -> Result<Promise, JsError> {
-        let key = BackupDecryptionKey::from_base58(&recovery_key_base_58)?;
+        let key = BackupDecryptionKey::from_base58(&decryption_key_base58)?;
 
         let me = self.inner.clone();
 

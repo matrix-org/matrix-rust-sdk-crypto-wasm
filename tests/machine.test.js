@@ -1018,7 +1018,7 @@ describe(OlmMachine.name, () => {
 
             let keyBackupKey = BackupDecryptionKey.createRandomKey();
 
-            await m.saveBackupRecoveryKey(keyBackupKey.toBase58(), "3");
+            await m.saveBackupDecryptionKey(keyBackupKey.toBase58(), "3");
 
             let savedKey = await m.getBackupKeys();
 
