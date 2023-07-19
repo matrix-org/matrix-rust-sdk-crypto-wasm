@@ -1022,7 +1022,7 @@ describe(OlmMachine.name, () => {
 
             let savedKey = await m.getBackupKeys();
 
-            expect(savedKey.recoveryKeyBase58).toStrictEqual(keyBackupKey.toBase58());
+            expect(savedKey.decryptionKeyBase58).toStrictEqual(keyBackupKey.toBase58());
             expect(savedKey.backupVersion).toStrictEqual("3");
         });
     });

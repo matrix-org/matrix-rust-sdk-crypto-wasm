@@ -808,7 +808,7 @@ impl OlmMachine {
     }
 
     /// Get the backup keys we have saved in our crypto store.
-    /// Returns a json object {recoveryKeyBase58: "", backupVersion: ""}
+    /// Returns `Promise<BackupKeys>`.
     #[wasm_bindgen(js_name = "getBackupKeys")]
     pub fn get_backup_keys(&self) -> Promise {
         let me = self.inner.clone();
@@ -816,7 +816,7 @@ impl OlmMachine {
         future_to_promise(async move {
             let inner = me.backup_machine().get_backup_keys().await?;
             let backup_keys = BackupKeys {
-                recovery_key: inner.decryption_key.map(|k| k.to_base58()),
+                decryption_key_base58: inner.decryption_key.map(|k| k.to_base58()),
                 backup_version: inner.backup_version,
             };
             Ok(serde_wasm_bindgen::to_value(&backup_keys).unwrap())
