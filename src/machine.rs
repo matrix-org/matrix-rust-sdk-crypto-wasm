@@ -13,7 +13,7 @@ use wasm_bindgen::prelude::*;
 use wasm_bindgen_futures::{spawn_local, JsFuture};
 
 use crate::{
-    backup::BackupDecryptionKey,
+    backup::{BackupDecryptionKey, BackupKeys, RoomKeyCounts},
     device, encryption,
     future::future_to_promise,
     identifiers, identities,
@@ -24,7 +24,7 @@ use crate::{
     store,
     store::RoomKeyInfo,
     sync_events,
-    types::{self, BackupKeys, RoomKeyCounts, SignatureVerification},
+    types::{self, SignatureVerification},
     verification, vodozemac,
 };
 
