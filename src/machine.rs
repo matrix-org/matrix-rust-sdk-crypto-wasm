@@ -5,7 +5,9 @@ use std::{collections::BTreeMap, ops::Deref, time::Duration};
 use futures_util::StreamExt;
 use js_sys::{Array, Function, Map, Promise, Set};
 use matrix_sdk_common::ruma::{self, serde::Raw, DeviceKeyAlgorithm, OwnedTransactionId, UInt};
-use matrix_sdk_crypto::{backups::MegolmV1BackupKey, store::RecoveryKey, types::RoomKeyBackupInfo};
+use matrix_sdk_crypto::{
+    backups::MegolmV1BackupKey, store::BackupDecryptionKey, types::RoomKeyBackupInfo,
+};
 use serde_json::{json, Value as JsonValue};
 use serde_wasm_bindgen;
 use tracing::warn;
@@ -795,12 +797,12 @@ impl OlmMachine {
         recovery_key_base_58: String,
         version: String,
     ) -> Result<Promise, JsError> {
-        let key = RecoveryKey::from_base58(&recovery_key_base_58)?;
+        let key = BackupDecryptionKey::from_base58(&recovery_key_base_58)?;
 
         let me = self.inner.clone();
 
         Ok(future_to_promise(async move {
-            me.backup_machine().save_recovery_key(Some(key), Some(version)).await?;
+            me.backup_machine().save_decryption_key(Some(key), Some(version)).await?;
             Ok(JsValue::NULL)
         }))
     }
@@ -814,7 +816,7 @@ impl OlmMachine {
         future_to_promise(async move {
             let inner = me.backup_machine().get_backup_keys().await?;
             let backup_keys = BackupKeys {
-                recovery_key: inner.recovery_key.map(|k| k.to_base58()),
+                recovery_key: inner.decryption_key.map(|k| k.to_base58()),
                 backup_version: inner.backup_version,
             };
             Ok(serde_wasm_bindgen::to_value(&backup_keys).unwrap())
