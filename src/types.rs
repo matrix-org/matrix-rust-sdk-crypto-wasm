@@ -1,13 +1,9 @@
 //! Extra types, like `Signatures`.
 
-use std::collections::BTreeMap;
-
-use js_sys::{Map, JSON};
+use js_sys::{JsString, Map};
 use matrix_sdk_crypto::backups::{
     SignatureState as InnerSignatureState, SignatureVerification as InnerSignatureVerification,
 };
-use serde::{Deserialize, Serialize};
-use tracing::trace;
 use wasm_bindgen::prelude::*;
 
 use crate::{
@@ -94,38 +90,8 @@ impl Signatures {
 
     /// Get the json with all signatures
     #[wasm_bindgen(js_name = "asJSON")]
-    pub fn as_json(&self) -> JsValue {
-        trace!(?self.inner, "The signature");
-        // can't use directly serde_wasm_bindgen as there is an issue with BTreeMap
-        // It's always returning an empty {} if I do:
-        // serde_wasm_bindgen::to_value(&self.inner).unwrap()
-
-        // Keep it like that for now as it's working
-        let map: BTreeMap<String, BTreeMap<String, String>> = self
-            .inner
-            .clone()
-            .into_iter()
-            .map(|(u, sign)| {
-                (
-                    u.as_str().to_owned(),
-                    sign.iter()
-                        .map(|(device, maybe_sign)| {
-                            (
-                                device.as_str().to_owned(),
-                                match maybe_sign {
-                                    Ok(s) => s.to_base64(),
-                                    Err(e) => e.source.to_owned(),
-                                },
-                            )
-                        })
-                        .collect(),
-                )
-            })
-            .collect();
-
-        let raw_string = serde_json::to_string(&map).unwrap();
-
-        JSON::parse(&raw_string).unwrap()
+    pub fn as_json(&self) -> Result<JsString, JsError> {
+        Ok(serde_json::to_string(&self.inner)?.into())
     }
 }
 
@@ -250,20 +216,35 @@ impl SignatureVerification {
 }
 
 /// Struct holding the number of room keys we have.
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug)]
+#[wasm_bindgen]
 pub struct RoomKeyCounts {
     /// The total number of room keys.
-    pub total: i64,
+    pub total: f64,
     /// The number of backed up room keys.
-    #[serde(rename = "backedUp")]
-    pub backed_up: i64,
+    #[wasm_bindgen(js_name = "backedUp")]
+    pub backed_up: f64,
 }
 
-/// TODO useful documentation
-#[derive(Debug, Serialize, Deserialize)]
+impl From<matrix_sdk_crypto::store::RoomKeyCounts> for RoomKeyCounts {
+    fn from(inner: matrix_sdk_crypto::store::RoomKeyCounts) -> Self {
+        RoomKeyCounts {
+            // There is no `TryFrom<usize> for f64`, so first downcast the usizes to u32, then back
+            // up to f64
+            total: inner.total.try_into().unwrap_or(u32::MAX).into(),
+            backed_up: inner.backed_up.try_into().unwrap_or(u32::MAX).into(),
+        }
+    }
+}
+
+/// Stored versions of the backup keys.
+#[derive(Debug)]
+#[wasm_bindgen]
 pub struct BackupKeys {
-    #[serde(rename = "decryptionKeyBase58")]
-    pub decryption_key_base58: Option<String>,
-    #[serde(rename = "backupVersion")]
+    /// The key used to decrypt backed up room keys, encoded as base64
+    #[wasm_bindgen(js_name = "decryptionKeyBase64", getter_with_clone)]
+    pub decryption_key_base64: Option<String>,
+    /// The version that we are using for backups.
+    #[wasm_bindgen(js_name = "backupVersion", getter_with_clone)]
     pub backup_version: Option<String>,
 }

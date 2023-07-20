@@ -25,45 +25,22 @@ describe("BackupRecoveryKey", () => {
     test("create from base64 string", () => {
         const backupkey = BackupDecryptionKey.fromBase64("Ha9cklU/9NqFo9WKdVfGzmqUL/9wlkdxfEitbSIPVXw");
 
-        const decypted = backupkey.decryptV1(
-            encryptedMegolm.session_data.ephemeral,
-            encryptedMegolm.session_data.mac,
-            encryptedMegolm.session_data.ciphertext,
+        const decrypted = JSON.parse(
+            backupkey.decryptV1(
+                encryptedMegolm.session_data.ephemeral,
+                encryptedMegolm.session_data.mac,
+                encryptedMegolm.session_data.ciphertext,
+            ),
         );
 
-        expect(decypted.algorithm).toStrictEqual(aMegolmKey.algorithm);
-        expect(decypted.sender_key).toStrictEqual(aMegolmKey.sender_key);
-        expect(decypted.session_key).toStrictEqual(aMegolmKey.session_key);
-    });
-
-    test("create export and import base58", () => {
-        const backupkey = BackupDecryptionKey.fromBase64("Ha9cklU/9NqFo9WKdVfGzmqUL/9wlkdxfEitbSIPVXw");
-        const base58 = backupkey.toBase58();
-        const imported = BackupDecryptionKey.fromBase58(base58);
-
-        expect(backupkey.megolmV1PublicKey.publicKeyBase64).toStrictEqual(imported.megolmV1PublicKey.publicKeyBase64);
-    });
-
-    test("with passphrase", () => {
-        const recoveryKey = BackupDecryptionKey.newFromPassphrase("aSecretPhrase");
-
-        expect(recoveryKey.megolmV1PublicKey.passphraseInfo).toBeDefined();
-        expect(recoveryKey.megolmV1PublicKey.passphraseInfo.private_key_iterations).toStrictEqual(500000);
+        expect(decrypted.algorithm).toStrictEqual(aMegolmKey.algorithm);
+        expect(decrypted.sender_key).toStrictEqual(aMegolmKey.sender_key);
+        expect(decrypted.session_key).toStrictEqual(aMegolmKey.session_key);
     });
 
     test("errors", () => {
         expect(() => {
             BackupDecryptionKey.fromBase64("notBase64");
-        }).toThrow();
-
-        const wrongKey = BackupDecryptionKey.newFromPassphrase("aSecretPhrase");
-
-        expect(() => {
-            wrongKey.decryptV1(
-                encryptedMegolm.session_data.ephemeral,
-                encryptedMegolm.session_data.mac,
-                encryptedMegolm.session_data.ciphertext,
-            );
         }).toThrow();
     });
 });

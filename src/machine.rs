@@ -5,9 +5,7 @@ use std::{collections::BTreeMap, ops::Deref, time::Duration};
 use futures_util::StreamExt;
 use js_sys::{Array, Function, Map, Promise, Set};
 use matrix_sdk_common::ruma::{self, serde::Raw, DeviceKeyAlgorithm, OwnedTransactionId, UInt};
-use matrix_sdk_crypto::{
-    backups::MegolmV1BackupKey, store::BackupDecryptionKey, types::RoomKeyBackupInfo,
-};
+use matrix_sdk_crypto::{backups::MegolmV1BackupKey, types::RoomKeyBackupInfo};
 use serde_json::{json, Value as JsonValue};
 use serde_wasm_bindgen;
 use tracing::warn;
@@ -15,6 +13,7 @@ use wasm_bindgen::prelude::*;
 use wasm_bindgen_futures::{spawn_local, JsFuture};
 
 use crate::{
+    backup::BackupDecryptionKey,
     device, encryption,
     future::future_to_promise,
     identifiers, identities,
@@ -791,24 +790,25 @@ impl OlmMachine {
     ///
     /// This is useful if the client wants to support gossiping of the backup
     /// key.
+    ///
+    /// Returns `Promise<void>`.
     #[wasm_bindgen(js_name = "saveBackupDecryptionKey")]
     pub fn save_backup_decryption_key(
         &self,
-        decryption_key_base58: String,
+        decryption_key: &BackupDecryptionKey,
         version: String,
-    ) -> Result<Promise, JsError> {
-        let key = BackupDecryptionKey::from_base58(&decryption_key_base58)?;
-
+    ) -> Promise {
         let me = self.inner.clone();
+        let inner_key = decryption_key.inner.clone();
 
-        Ok(future_to_promise(async move {
-            me.backup_machine().save_decryption_key(Some(key), Some(version)).await?;
-            Ok(JsValue::NULL)
-        }))
+        future_to_promise(async move {
+            me.backup_machine().save_decryption_key(Some(inner_key), Some(version)).await?;
+            Ok(JsValue::UNDEFINED)
+        })
     }
 
-    /// Get the backup keys we have saved in our crypto store.
-    /// Returns `Promise<BackupKeys>`.
+    /// Get the backup keys we have saved in our store.
+    /// Returns a `Promise` for {@link BackupKeys}.
     #[wasm_bindgen(js_name = "getBackupKeys")]
     pub fn get_backup_keys(&self) -> Promise {
         let me = self.inner.clone();
@@ -816,17 +816,17 @@ impl OlmMachine {
         future_to_promise(async move {
             let inner = me.backup_machine().get_backup_keys().await?;
             let backup_keys = BackupKeys {
-                decryption_key_base58: inner.decryption_key.map(|k| k.to_base58()),
+                decryption_key_base64: inner.decryption_key.map(|k| k.to_base64()),
                 backup_version: inner.backup_version,
             };
-            Ok(serde_wasm_bindgen::to_value(&backup_keys).unwrap())
+            Ok(backup_keys)
         })
     }
 
     /// Check if the given backup has been verified by us or by another of our
     /// devices that we trust.
     ///
-    /// The `backup_info` should be a JSON object with the following
+    /// The `backup_info` should be a Javascript object with the following
     /// format:
     ///
     /// ```json
@@ -838,7 +838,8 @@ impl OlmMachine {
     ///     }
     /// }
     /// ```
-    /// Returns a SignatureVerification object
+    ///
+    /// Returns a {@link SignatureVerification} object.
     #[wasm_bindgen(js_name = "verifyBackup")]
     pub fn verify_backup(&self, backup_info: JsValue) -> Result<Promise, JsError> {
         let backup_info: RoomKeyBackupInfo = serde_wasm_bindgen::from_value(backup_info)?;
@@ -857,7 +858,9 @@ impl OlmMachine {
     /// trusted, otherwise we might be encrypting room keys that a malicious
     /// party could decrypt.
     ///
-    /// The [`OlmMachine::verify_backup`] method can be used to so.
+    /// The {@link #verifyBackup} method can be used to do so.
+    ///
+    /// Returns `Promise<void>`.
     #[wasm_bindgen(js_name = "enableBackupV1")]
     pub fn enable_backup_v1(
         &self,
@@ -871,7 +874,7 @@ impl OlmMachine {
 
         Ok(future_to_promise(async move {
             me.backup_machine().enable_backup_v1(backup_key).await?;
-            Ok(JsValue::NULL)
+            Ok(JsValue::UNDEFINED)
         }))
     }
 
@@ -879,8 +882,10 @@ impl OlmMachine {
     ///
     /// This returns true if we have an active `BackupKey` and backup version
     /// registered with the state machine.
+    ///
+    /// Returns `Promise<bool>`.
     #[wasm_bindgen(js_name = "isBackupEnabled")]
-    pub fn backup_enabled(&self) -> Promise {
+    pub fn is_backup_enabled(&self) -> Promise {
         let me = self.inner.clone();
 
         future_to_promise(async move {
@@ -893,46 +898,47 @@ impl OlmMachine {
     ///
     /// This will remove any pending backup request, remove the backup key and
     /// reset the backup state of each room key we have.
-    #[wasm_bindgen(js_name = "disabledBackup")]
+    ///
+    /// Returns `Promise<void>`.
+    #[wasm_bindgen(js_name = "disableBackup")]
     pub fn disable_backup(&self) -> Promise {
         let me = self.inner.clone();
 
         future_to_promise(async move {
             me.backup_machine().disable_backup().await?;
-            Ok(JsValue::NULL)
+            Ok(JsValue::UNDEFINED)
         })
     }
 
     /// Encrypt a batch of room keys and return a request that needs to be sent
     /// out to backup the room keys.
-    /// This returns an optional `JsValue` representing a `KeysBackupRequest`.
+    ///
+    /// Returns an optional {@link KeysBackupRequest}.
     #[wasm_bindgen(js_name = "backupRoomKeys")]
     pub fn backup_room_keys(&self) -> Promise {
         let me = self.inner.clone();
 
         future_to_promise(async move {
-            let request = me.backup_machine().backup().await?.map(OutgoingRequest);
+            let request = me.backup_machine().backup().await?;
 
-            match request {
-                None => Ok(JsValue::NULL),
-                Some(r) => Ok(JsValue::try_from(r)?),
-            }
+            let Some(request) = request else {
+                return Ok(None);
+            };
+
+            // Wrap with our own `OutgoingRequest` wrapper, so that we can benefit from its
+            // `TryFrom for JsValue` implementation, which converts back to a
+            // `KeysBackupRequest`
+            Ok(Some(JsValue::try_from(OutgoingRequest(request))?))
         })
     }
 
     /// Get the number of backed up room keys and the total number of room keys.
-    /// Returns a {"total":1,"backedUp":0} json object
+    /// Returns a {@link RoomKeyCounts}.
     #[wasm_bindgen(js_name = "roomKeyCounts")]
     pub fn room_key_counts(&self) -> Promise {
         let me = self.inner.clone();
-        future_to_promise(async move {
-            let inner = me.backup_machine().room_key_counts().await?;
-            let count = RoomKeyCounts {
-                total: inner.total.try_into()?,
-                backed_up: inner.backed_up.try_into()?,
-            };
-            let js_value = serde_wasm_bindgen::to_value(&count).unwrap();
-            Ok(js_value)
+        future_to_promise::<_, RoomKeyCounts>(async move {
+            Ok(me.backup_machine().room_key_counts().await?.into())
         })
     }
 
