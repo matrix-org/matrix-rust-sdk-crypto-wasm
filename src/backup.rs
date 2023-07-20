@@ -4,9 +4,7 @@ use std::{collections::HashMap, iter, ops::DerefMut};
 
 use hmac::Hmac;
 use js_sys::{JsString, JSON};
-use matrix_sdk_crypto::{
-    backups::MegolmV1BackupKey as InnerMegolmV1BackupKey, store::BackupDecryptionKey,
-};
+use matrix_sdk_crypto::{backups::MegolmV1BackupKey as InnerMegolmV1BackupKey, store};
 use pbkdf2::pbkdf2;
 use rand::{distributions::Alphanumeric, thread_rng, Rng};
 use serde_wasm_bindgen;
@@ -17,8 +15,8 @@ use zeroize::Zeroize;
 /// The private part of the backup key, the one used for recovery.
 #[derive(Debug)]
 #[wasm_bindgen]
-pub struct BackupRecoveryKey {
-    pub(crate) inner: BackupDecryptionKey,
+pub struct BackupDecryptionKey {
+    pub(crate) inner: store::BackupDecryptionKey,
     pub(crate) passphrase_info: Option<PassphraseInfo>,
 }
 
@@ -77,39 +75,39 @@ impl MegolmV1BackupKey {
     }
 }
 
-impl BackupRecoveryKey {
+impl BackupDecryptionKey {
     const KEY_SIZE: usize = 32;
     const SALT_SIZE: usize = 32;
     const PBKDF_ROUNDS: i32 = 500_000;
 }
 
 #[wasm_bindgen]
-impl BackupRecoveryKey {
-    /// Create a new random [`BackupRecoveryKey`].
+impl BackupDecryptionKey {
+    /// Create a new random [`BackupDecryptionKey`].
     #[wasm_bindgen(js_name = "createRandomKey")]
-    pub fn create_random_key() -> BackupRecoveryKey {
-        BackupRecoveryKey {
-            inner: BackupDecryptionKey::new()
+    pub fn create_random_key() -> BackupDecryptionKey {
+        BackupDecryptionKey {
+            inner: store::BackupDecryptionKey::new()
                 .expect("Can't gather enough randomness to create a recovery key"),
             passphrase_info: None,
         }
     }
 
-    /// Try to create a [`BackupRecoveryKey`] from a base 64 encoded string.
+    /// Try to create a [`BackupDecryptionKey`] from a base 64 encoded string.
     #[wasm_bindgen(js_name = "fromBase64")]
-    pub fn from_base64(key: String) -> Result<BackupRecoveryKey, JsError> {
-        Ok(Self { inner: BackupDecryptionKey::from_base64(&key)?, passphrase_info: None })
+    pub fn from_base64(key: String) -> Result<BackupDecryptionKey, JsError> {
+        Ok(Self { inner: store::BackupDecryptionKey::from_base64(&key)?, passphrase_info: None })
     }
 
-    /// Try to create a [`BackupRecoveryKey`] from a base 58 encoded string.
+    /// Try to create a [`BackupDecryptionKey`] from a base 58 encoded string.
     #[wasm_bindgen(js_name = "fromBase58")]
-    pub fn from_base58(key: String) -> Result<BackupRecoveryKey, JsError> {
-        Ok(Self { inner: BackupDecryptionKey::from_base58(&key)?, passphrase_info: None })
+    pub fn from_base58(key: String) -> Result<BackupDecryptionKey, JsError> {
+        Ok(Self { inner: store::BackupDecryptionKey::from_base58(&key)?, passphrase_info: None })
     }
 
-    /// Create a new [`BackupRecoveryKey`] from the given passphrase.
+    /// Create a new [`BackupDecryptionKey`] from the given passphrase.
     #[wasm_bindgen(js_name = "newFromPassphrase")]
-    pub fn new_from_passphrase(passphrase: String) -> BackupRecoveryKey {
+    pub fn new_from_passphrase(passphrase: String) -> BackupDecryptionKey {
         let mut rng = thread_rng();
         let salt: String = iter::repeat(())
             .map(|()| rng.sample(Alphanumeric))
@@ -117,10 +115,10 @@ impl BackupRecoveryKey {
             .take(Self::SALT_SIZE)
             .collect();
 
-        BackupRecoveryKey::from_passphrase(passphrase, salt, Self::PBKDF_ROUNDS)
+        BackupDecryptionKey::from_passphrase(passphrase, salt, Self::PBKDF_ROUNDS)
     }
 
-    /// Restore a [`BackupRecoveryKey`] from the given passphrase.
+    /// Restore a [`BackupDecryptionKey`] from the given passphrase.
     #[wasm_bindgen(js_name = "fromPassphrase")]
     pub fn from_passphrase(passphrase: String, salt: String, rounds: i32) -> Self {
         let mut key = Box::new([0u8; Self::KEY_SIZE]);
@@ -128,7 +126,7 @@ impl BackupRecoveryKey {
 
         pbkdf2::<Hmac<Sha512>>(passphrase.as_bytes(), salt.as_bytes(), rounds, key.deref_mut());
 
-        let recovery_key = BackupDecryptionKey::from_bytes(&key);
+        let recovery_key = store::BackupDecryptionKey::from_bytes(&key);
 
         key.zeroize();
 

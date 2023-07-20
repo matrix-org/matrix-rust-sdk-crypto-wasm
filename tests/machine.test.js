@@ -25,7 +25,7 @@ const {
     Versions,
     getVersions,
     SignatureState,
-    BackupRecoveryKey,
+    BackupDecryptionKey,
 } = require("../pkg/matrix_sdk_crypto_wasm");
 const { addMachineToMachine } = require("./helper");
 require("fake-indexeddb/auto");
@@ -946,7 +946,7 @@ describe(OlmMachine.name, () => {
             let m = await machine();
             let _ = m.bootstrapCrossSigning(true);
 
-            let keyBackupKey = BackupRecoveryKey.createRandomKey();
+            let keyBackupKey = BackupDecryptionKey.createRandomKey();
 
             let auth_data = {
                 public_key: keyBackupKey.megolmV1PublicKey.publicKeyBase64,
@@ -983,7 +983,7 @@ describe(OlmMachine.name, () => {
             let backupEnabled = await m.isBackupEnabled();
             expect(backupEnabled).toStrictEqual(false);
 
-            let keyBackupKey = BackupRecoveryKey.createRandomKey();
+            let keyBackupKey = BackupDecryptionKey.createRandomKey();
 
             await m.enableBackupV1(keyBackupKey.megolmV1PublicKey.publicKeyBase64, "1");
 
@@ -1016,7 +1016,7 @@ describe(OlmMachine.name, () => {
         test("test save and get private key", async () => {
             let m = await machine();
 
-            let keyBackupKey = BackupRecoveryKey.createRandomKey();
+            let keyBackupKey = BackupDecryptionKey.createRandomKey();
 
             await m.saveBackupRecoveryKey(keyBackupKey.toBase58(), "3");
 

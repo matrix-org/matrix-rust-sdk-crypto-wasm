@@ -1,4 +1,4 @@
-const { BackupRecoveryKey } = require("../pkg/matrix_sdk_crypto_wasm");
+const { BackupDecryptionKey } = require("../pkg/matrix_sdk_crypto_wasm");
 
 const aMegolmKey = {
     algorithm: "m.megolm.v1.aes-sha2",
@@ -23,7 +23,7 @@ const encryptedMegolm = {
 
 describe("BackupRecoveryKey", () => {
     test("create from base64 string", () => {
-        const backupkey = BackupRecoveryKey.fromBase64("Ha9cklU/9NqFo9WKdVfGzmqUL/9wlkdxfEitbSIPVXw");
+        const backupkey = BackupDecryptionKey.fromBase64("Ha9cklU/9NqFo9WKdVfGzmqUL/9wlkdxfEitbSIPVXw");
 
         const decypted = backupkey.decryptV1(
             encryptedMegolm.session_data.ephemeral,
@@ -37,15 +37,15 @@ describe("BackupRecoveryKey", () => {
     });
 
     test("create export and import base58", () => {
-        const backupkey = BackupRecoveryKey.fromBase64("Ha9cklU/9NqFo9WKdVfGzmqUL/9wlkdxfEitbSIPVXw");
+        const backupkey = BackupDecryptionKey.fromBase64("Ha9cklU/9NqFo9WKdVfGzmqUL/9wlkdxfEitbSIPVXw");
         const base58 = backupkey.toBase58();
-        const imported = BackupRecoveryKey.fromBase58(base58);
+        const imported = BackupDecryptionKey.fromBase58(base58);
 
         expect(backupkey.megolmV1PublicKey.publicKeyBase64).toStrictEqual(imported.megolmV1PublicKey.publicKeyBase64);
     });
 
     test("with passphrase", () => {
-        const recoveryKey = BackupRecoveryKey.newFromPassphrase("aSecretPhrase");
+        const recoveryKey = BackupDecryptionKey.newFromPassphrase("aSecretPhrase");
 
         expect(recoveryKey.megolmV1PublicKey.passphraseInfo).toBeDefined();
         expect(recoveryKey.megolmV1PublicKey.passphraseInfo.private_key_iterations).toStrictEqual(500000);
@@ -53,10 +53,10 @@ describe("BackupRecoveryKey", () => {
 
     test("errors", () => {
         expect(() => {
-            BackupRecoveryKey.fromBase64("notBase64");
+            BackupDecryptionKey.fromBase64("notBase64");
         }).toThrow();
 
-        const wrongKey = BackupRecoveryKey.newFromPassphrase("aSecretPhrase");
+        const wrongKey = BackupDecryptionKey.newFromPassphrase("aSecretPhrase");
 
         expect(() => {
             wrongKey.decryptV1(
