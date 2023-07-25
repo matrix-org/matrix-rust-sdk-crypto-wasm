@@ -1009,7 +1009,7 @@ describe(OlmMachine.name, () => {
             expect(decrypted.algorithm).toStrictEqual("m.megolm.v1.aes-sha2");
 
             // simulate key backed up
-            m.markRequestAsSent(outgoing.id, outgoing.type, '{"etag":"1","count":3}');
+            await m.markRequestAsSent(outgoing.id, outgoing.type, '{"etag":"1","count":3}');
 
             let newCounts = await m.roomKeyCounts();
 

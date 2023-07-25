@@ -815,11 +815,10 @@ impl OlmMachine {
 
         future_to_promise(async move {
             let inner = me.backup_machine().get_backup_keys().await?;
-            let backup_keys = BackupKeys {
+            Ok(BackupKeys {
                 decryption_key_base64: inner.decryption_key.map(|k| k.to_base64()),
                 backup_version: inner.backup_version,
-            };
-            Ok(backup_keys)
+            })
         })
     }
 

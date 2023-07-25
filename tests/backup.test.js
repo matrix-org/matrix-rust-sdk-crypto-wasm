@@ -21,7 +21,7 @@ const encryptedMegolm = {
     },
 };
 
-describe("BackupRecoveryKey", () => {
+describe("BackupDecryptionKey", () => {
     test("create from base64 string", () => {
         const backupkey = BackupDecryptionKey.fromBase64("Ha9cklU/9NqFo9WKdVfGzmqUL/9wlkdxfEitbSIPVXw");
 

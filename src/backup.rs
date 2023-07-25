@@ -50,7 +50,7 @@ impl BackupDecryptionKey {
         Ok(Self { inner: store::BackupDecryptionKey::from_base64(&key)? })
     }
 
-    /// Convert the recovery key to a base 64 encoded string.
+    /// Convert the backup decryption key to a base 64 encoded string.
     #[wasm_bindgen(js_name = "toBase64")]
     pub fn to_base64(&self) -> JsString {
         self.inner.to_base64().into()
