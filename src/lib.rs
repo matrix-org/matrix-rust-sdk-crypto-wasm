@@ -19,6 +19,7 @@
 #![allow(clippy::drop_non_drop)]
 
 pub mod attachment;
+pub mod backup;
 pub mod device;
 pub mod encryption;
 pub mod events;

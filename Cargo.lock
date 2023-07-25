@@ -325,6 +325,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "bs58"
+version = "0.5.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "f5353f36341f7451062466f0b755b96ac3a9547e4d7f6b70d603fc721a7d7896"
+dependencies = [
+ "tinyvec",
+]
+
+[[package]]
 name = "bumpalo"
 version = "3.13.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1058,7 +1067,7 @@ dependencies = [
 [[package]]
 name = "matrix-sdk-base"
 version = "0.6.1"
-source = "git+https://github.com/matrix-org/matrix-rust-sdk?rev=24e3ccfbb33b78bfbdc832e50acc43fa12b5a718#24e3ccfbb33b78bfbdc832e50acc43fa12b5a718"
+source = "git+https://github.com/matrix-org/matrix-rust-sdk?rev=c6dab4088e4288a5a0636d8687534aa4652bed18#c6dab4088e4288a5a0636d8687534aa4652bed18"
 dependencies = [
  "async-trait",
  "bitflags 2.3.3",
@@ -1080,7 +1089,7 @@ dependencies = [
 [[package]]
 name = "matrix-sdk-common"
 version = "0.6.0"
-source = "git+https://github.com/matrix-org/matrix-rust-sdk?rev=24e3ccfbb33b78bfbdc832e50acc43fa12b5a718#24e3ccfbb33b78bfbdc832e50acc43fa12b5a718"
+source = "git+https://github.com/matrix-org/matrix-rust-sdk?rev=c6dab4088e4288a5a0636d8687534aa4652bed18#c6dab4088e4288a5a0636d8687534aa4652bed18"
 dependencies = [
  "futures-core",
  "futures-util",
@@ -1096,20 +1105,23 @@ dependencies = [
 [[package]]
 name = "matrix-sdk-crypto"
 version = "0.6.0"
-source = "git+https://github.com/matrix-org/matrix-rust-sdk?rev=24e3ccfbb33b78bfbdc832e50acc43fa12b5a718#24e3ccfbb33b78bfbdc832e50acc43fa12b5a718"
+source = "git+https://github.com/matrix-org/matrix-rust-sdk?rev=c6dab4088e4288a5a0636d8687534aa4652bed18#c6dab4088e4288a5a0636d8687534aa4652bed18"
 dependencies = [
  "aes",
  "async-std",
  "async-trait",
  "atomic",
  "base64 0.21.2",
+ "bs58",
  "byteorder",
+ "cbc",
  "cfg-if",
  "ctr",
  "dashmap",
  "eyeball",
  "futures-core",
  "futures-util",
+ "hkdf",
  "hmac",
  "itertools 0.11.0",
  "matrix-sdk-common",
@@ -1142,6 +1154,7 @@ dependencies = [
  "matrix-sdk-crypto",
  "matrix-sdk-indexeddb",
  "matrix-sdk-qrcode",
+ "serde-wasm-bindgen",
  "serde_json",
  "tracing",
  "tracing-subscriber",
@@ -1153,7 +1166,7 @@ dependencies = [
 [[package]]
 name = "matrix-sdk-indexeddb"
 version = "0.2.0"
-source = "git+https://github.com/matrix-org/matrix-rust-sdk?rev=24e3ccfbb33b78bfbdc832e50acc43fa12b5a718#24e3ccfbb33b78bfbdc832e50acc43fa12b5a718"
+source = "git+https://github.com/matrix-org/matrix-rust-sdk?rev=c6dab4088e4288a5a0636d8687534aa4652bed18#c6dab4088e4288a5a0636d8687534aa4652bed18"
 dependencies = [
  "anyhow",
  "async-trait",
@@ -1178,7 +1191,7 @@ dependencies = [
 [[package]]
 name = "matrix-sdk-qrcode"
 version = "0.4.0"
-source = "git+https://github.com/matrix-org/matrix-rust-sdk?rev=24e3ccfbb33b78bfbdc832e50acc43fa12b5a718#24e3ccfbb33b78bfbdc832e50acc43fa12b5a718"
+source = "git+https://github.com/matrix-org/matrix-rust-sdk?rev=c6dab4088e4288a5a0636d8687534aa4652bed18#c6dab4088e4288a5a0636d8687534aa4652bed18"
 dependencies = [
  "byteorder",
  "qrcode",
@@ -1190,7 +1203,7 @@ dependencies = [
 [[package]]
 name = "matrix-sdk-store-encryption"
 version = "0.2.0"
-source = "git+https://github.com/matrix-org/matrix-rust-sdk?rev=24e3ccfbb33b78bfbdc832e50acc43fa12b5a718#24e3ccfbb33b78bfbdc832e50acc43fa12b5a718"
+source = "git+https://github.com/matrix-org/matrix-rust-sdk?rev=c6dab4088e4288a5a0636d8687534aa4652bed18#c6dab4088e4288a5a0636d8687534aa4652bed18"
 dependencies = [
  "blake3",
  "chacha20poly1305",
@@ -1703,6 +1716,17 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "30e27d1e4fd7659406c492fd6cfaf2066ba8773de45ca75e855590f856dc34a9"
 dependencies = [
  "serde_derive",
+]
+
+[[package]]
+name = "serde-wasm-bindgen"
+version = "0.5.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "f3b143e2833c57ab9ad3ea280d21fd34e285a42837aeb0ee301f4f41890fa00e"
+dependencies = [
+ "js-sys",
+ "serde",
+ "wasm-bindgen",
 ]
 
 [[package]]

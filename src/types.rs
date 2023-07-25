@@ -1,6 +1,9 @@
 //! Extra types, like `Signatures`.
 
-use js_sys::Map;
+use js_sys::{JsString, Map};
+use matrix_sdk_crypto::backups::{
+    SignatureState as InnerSignatureState, SignatureVerification as InnerSignatureVerification,
+};
 use wasm_bindgen::prelude::*;
 
 use crate::{
@@ -84,6 +87,12 @@ impl Signatures {
     pub fn count(&self) -> usize {
         self.inner.signature_count()
     }
+
+    /// Get the json with all signatures
+    #[wasm_bindgen(js_name = "asJSON")]
+    pub fn as_json(&self) -> Result<JsString, JsError> {
+        Ok(serde_json::to_string(&self.inner)?.into())
+    }
 }
 
 /// Represents a potentially decoded signature (but not a validated
@@ -152,5 +161,56 @@ impl MaybeSignature {
             Ok(_) => None,
             Err(signature) => Some(signature.source.clone()),
         }
+    }
+}
+
+/// The result of a signature verification of a signed JSON object.
+#[derive(Debug)]
+#[wasm_bindgen]
+pub struct SignatureVerification {
+    pub(crate) inner: InnerSignatureVerification,
+}
+
+/// The result of a signature check.
+#[derive(Debug)]
+#[wasm_bindgen]
+pub enum SignatureState {
+    /// The signature is missing.
+    Missing = 0,
+    /// The signature is invalid.
+    Invalid = 1,
+    /// The signature is valid but the device or user identity that created the
+    /// signature is not trusted.
+    ValidButNotTrusted = 2,
+    /// The signature is valid and the device or user identity that created the
+    /// signature is trusted.
+    ValidAndTrusted = 3,
+}
+
+impl From<InnerSignatureState> for SignatureState {
+    fn from(val: InnerSignatureState) -> Self {
+        match val {
+            InnerSignatureState::Missing => SignatureState::Missing,
+            InnerSignatureState::Invalid => SignatureState::Invalid,
+            InnerSignatureState::ValidButNotTrusted => SignatureState::ValidButNotTrusted,
+            InnerSignatureState::ValidAndTrusted => SignatureState::ValidAndTrusted,
+        }
+    }
+}
+
+#[wasm_bindgen]
+impl SignatureVerification {
+    /// Give the backup signature state from the current device.
+    /// See SignatureState for values
+    #[wasm_bindgen(getter, js_name = "deviceState")]
+    pub fn device_state(&self) -> SignatureState {
+        self.inner.device_signature.into()
+    }
+
+    /// Give the backup signature state from the current user identity.
+    /// See SignatureState for values
+    #[wasm_bindgen(getter, js_name = "userState")]
+    pub fn user_state(&self) -> SignatureState {
+        self.inner.user_identity_signature.into()
     }
 }
