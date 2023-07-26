@@ -38,6 +38,12 @@ impl_from_to_inner!(matrix_sdk_crypto::OwnUserIdentity => OwnUserIdentity);
 
 #[wasm_bindgen]
 impl OwnUserIdentity {
+    /// Is this user identity verified?
+    #[wasm_bindgen(js_name = "isVerified")]
+    pub fn is_verified(&self) -> bool {
+        self.inner.is_verified()
+    }
+
     /// Mark our user identity as verified.
     ///
     /// This will mark the identity locally as verified and sign it with our own
