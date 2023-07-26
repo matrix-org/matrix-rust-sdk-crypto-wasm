@@ -1,3 +1,13 @@
+# matrix-sdk-crypto-wasm v1.1.0
+
+## Changes in the WASM bindings
+
+-   Expose bindings for secure key backup.
+
+## Changes in the underlying Rust crate
+
+-   Mark our `OwnUserIdentity` as verified if we successfully import the matching private keys.
+
 # matrix-sdk-crypto-wasm v1.0.1
 
 No functional changes. Fixes for the release process which prevented v1.0.0
