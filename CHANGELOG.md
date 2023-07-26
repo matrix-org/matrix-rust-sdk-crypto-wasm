@@ -3,6 +3,7 @@
 ## Changes in the WASM bindings
 
 -   Expose bindings for secure key backup.
+-   Expose `OwnUserIdentity.isVerified`.
 
 ## Changes in the underlying Rust crate
 
