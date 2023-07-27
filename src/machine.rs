@@ -920,10 +920,10 @@ impl OlmMachine {
         future_to_promise(async move {
             match me.backup_machine().backup().await? {
                 Some((transaction_id, keys_backup_request)) => {
-                    Ok(Some(JsValue::from(requests::KeysBackupRequest::try_from((
+                    Ok(Some(requests::KeysBackupRequest::try_from((
                         transaction_id.to_string(),
                         &keys_backup_request,
-                    ))?)))
+                    ))?))
                 }
 
                 None => Ok(None),
