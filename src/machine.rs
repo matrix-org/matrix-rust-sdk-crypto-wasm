@@ -918,16 +918,16 @@ impl OlmMachine {
         let me = self.inner.clone();
 
         future_to_promise(async move {
-            let request = me.backup_machine().backup().await?;
+            match me.backup_machine().backup().await? {
+                Some((transaction_id, keys_backup_request)) => {
+                    Ok(Some(JsValue::from(requests::KeysBackupRequest::try_from((
+                        transaction_id.to_string(),
+                        &keys_backup_request,
+                    ))?)))
+                }
 
-            let Some(request) = request else {
-                return Ok(None);
-            };
-
-            // Wrap with our own `OutgoingRequest` wrapper, so that we can benefit from its
-            // `TryFrom for JsValue` implementation, which converts back to a
-            // `KeysBackupRequest`
-            Ok(Some(JsValue::try_from(OutgoingRequest(request))?))
+                None => Ok(None),
+            }
         })
     }
 
