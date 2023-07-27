@@ -6,6 +6,8 @@
     contains a `decryptionKey` property which is is a `BackupDecryptionKey`
     instance.
 
+-   Expose `SignatureVerification.trusted` method.
+
 # matrix-sdk-crypto-wasm v1.1.0
 
 ## Changes in the WASM bindings
