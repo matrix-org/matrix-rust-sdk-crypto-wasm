@@ -223,5 +223,7 @@ impl SignatureVerification {
     /// * Our own user identity, provided the identity is trusted as well
     /// * Any of our own devices, provided the device is trusted as well
     #[wasm_bindgen()]
-    pub fn trusted(&self) -> bool { self.inner.trusted() }
+    pub fn trusted(&self) -> bool {
+        self.inner.trusted()
+    }
 }
