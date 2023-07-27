@@ -3,6 +3,7 @@
 use js_sys::JsString;
 use matrix_sdk_crypto::{backups::MegolmV1BackupKey as InnerMegolmV1BackupKey, store};
 use wasm_bindgen::prelude::*;
+
 use crate::impl_from_to_inner;
 
 /// The private part of the backup key, the one used for recovery.
@@ -13,7 +14,6 @@ pub struct BackupDecryptionKey {
 }
 
 impl_from_to_inner!(store::BackupDecryptionKey => BackupDecryptionKey);
-
 
 /// The public part of the backup key.
 #[derive(Debug, Clone)]
