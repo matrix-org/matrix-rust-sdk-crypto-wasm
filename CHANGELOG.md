@@ -1,3 +1,11 @@
+# unreleased
+
+## Changes in the WASM bindings
+
+-   The `BackupKeys` structure returned by `OlmMachine.getBackupKeys` now
+    contains a `decryptionKey` property which is is a `BackupDecryptionKey`
+    instance.
+
 # matrix-sdk-crypto-wasm v1.1.0
 
 ## Changes in the WASM bindings

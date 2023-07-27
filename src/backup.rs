@@ -3,13 +3,17 @@
 use js_sys::JsString;
 use matrix_sdk_crypto::{backups::MegolmV1BackupKey as InnerMegolmV1BackupKey, store};
 use wasm_bindgen::prelude::*;
+use crate::impl_from_to_inner;
 
 /// The private part of the backup key, the one used for recovery.
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 #[wasm_bindgen]
 pub struct BackupDecryptionKey {
     pub(crate) inner: store::BackupDecryptionKey,
 }
+
+impl_from_to_inner!(store::BackupDecryptionKey => BackupDecryptionKey);
+
 
 /// The public part of the backup key.
 #[derive(Debug, Clone)]
@@ -103,10 +107,22 @@ impl From<matrix_sdk_crypto::store::RoomKeyCounts> for RoomKeyCounts {
 #[derive(Debug)]
 #[wasm_bindgen]
 pub struct BackupKeys {
-    /// The key used to decrypt backed up room keys, encoded as base64
-    #[wasm_bindgen(js_name = "decryptionKeyBase64", getter_with_clone)]
-    pub decryption_key_base64: Option<String>,
+    /// The key used to decrypt backed up room keys
+    #[wasm_bindgen(js_name = "decryptionKey", getter_with_clone)]
+    pub decryption_key: Option<BackupDecryptionKey>,
+
     /// The version that we are using for backups.
     #[wasm_bindgen(js_name = "backupVersion", getter_with_clone)]
     pub backup_version: Option<String>,
+}
+
+#[wasm_bindgen]
+impl BackupKeys {
+    /// The key used to decrypt backed up room keys, encoded as base64
+    ///
+    /// @deprecated Use `BackupKeys.decryptionKey.toBase64()`
+    #[wasm_bindgen(js_name = "decryptionKeyBase64", getter)]
+    pub fn decryption_key_base64(&self) -> Option<JsString> {
+        self.decryption_key.clone().map(|k| k.to_base64())
+    }
 }
