@@ -1026,6 +1026,7 @@ describe(OlmMachine.name, () => {
 
             let savedKey = await m.getBackupKeys();
 
+            expect(savedKey.decryptionKey.toBase64()).toStrictEqual(keyBackupKey.toBase64());
             expect(savedKey.decryptionKeyBase64).toStrictEqual(keyBackupKey.toBase64());
             expect(savedKey.backupVersion).toStrictEqual("3");
         });
