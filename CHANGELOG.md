@@ -1,4 +1,4 @@
-# unreleased
+# matrix-sdk-crypto-wasm v1.2.0
 
 ## Changes in the WASM bindings
 
