@@ -213,4 +213,17 @@ impl SignatureVerification {
     pub fn user_state(&self) -> SignatureState {
         self.inner.user_identity_signature.into()
     }
+
+    /// Is the result considered to be trusted?
+    ///
+    /// This tells us if the result has a valid signature from any of the
+    /// following:
+    ///
+    /// * Our own device
+    /// * Our own user identity, provided the identity is trusted as well
+    /// * Any of our own devices, provided the device is trusted as well
+    #[wasm_bindgen()]
+    pub fn trusted(&self) -> bool {
+        self.inner.trusted()
+    }
 }
