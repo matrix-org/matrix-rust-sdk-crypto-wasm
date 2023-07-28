@@ -1,8 +1,8 @@
 # Steps for releasing `matrix-sdk-crypto-wasm`
 
 1. Create a new branch, named `release-v<version>`.
-2. Update `CHANGELOG.md`, if necessary.
-3. Run `yarn version` to bump the version number and create a tag.
+2. Update `CHANGELOG.md` and `git add` ready for commit on the next step.
+3. Run `yarn version` to bump the version number, commit, and create a tag.
 4. Push the branch, but not yet the tag.
 5. Create a PR to approve the changes.
 6. Once approved:
