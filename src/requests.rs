@@ -285,14 +285,18 @@ pub struct KeysBackupRequest {
     /// It represents the body of the HTTP request.
     #[wasm_bindgen(readonly)]
     pub body: JsString,
+
+    /// The backup version that these room keys should be part of.
+    #[wasm_bindgen(readonly)]
+    pub version: JsString,
 }
 
 #[wasm_bindgen]
 impl KeysBackupRequest {
     /// Create a new `KeysBackupRequest`.
     #[wasm_bindgen(constructor)]
-    pub fn new(id: JsString, body: JsString) -> KeysBackupRequest {
-        Self { id: Some(id), body }
+    pub fn new(id: JsString, body: JsString, version: JsString) -> KeysBackupRequest {
+        Self { id: Some(id), body, version }
     }
 
     /// Get its request type.
@@ -425,7 +429,7 @@ request!(KeysClaimRequest from OriginalKeysClaimRequest groups timeout, one_time
 request!(ToDeviceRequest from OriginalToDeviceRequest extracts event_type: string, txn_id: string and groups messages);
 request!(SignatureUploadRequest from OriginalSignatureUploadRequest extracts signed_keys: json);
 request!(RoomMessageRequest from OriginalRoomMessageRequest extracts room_id: string, txn_id: string, event_type: event_type, content: json);
-request!(KeysBackupRequest from OriginalKeysBackupRequest groups rooms);
+request!(KeysBackupRequest from OriginalKeysBackupRequest extracts version: string and groups rooms);
 
 // Other Requests
 request!(SigningKeysUploadRequest from OriginalUploadSigningKeysRequest groups master_key, self_signing_key, user_signing_key);
