@@ -1,3 +1,9 @@
+# matrix-sdk-crypto-wasm v1.2.1
+
+## Changes in the WASM bindings
+
+-   Expose `version` field of `KeysBackupRequest`.
+
 # matrix-sdk-crypto-wasm v1.2.0
 
 ## Changes in the WASM bindings
