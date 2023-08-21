@@ -227,6 +227,12 @@ impl DecryptedRoomEvent {
     /// note this is the state of the device at the time of
     /// decryption. It may change in the future if a device gets
     /// verified or deleted.
+    ///
+    /// # Arguments
+    ///
+    /// * `strict` - whether to enable "strict mode" verification. In non-strict mode,
+    ///   unverified users are given no shield, and keys that have been forwarded or restored
+    ///   from an insecure backup are given a grey shield (both get a red shield in strict mode).
     #[wasm_bindgen(js_name = "shieldState")]
     pub fn shield_state(&self, strict: bool) -> Option<encryption::ShieldState> {
         let state = &self.encryption_info.as_ref()?.verification_state;
