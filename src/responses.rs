@@ -230,9 +230,10 @@ impl DecryptedRoomEvent {
     ///
     /// # Arguments
     ///
-    /// * `strict` - whether to enable "strict mode" verification. In non-strict mode,
-    ///   unverified users are given no shield, and keys that have been forwarded or restored
-    ///   from an insecure backup are given a grey shield (both get a red shield in strict mode).
+    /// * `strict` - whether to enable "strict mode" verification. In non-strict
+    ///   mode, unverified users are given no shield, and keys that have been
+    ///   forwarded or restored from an insecure backup are given a grey shield
+    ///   (both get a red shield in strict mode).
     #[wasm_bindgen(js_name = "shieldState")]
     pub fn shield_state(&self, strict: bool) -> Option<encryption::ShieldState> {
         let state = &self.encryption_info.as_ref()?.verification_state;
