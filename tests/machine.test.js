@@ -553,7 +553,7 @@ describe(OlmMachine.name, () => {
         };
         try {
             await m.decryptRoomEvent(JSON.stringify(evt), room);
-            fail('it should not reach here');
+            fail("it should not reach here");
         } catch (err) {
             expect(err).toBeInstanceOf(MegolmDecryptionError);
             expect(err.code).toStrictEqual(DecryptionErrorCode.UnableToDecrypt);
