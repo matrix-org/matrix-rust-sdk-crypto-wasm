@@ -26,6 +26,8 @@ const {
     getVersions,
     SignatureState,
     BackupDecryptionKey,
+    MegolmDecryptionError,
+    DecryptionErrorCode,
 } = require("../pkg/matrix_sdk_crypto_wasm");
 const { addMachineToMachine } = require("./helper");
 require("fake-indexeddb/auto");
@@ -549,7 +551,13 @@ describe(OlmMachine.name, () => {
                 ciphertext: "blah",
             },
         };
-        await expect(() => m.decryptRoomEvent(JSON.stringify(evt), room)).rejects.toThrowError();
+        try {
+            await m.decryptRoomEvent(JSON.stringify(evt), room);
+            fail('it should not reach here');
+        } catch (err) {
+            expect(err).toBeInstanceOf(MegolmDecryptionError);
+            expect(err.code).toStrictEqual(DecryptionErrorCode.UnableToDecrypt);
+        }
     });
 
     test("can read cross-signing status", async () => {

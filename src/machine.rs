@@ -15,6 +15,7 @@ use wasm_bindgen_futures::{spawn_local, JsFuture};
 use crate::{
     backup::{BackupDecryptionKey, BackupKeys, RoomKeyCounts},
     device, encryption,
+    error::MegolmDecryptionError,
     future::{future_to_promise, future_to_promise_with_custom_error},
     identifiers, identities,
     js::downcast,
@@ -25,7 +26,7 @@ use crate::{
     store::RoomKeyInfo,
     sync_events,
     types::{self, SignatureVerification},
-    verification, vodozemac, error::MegolmDecryptionError,
+    verification, vodozemac,
 };
 
 /// State machine implementation of the Olm/Megolm encryption protocol
@@ -381,17 +382,21 @@ impl OlmMachine {
         event: &str,
         room_id: &identifiers::RoomId,
     ) -> Result<Promise, JsError> {
-
         let event: Raw<_> = serde_json::from_str(event)?;
         let room_id = room_id.inner.clone();
         let me = self.inner.clone();
 
-        Ok(future_to_promise_with_custom_error::<_, responses::DecryptedRoomEvent, MegolmDecryptionError>(async move {
-            let room_event = me.decrypt_room_event(&event, room_id.as_ref()).await
-            .map_err(|e| MegolmDecryptionError::from(e))?;
+        Ok(future_to_promise_with_custom_error::<
+            _,
+            responses::DecryptedRoomEvent,
+            MegolmDecryptionError,
+        >(async move {
+            let room_event = me
+                .decrypt_room_event(&event, room_id.as_ref())
+                .await
+                .map_err(|e| MegolmDecryptionError::from(e))?;
             Ok(responses::DecryptedRoomEvent::from(room_event))
         }))
-
     }
 
     /// Get the status of the private cross signing keys.

@@ -1,7 +1,7 @@
 //! Errors related to room event decryption.
 
 use js_sys::JsString;
-use matrix_sdk_crypto::{MegolmError, vodozemac};
+use matrix_sdk_crypto::{vodozemac, MegolmError};
 use wasm_bindgen::prelude::wasm_bindgen;
 
 /// Decryption error codes
@@ -17,7 +17,7 @@ pub enum DecryptionErrorCode {
     /// the plaintext of the room key to-device message.
     MismatchedIdentityKeys,
     /// Other failuer
-    UnableToDecrypt
+    UnableToDecrypt,
 }
 
 /// Js Decryption error with code.
@@ -41,44 +41,44 @@ impl MegolmDecryptionError {
         Self {
             code: DecryptionErrorCode::UnableToDecrypt,
             description: desc.into(),
-            maybe_withheld: None
+            maybe_withheld: None,
         }
     }
 }
 
-
 impl From<MegolmError> for MegolmDecryptionError {
-
     fn from(value: MegolmError) -> Self {
         match &value {
-            MegolmError::MissingRoomKey(withheld_code) => {
-                MegolmDecryptionError {
-                    code: DecryptionErrorCode::MissingRoomKey,
-                    description: value.to_string().into(),
-                    maybe_withheld: withheld_code.as_ref().map(|code| code.to_string().to_owned().into()),
-                }
-            }
-            MegolmError::Decryption(vodozemac::megolm::DecryptionError::UnknownMessageIndex(_,_)) => {
-                MegolmDecryptionError {
-                    code: DecryptionErrorCode::UnknownMessageIndex,
-                    description: value.to_string().into(),
-                    maybe_withheld: None
-                }
-            }
-            MegolmError::MismatchedIdentityKeys { key_ed25519: _, device_ed25519: _, key_curve25519: _, device_curve25519: _ } => {
-                MegolmDecryptionError { 
-                    code: DecryptionErrorCode::UnknownMessageIndex,
-                    description: value.to_string().into(),
-                    maybe_withheld: None
-                }
-            }
-            _ => {
-                MegolmDecryptionError { 
-                    code: DecryptionErrorCode::UnableToDecrypt,
-                    description: value.to_string().into(),
-                    maybe_withheld: None
-                }
-            }
+            MegolmError::MissingRoomKey(withheld_code) => MegolmDecryptionError {
+                code: DecryptionErrorCode::MissingRoomKey,
+                description: value.to_string().into(),
+                maybe_withheld: withheld_code
+                    .as_ref()
+                    .map(|code| code.to_string().to_owned().into()),
+            },
+            MegolmError::Decryption(vodozemac::megolm::DecryptionError::UnknownMessageIndex(
+                _,
+                _,
+            )) => MegolmDecryptionError {
+                code: DecryptionErrorCode::UnknownMessageIndex,
+                description: value.to_string().into(),
+                maybe_withheld: None,
+            },
+            MegolmError::MismatchedIdentityKeys {
+                key_ed25519: _,
+                device_ed25519: _,
+                key_curve25519: _,
+                device_curve25519: _,
+            } => MegolmDecryptionError {
+                code: DecryptionErrorCode::UnknownMessageIndex,
+                description: value.to_string().into(),
+                maybe_withheld: None,
+            },
+            _ => MegolmDecryptionError {
+                code: DecryptionErrorCode::UnableToDecrypt,
+                description: value.to_string().into(),
+                maybe_withheld: None,
+            },
         }
     }
 }
