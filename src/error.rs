@@ -61,12 +61,7 @@ impl From<MegolmError> for MegolmDecryptionError {
                 description: value.to_string().into(),
                 maybe_withheld: None,
             },
-            MegolmError::MismatchedIdentityKeys {
-                key_ed25519: _,
-                device_ed25519: _,
-                key_curve25519: _,
-                device_curve25519: _,
-            } => MegolmDecryptionError {
+            MegolmError::MismatchedIdentityKeys { .. } => MegolmDecryptionError {
                 code: DecryptionErrorCode::UnknownMessageIndex,
                 description: value.to_string().into(),
                 maybe_withheld: None,
