@@ -22,6 +22,7 @@ pub mod attachment;
 pub mod backup;
 pub mod device;
 pub mod encryption;
+pub mod error;
 pub mod events;
 mod future;
 pub mod identifiers;
