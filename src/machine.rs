@@ -15,7 +15,8 @@ use wasm_bindgen_futures::{spawn_local, JsFuture};
 use crate::{
     backup::{BackupDecryptionKey, BackupKeys, RoomKeyCounts},
     device, encryption,
-    future::future_to_promise,
+    error::MegolmDecryptionError,
+    future::{future_to_promise, future_to_promise_with_custom_error},
     identifiers, identities,
     js::downcast,
     olm, requests,
@@ -369,6 +370,7 @@ impl OlmMachine {
     }
 
     /// Decrypt an event from a room timeline.
+    /// The returned promise will reject MegolmDecryptionError errors.
     ///
     /// # Arguments
     ///
@@ -384,9 +386,15 @@ impl OlmMachine {
         let room_id = room_id.inner.clone();
         let me = self.inner.clone();
 
-        Ok(future_to_promise(async move {
-            let room_event = me.decrypt_room_event(&event, room_id.as_ref()).await?;
-
+        Ok(future_to_promise_with_custom_error::<
+            _,
+            responses::DecryptedRoomEvent,
+            MegolmDecryptionError,
+        >(async move {
+            let room_event = me
+                .decrypt_room_event(&event, room_id.as_ref())
+                .await
+                .map_err(|e| MegolmDecryptionError::from(e))?;
             Ok(responses::DecryptedRoomEvent::from(room_event))
         }))
     }
