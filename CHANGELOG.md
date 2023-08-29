@@ -2,7 +2,7 @@
 
 ## Changes in the WASM bindings
 
--   The `OlmMachine.decrypt_room_event()` returns now a Promise that will throw
+-   `OlmMachine.decrypt_room_event()` now throws a
     typed `MegolmDecryptionError` instead of generic `JsError``.
 
 # matrix-sdk-crypto-wasm v1.2.1
