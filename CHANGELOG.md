@@ -3,7 +3,7 @@
 ## Changes in the WASM bindings
 
 -   `OlmMachine.decrypt_room_event()` now throws a
-    typed `MegolmDecryptionError` instead of generic `JsError``.
+    typed `MegolmDecryptionError` instead of generic `Error`.
 
 # matrix-sdk-crypto-wasm v1.2.1
 
