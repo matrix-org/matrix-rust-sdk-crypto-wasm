@@ -56,7 +56,9 @@ impl From<MegolmError> for MegolmDecryptionError {
                     .as_ref()
                     .map(|code| code.to_string().to_owned().into()),
             },
-            MegolmError::Decryption(vodozemac::megolm::DecryptionError::UnknownMessageIndex(..))) => MegolmDecryptionError {
+            MegolmError::Decryption(vodozemac::megolm::DecryptionError::UnknownMessageIndex(
+                ..,
+            )) => MegolmDecryptionError {
                 code: DecryptionErrorCode::UnknownMessageIndex,
                 description: value.to_string().into(),
                 maybe_withheld: None,
