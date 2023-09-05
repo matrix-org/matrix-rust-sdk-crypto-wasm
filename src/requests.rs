@@ -424,7 +424,7 @@ macro_rules! request {
 
 // Outgoing Requests
 request!(KeysUploadRequest from OriginalKeysUploadRequest groups device_keys, one_time_keys, fallback_keys);
-request!(KeysQueryRequest from OriginalKeysQueryRequest groups timeout, device_keys, token);
+request!(KeysQueryRequest from OriginalKeysQueryRequest groups timeout, device_keys);
 request!(KeysClaimRequest from OriginalKeysClaimRequest groups timeout, one_time_keys);
 request!(ToDeviceRequest from OriginalToDeviceRequest extracts event_type: string, txn_id: string and groups messages);
 request!(SignatureUploadRequest from OriginalSignatureUploadRequest extracts signed_keys: json);

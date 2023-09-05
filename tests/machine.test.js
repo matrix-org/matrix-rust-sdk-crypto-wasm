@@ -237,7 +237,7 @@ describe(OlmMachine.name, () => {
         expect(receiveSyncChanges).toEqual([]);
     });
 
-    test("can get the outgoing requests that need to be send out", async () => {
+    test("can get the outgoing requests that need to be sent out", async () => {
         const m = await machine();
         const toDeviceEvents = JSON.stringify([]);
         const changedDevices = new DeviceLists();
@@ -274,7 +274,6 @@ describe(OlmMachine.name, () => {
             const body = JSON.parse(outgoingRequests[1].body);
             expect(body.timeout).toBeDefined();
             expect(body.device_keys).toBeDefined();
-            expect(body.token).toBeDefined();
         }
     });
 
