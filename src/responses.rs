@@ -13,13 +13,13 @@ pub(crate) use matrix_sdk_common::ruma::api::client::{
     to_device::send_event_to_device::v3::Response as ToDeviceResponse,
 };
 use matrix_sdk_common::{
-    deserialized_responses::{AlgorithmInfo, EncryptionInfo},
+    deserialized_responses::AlgorithmInfo,
     ruma::{self, api::IncomingResponse as RumaIncomingResponse},
 };
 use matrix_sdk_crypto::IncomingResponse;
 use wasm_bindgen::prelude::*;
 
-use crate::{encryption, identifiers, requests::RequestType};
+use crate::{encryption, identifiers, impl_from_to_inner, requests::RequestType};
 
 pub(crate) fn response_from_string(body: &str) -> http::Result<http::Response<Vec<u8>>> {
     http::Response::builder().status(200).body(body.as_bytes().to_vec())
@@ -185,7 +185,7 @@ impl DecryptedRoomEvent {
     /// unless the `verification_state` is as well trusted.
     #[wasm_bindgen(getter)]
     pub fn sender(&self) -> Option<identifiers::UserId> {
-        Some(identifiers::UserId::from(self.encryption_info.as_ref()?.sender.clone()))
+        Some(self.encryption_info.as_ref()?.sender())
     }
 
     /// The device ID of the device that sent us the event, note this
@@ -193,38 +193,103 @@ impl DecryptedRoomEvent {
     /// trusted.
     #[wasm_bindgen(getter, js_name = "senderDevice")]
     pub fn sender_device(&self) -> Option<identifiers::DeviceId> {
-        Some(self.encryption_info.as_ref()?.sender_device.as_ref()?.clone().into())
+        self.encryption_info.as_ref()?.sender_device()
     }
 
     /// The Curve25519 key of the device that created the megolm
     /// decryption key originally.
     #[wasm_bindgen(getter, js_name = "senderCurve25519Key")]
     pub fn sender_curve25519_key(&self) -> Option<JsString> {
-        Some(match &self.encryption_info.as_ref()?.algorithm_info {
-            AlgorithmInfo::MegolmV1AesSha2 { curve25519_key, .. } => curve25519_key.clone().into(),
-        })
+        self.encryption_info.as_ref()?.sender_curve25519_key()
     }
 
     /// The signing Ed25519 key that have created the megolm key that
     /// was used to decrypt this session.
     #[wasm_bindgen(getter, js_name = "senderClaimedEd25519Key")]
     pub fn sender_claimed_ed25519_key(&self) -> Option<JsString> {
-        match &self.encryption_info.as_ref()?.algorithm_info {
+        self.encryption_info.as_ref()?.sender_claimed_ed25519_key()
+    }
+
+    /// Returns an empty array
+    ///
+    /// Previously, this returned the chain of Curve25519 keys through which
+    /// this session was forwarded, via `m.forwarded_room_key` events.
+    /// However, that is not cryptographically reliable, and clients should not
+    /// be using it.
+    ///
+    /// @see https://github.com/matrix-org/matrix-spec/issues/1089
+    #[wasm_bindgen(getter, js_name = "forwardingCurve25519KeyChain")]
+    pub fn forwarding_curve25519_key_chain(&self) -> Array {
+        Array::new()
+    }
+
+    /// The verification state of the device that sent us the event.
+    /// Note this is the state of the device at the time of
+    /// decryption. It may change in the future if a device gets
+    /// verified or deleted.
+    #[wasm_bindgen(js_name = "shieldState")]
+    pub fn shield_state(&self, strict: bool) -> Option<encryption::ShieldState> {
+        Some(self.encryption_info.as_ref()?.shield_state(strict))
+    }
+}
+
+impl From<matrix_sdk_common::deserialized_responses::TimelineEvent> for DecryptedRoomEvent {
+    fn from(value: matrix_sdk_common::deserialized_responses::TimelineEvent) -> Self {
+        Self {
+            event: value.event.json().get().to_owned().into(),
+            encryption_info: value.encryption_info.map(|e| e.into()),
+        }
+    }
+}
+
+/// Struct containing information on how an event was decrypted.
+#[wasm_bindgen()]
+#[derive(Debug)]
+pub struct EncryptionInfo {
+    inner: matrix_sdk_common::deserialized_responses::EncryptionInfo,
+}
+
+impl_from_to_inner!(matrix_sdk_common::deserialized_responses::EncryptionInfo => EncryptionInfo);
+
+#[wasm_bindgen()]
+impl EncryptionInfo {
+    /// The user ID of the event sender. Note this is untrusted data
+    /// unless `verification_state` is also trusted.
+    #[wasm_bindgen(getter)]
+    pub fn sender(&self) -> identifiers::UserId {
+        identifiers::UserId::from(self.inner.sender.clone())
+    }
+
+    /// The device ID of the device that sent us the event. Note this
+    /// is untrusted data unless `verification_state` is also
+    /// trusted.
+    #[wasm_bindgen(getter, js_name = "senderDevice")]
+    pub fn sender_device(&self) -> Option<identifiers::DeviceId> {
+        Some(self.inner.sender_device.as_ref()?.clone().into())
+    }
+
+    /// The Curve25519 key of the device that created the megolm
+    /// decryption key originally.
+    #[wasm_bindgen(getter, js_name = "senderCurve25519Key")]
+    pub fn sender_curve25519_key(&self) -> Option<JsString> {
+        Some(match &self.inner.algorithm_info {
+            AlgorithmInfo::MegolmV1AesSha2 { curve25519_key, .. } => curve25519_key.clone().into(),
+        })
+    }
+
+    /// The signing Ed25519 key that created the megolm key that
+    /// was used to decrypt this session.
+    #[wasm_bindgen(getter, js_name = "senderClaimedEd25519Key")]
+    pub fn sender_claimed_ed25519_key(&self) -> Option<JsString> {
+        match &self.inner.algorithm_info {
             AlgorithmInfo::MegolmV1AesSha2 { sender_claimed_keys, .. } => {
                 sender_claimed_keys.get(&ruma::DeviceKeyAlgorithm::Ed25519).cloned().map(Into::into)
             }
         }
     }
 
-    /// Chain of Curve25519 keys through which this session was
-    /// forwarded, via `m.forwarded_room_key` events.
-    #[wasm_bindgen(getter, js_name = "forwardingCurve25519KeyChain")]
-    pub fn forwarding_curve25519_key_chain(&self) -> Array {
-        Array::new()
-    }
-
-    /// The verification state of the device that sent us the event,
-    /// note this is the state of the device at the time of
+    /// The verification state of the device that sent us the event.
+    /// Note this is the state of the device at the time of
     /// decryption. It may change in the future if a device gets
     /// verified or deleted.
     ///
@@ -235,22 +300,14 @@ impl DecryptedRoomEvent {
     ///   forwarded or restored from an insecure backup are given a grey shield
     ///   (both get a red shield in strict mode).
     #[wasm_bindgen(js_name = "shieldState")]
-    pub fn shield_state(&self, strict: bool) -> Option<encryption::ShieldState> {
-        let state = &self.encryption_info.as_ref()?.verification_state;
+    pub fn shield_state(&self, strict: bool) -> encryption::ShieldState {
+        let verification_state = &self.inner.verification_state;
 
         if strict {
-            Some(state.to_shield_state_strict().into())
+            verification_state.to_shield_state_strict()
         } else {
-            Some(state.to_shield_state_lax().into())
+            verification_state.to_shield_state_lax()
         }
-    }
-}
-
-impl From<matrix_sdk_common::deserialized_responses::TimelineEvent> for DecryptedRoomEvent {
-    fn from(value: matrix_sdk_common::deserialized_responses::TimelineEvent) -> Self {
-        Self {
-            event: value.event.json().get().to_owned().into(),
-            encryption_info: value.encryption_info,
-        }
+        .into()
     }
 }
