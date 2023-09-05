@@ -7,6 +7,7 @@ use js_sys::{Array, Function, Map, Promise, Set};
 use matrix_sdk_common::ruma::{self, serde::Raw, DeviceKeyAlgorithm, OwnedTransactionId, UInt};
 use matrix_sdk_crypto::{
     backups::MegolmV1BackupKey, types::RoomKeyBackupInfo, EncryptionSyncChanges,
+    ReadOnlyUserIdentities,
 };
 use serde_json::{json, Value as JsonValue};
 use serde_wasm_bindgen;
@@ -1025,6 +1026,25 @@ impl OlmMachine {
         });
     }
 
+    /// Register a callback which will be called whenever there is an update to
+    /// a user identity.
+    ///
+    /// `callback` should be a function that takes a single argument (a {@link
+    /// UserId}) and returns a Promise.
+    #[wasm_bindgen(js_name = "registerUserIdentityUpdatedCallback")]
+    pub async fn register_user_identity_updated_callback(&self, callback: Function) {
+        let stream = self.inner.store().identity_updates_stream();
+
+        // fire up a promise chain which will call `cb` on each result from the stream
+        spawn_local(async move {
+            // take a reference to `callback` (which we then pass into the closure), to stop
+            // the callback being moved into the closure (which would mean we could only
+            // call the closure once)
+            let callback_ref = &callback;
+            stream.for_each(move |item| send_user_identities_to_callback(callback_ref, item)).await;
+        });
+    }
+
     /// Shut down the `OlmMachine`.
     ///
     /// The `OlmMachine` cannot be used after this method has been called.
@@ -1043,6 +1063,21 @@ async fn send_room_key_info_to_callback(
 ) {
     let rki: Array = room_key_info.into_iter().map(RoomKeyInfo::from).map(JsValue::from).collect();
     match promise_result_to_future(callback.call1(&JsValue::NULL, &rki)).await {
+        Ok(_) => (),
+        Err(e) => {
+            warn!("Error calling room-key-received callback: {:?}", e);
+        }
+    }
+}
+
+// helper for register_user_identity_updated_callback: passes the user ID into
+// the javascript function
+async fn send_user_identities_to_callback(
+    callback: &Function,
+    user_identity: ReadOnlyUserIdentities,
+) {
+    let user_id: JsValue = identifiers::UserId::from(user_identity.user_id().to_owned()).into();
+    match promise_result_to_future(callback.call1(&JsValue::NULL, &user_id)).await {
         Ok(_) => (),
         Err(e) => {
             warn!("Error calling room-key-received callback: {:?}", e);

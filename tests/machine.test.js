@@ -31,6 +31,7 @@ const {
 } = require("../pkg/matrix_sdk_crypto_wasm");
 const { addMachineToMachine } = require("./helper");
 require("fake-indexeddb/auto");
+const RustSdkCryptoJs = require("../pkg");
 
 describe("Versions", () => {
     test("can find out the crate versions", async () => {
@@ -126,6 +127,7 @@ describe(OlmMachine.name, () => {
     const room = new RoomId("!baz:matrix.org");
 
     function machine(new_user, new_device) {
+        new RustSdkCryptoJs.Tracing(RustSdkCryptoJs.LoggerLevel.Trace).turnOn();
         return OlmMachine.initialize(new_user || user, new_device || device);
     }
 
@@ -611,7 +613,7 @@ describe(OlmMachine.name, () => {
         }
     });
 
-    test("can get a user identities", async () => {
+    test("can get own user identity", async () => {
         const m = await machine();
         let _ = m.bootstrapCrossSigning(true);
 
@@ -650,6 +652,22 @@ describe(OlmMachine.name, () => {
         const isTrusted = await identity.trustsOurOwnDevice();
 
         expect(isTrusted).toStrictEqual(false);
+    });
+
+    test("Updating user identity should call userIdentityUpdatedCallback", async () => {
+        const m = await machine();
+        let _ = m.bootstrapCrossSigning(true);
+        const identity = await m.getIdentity(user);
+        expect(identity).toBeInstanceOf(OwnUserIdentity);
+
+        const callback = jest.fn().mockImplementation(() => Promise.resolve(undefined));
+        m.registerUserIdentityUpdatedCallback(callback);
+
+        await identity.verify();
+
+        expect(callback).toHaveBeenCalledTimes(1);
+        expect(callback.mock.calls[0][0].toString()).toEqual(user.toString());
+
     });
 
     describe("can export/import room keys", () => {
