@@ -5,7 +5,9 @@ use std::{collections::BTreeMap, ops::Deref, time::Duration};
 use futures_util::StreamExt;
 use js_sys::{Array, Function, Map, Promise, Set};
 use matrix_sdk_common::ruma::{self, serde::Raw, DeviceKeyAlgorithm, OwnedTransactionId, UInt};
-use matrix_sdk_crypto::{backups::MegolmV1BackupKey, types::RoomKeyBackupInfo};
+use matrix_sdk_crypto::{
+    backups::MegolmV1BackupKey, types::RoomKeyBackupInfo, EncryptionSyncChanges,
+};
 use serde_json::{json, Value as JsonValue};
 use serde_wasm_bindgen;
 use tracing::warn;
@@ -220,19 +222,33 @@ impl OlmMachine {
     /// To decrypt an event from the room timeline call
     /// `decrypt_room_event`.
     ///
-    /// Returns a list of JSON strings, containing the decrypted to-device
-    /// events.
+    /// # Arguments
+    ///
+    /// * `to_device_events`: the JSON-encoded to-device evens from the `/sync`
+    ///   response
+    /// * `changed_devices`: the mapping of changed and left devices, from the
+    ///   `/sync` response
+    /// * `one_time_keys_counts`: The number of one-time keys on the server,
+    ///   from the `/sync` response. A `Map` from string (encryption algorithm)
+    ///   to number (number of keys).
+    /// * `unused_fallback_keys`: Optionally, a `Set` of unused fallback keys on
+    ///   the server, from the `/sync` response. If this is set, it is used to
+    ///   determine if new fallback keys should be uploaded.
+    ///
+    /// # Returns
+    ///
+    /// A list of JSON strings, containing the decrypted to-device events.
     #[wasm_bindgen(js_name = "receiveSyncChanges")]
     pub fn receive_sync_changes(
         &self,
         to_device_events: &str,
         changed_devices: &sync_events::DeviceLists,
-        one_time_key_counts: &Map,
+        one_time_keys_counts: &Map,
         unused_fallback_keys: Option<Set>,
     ) -> Result<Promise, JsError> {
         let to_device_events = serde_json::from_str(to_device_events)?;
         let changed_devices = changed_devices.inner.clone();
-        let one_time_key_counts: BTreeMap<DeviceKeyAlgorithm, UInt> = one_time_key_counts
+        let one_time_keys_counts: BTreeMap<DeviceKeyAlgorithm, UInt> = one_time_keys_counts
             .entries()
             .into_iter()
             .filter_map(|js_value| {
@@ -265,12 +281,15 @@ impl OlmMachine {
             // expected to use register_room_key_updated_callback to receive updated room
             // keys.
             let (decrypted_to_device_events, _) = me
-                .receive_sync_changes(
+                .receive_sync_changes(EncryptionSyncChanges {
                     to_device_events,
-                    &changed_devices,
-                    &one_time_key_counts,
-                    unused_fallback_keys.as_deref(),
-                )
+                    changed_devices: &changed_devices,
+                    one_time_keys_counts: &one_time_keys_counts,
+                    unused_fallback_keys: unused_fallback_keys.as_deref(),
+
+                    // matrix-sdk-crypto does not (currently) use `next_batch_token`.
+                    next_batch_token: None,
+                })
                 .await?;
 
             Ok(serde_json::to_string(&decrypted_to_device_events)?)
