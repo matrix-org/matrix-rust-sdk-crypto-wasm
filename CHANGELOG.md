@@ -1,6 +1,7 @@
 # unreleased
 
 -   Add `OlmMachine.registerUserIdentityUpdatedCallback`.
+-   Expose new method `OlmMachine.getRoomEventEncryptionInfo`.
 
 # matrix-sdk-crypto-wasm v1.2.2
 

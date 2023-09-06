@@ -390,12 +390,16 @@ impl OlmMachine {
     }
 
     /// Decrypt an event from a room timeline.
-    /// The returned promise will reject MegolmDecryptionError errors.
     ///
     /// # Arguments
     ///
     /// * `event`, the event that should be decrypted.
     /// * `room_id`, the ID of the room where the event was sent to.
+    ///
+    /// # Returns
+    ///
+    /// A `Promise` which resolves to a {@link DecryptedRoomEvent} instance, or
+    /// rejects with a {@link MegolmDecryptionError} instance.
     #[wasm_bindgen(js_name = "decryptRoomEvent")]
     pub fn decrypt_room_event(
         &self,
@@ -416,6 +420,39 @@ impl OlmMachine {
                 .await
                 .map_err(|e| MegolmDecryptionError::from(e))?;
             Ok(responses::DecryptedRoomEvent::from(room_event))
+        }))
+    }
+
+    /// Get encryption info for a decrypted timeline event.
+    ///
+    /// This recalculates the `EncryptionInfo` data that is returned by
+    /// `decryptRoomEvent`, based on the current
+    /// verification status of the sender, etc.
+    ///
+    /// Returns an error for an unencrypted event.
+    ///
+    /// # Arguments
+    ///
+    /// * `event` - The event to get information for.
+    /// * `room_id` - The ID of the room where the event was sent to.
+    ///
+    /// # Returns
+    ///
+    /// {@link EncryptionInfo}
+    #[wasm_bindgen(js_name = "getRoomEventEncryptionInfo")]
+    pub fn get_room_event_encryption_info(
+        &self,
+        event: &str,
+        room_id: &identifiers::RoomId,
+    ) -> Result<Promise, JsError> {
+        let event: Raw<_> = serde_json::from_str(event)?;
+        let room_id = room_id.inner.clone();
+        let me = self.inner.clone();
+
+        Ok(future_to_promise(async move {
+            let encryption_info =
+                me.get_room_event_encryption_info(&event, room_id.as_ref()).await?;
+            Ok(responses::EncryptionInfo::from(encryption_info))
         }))
     }
 
