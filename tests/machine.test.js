@@ -668,7 +668,6 @@ describe(OlmMachine.name, () => {
         expect(callback).toHaveBeenCalledTimes(1);
         const [userId] = callback.mock.calls[0];
         expect(userId.toString()).toEqual(user.toString());
-
     });
 
     describe("can export/import room keys", () => {
