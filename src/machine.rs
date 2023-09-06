@@ -6,8 +6,8 @@ use futures_util::StreamExt;
 use js_sys::{Array, Function, Map, Promise, Set};
 use matrix_sdk_common::ruma::{self, serde::Raw, DeviceKeyAlgorithm, OwnedTransactionId, UInt};
 use matrix_sdk_crypto::{
-    backups::MegolmV1BackupKey, types::RoomKeyBackupInfo, EncryptionSyncChanges,
-    ReadOnlyUserIdentities,
+    backups::MegolmV1BackupKey, store::IdentityUpdates, types::RoomKeyBackupInfo,
+    EncryptionSyncChanges,
 };
 use serde_json::{json, Value as JsonValue};
 use serde_wasm_bindgen;
@@ -1033,7 +1033,7 @@ impl OlmMachine {
     /// UserId}) and returns a Promise.
     #[wasm_bindgen(js_name = "registerUserIdentityUpdatedCallback")]
     pub async fn register_user_identity_updated_callback(&self, callback: Function) {
-        let stream = self.inner.store().identity_updates_stream();
+        let stream = self.inner.store().user_identities_stream();
 
         // fire up a promise chain which will call `cb` on each result from the stream
         spawn_local(async move {
@@ -1072,15 +1072,19 @@ async fn send_room_key_info_to_callback(
 
 // helper for register_user_identity_updated_callback: passes the user ID into
 // the javascript function
-async fn send_user_identities_to_callback(
-    callback: &Function,
-    user_identity: ReadOnlyUserIdentities,
-) {
-    let user_id: JsValue = identifiers::UserId::from(user_identity.user_id().to_owned()).into();
-    match promise_result_to_future(callback.call1(&JsValue::NULL, &user_id)).await {
-        Ok(_) => (),
-        Err(e) => {
-            warn!("Error calling room-key-received callback: {:?}", e);
+async fn send_user_identities_to_callback(callback: &Function, user_identity: IdentityUpdates) {
+    let update_chain = user_identity.new.into_keys().chain(user_identity.changed.into_keys());
+    for user_id in update_chain {
+        match promise_result_to_future(callback.call1(
+            &JsValue::NULL,
+            &(identifiers::UserId::from(user_id).into()),
+        ))
+        .await
+        {
+            Ok(_) => (),
+            Err(e) => {
+                warn!("Error calling user-identity-updated callback: {:?}", e);
+            }
         }
     }
 }

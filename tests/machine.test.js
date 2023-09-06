@@ -666,7 +666,8 @@ describe(OlmMachine.name, () => {
         await identity.verify();
 
         expect(callback).toHaveBeenCalledTimes(1);
-        expect(callback.mock.calls[0][0].toString()).toEqual(user.toString());
+        const [userId] = callback.mock.calls[0];
+        expect(userId.toString()).toEqual(user.toString());
 
     });
 
