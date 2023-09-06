@@ -508,20 +508,18 @@ describe(OlmMachine.name, () => {
         });
 
         test("can decrypt an event", async () => {
-            const decrypted = await m.decryptRoomEvent(
-                JSON.stringify({
-                    type: "m.room.encrypted",
-                    event_id: "$xxxxx:example.org",
-                    origin_server_ts: Date.now(),
-                    sender: user.toString(),
-                    content: encrypted,
-                    unsigned: {
-                        age: 1234,
-                    },
-                }),
-                room,
-            );
+            const stringifiedEvent = JSON.stringify({
+                type: "m.room.encrypted",
+                event_id: "$xxxxx:example.org",
+                origin_server_ts: Date.now(),
+                sender: user.toString(),
+                content: encrypted,
+                unsigned: {
+                    age: 1234,
+                },
+            });
 
+            const decrypted = await m.decryptRoomEvent(stringifiedEvent, room);
             expect(decrypted).toBeInstanceOf(DecryptedRoomEvent);
 
             const event = JSON.parse(decrypted.event);
@@ -535,6 +533,14 @@ describe(OlmMachine.name, () => {
             expect(decrypted.forwardingCurve25519KeyChain).toHaveLength(0);
             expect(decrypted.shieldState(true).color).toStrictEqual(ShieldColor.Red);
             expect(decrypted.shieldState(false).color).toStrictEqual(ShieldColor.Red);
+
+            const decryptionInfo = await m.getRoomEventEncryptionInfo(stringifiedEvent, room);
+            expect(decryptionInfo.sender.toString()).toStrictEqual(user.toString());
+            expect(decryptionInfo.senderDevice.toString()).toStrictEqual(device.toString());
+            expect(decryptionInfo.senderCurve25519Key).toBeDefined();
+            expect(decryptionInfo.senderClaimedEd25519Key).toBeDefined();
+            expect(decryptionInfo.shieldState(true).color).toStrictEqual(ShieldColor.Red);
+            expect(decryptionInfo.shieldState(false).color).toStrictEqual(ShieldColor.Red);
         });
     });
 
