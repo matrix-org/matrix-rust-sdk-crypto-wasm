@@ -6,7 +6,8 @@ use futures_util::StreamExt;
 use js_sys::{Array, Function, Map, Promise, Set};
 use matrix_sdk_common::ruma::{self, serde::Raw, DeviceKeyAlgorithm, OwnedTransactionId, UInt};
 use matrix_sdk_crypto::{
-    backups::MegolmV1BackupKey, types::RoomKeyBackupInfo, EncryptionSyncChanges,
+    backups::MegolmV1BackupKey, store::IdentityUpdates, types::RoomKeyBackupInfo,
+    EncryptionSyncChanges,
 };
 use serde_json::{json, Value as JsonValue};
 use serde_wasm_bindgen;
@@ -1025,6 +1026,25 @@ impl OlmMachine {
         });
     }
 
+    /// Register a callback which will be called whenever there is an update to
+    /// a user identity.
+    ///
+    /// `callback` should be a function that takes a single argument (a {@link
+    /// UserId}) and returns a Promise.
+    #[wasm_bindgen(js_name = "registerUserIdentityUpdatedCallback")]
+    pub async fn register_user_identity_updated_callback(&self, callback: Function) {
+        let stream = self.inner.store().user_identities_stream();
+
+        // fire up a promise chain which will call `cb` on each result from the stream
+        spawn_local(async move {
+            // take a reference to `callback` (which we then pass into the closure), to stop
+            // the callback being moved into the closure (which would mean we could only
+            // call the closure once)
+            let callback_ref = &callback;
+            stream.for_each(move |item| send_user_identities_to_callback(callback_ref, item)).await;
+        });
+    }
+
     /// Shut down the `OlmMachine`.
     ///
     /// The `OlmMachine` cannot be used after this method has been called.
@@ -1046,6 +1066,24 @@ async fn send_room_key_info_to_callback(
         Ok(_) => (),
         Err(e) => {
             warn!("Error calling room-key-received callback: {:?}", e);
+        }
+    }
+}
+
+// helper for register_user_identity_updated_callback: passes the user ID into
+// the javascript function
+async fn send_user_identities_to_callback(callback: &Function, user_identity: IdentityUpdates) {
+    let update_chain = user_identity.new.into_keys().chain(user_identity.changed.into_keys());
+    for user_id in update_chain {
+        match promise_result_to_future(
+            callback.call1(&JsValue::NULL, &(identifiers::UserId::from(user_id).into())),
+        )
+        .await
+        {
+            Ok(_) => (),
+            Err(e) => {
+                warn!("Error calling user-identity-updated callback: {:?}", e);
+            }
         }
     }
 }
