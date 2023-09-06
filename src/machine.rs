@@ -1075,10 +1075,9 @@ async fn send_room_key_info_to_callback(
 async fn send_user_identities_to_callback(callback: &Function, user_identity: IdentityUpdates) {
     let update_chain = user_identity.new.into_keys().chain(user_identity.changed.into_keys());
     for user_id in update_chain {
-        match promise_result_to_future(callback.call1(
-            &JsValue::NULL,
-            &(identifiers::UserId::from(user_id).into()),
-        ))
+        match promise_result_to_future(
+            callback.call1(&JsValue::NULL, &(identifiers::UserId::from(user_id).into())),
+        )
         .await
         {
             Ok(_) => (),
