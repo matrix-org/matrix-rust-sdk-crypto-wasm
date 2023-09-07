@@ -1067,7 +1067,7 @@ dependencies = [
 [[package]]
 name = "matrix-sdk-base"
 version = "0.6.1"
-source = "git+https://github.com/matrix-org/matrix-rust-sdk?rev=9174f120b43453b85202339c21ba6a76bdf610c9#9174f120b43453b85202339c21ba6a76bdf610c9"
+source = "git+https://github.com/matrix-org/matrix-rust-sdk?rev=783adb424e23eeac8067844bcf5510f9bede70e1#783adb424e23eeac8067844bcf5510f9bede70e1"
 dependencies = [
  "async-trait",
  "bitflags 2.3.3",
@@ -1089,8 +1089,9 @@ dependencies = [
 [[package]]
 name = "matrix-sdk-common"
 version = "0.6.0"
-source = "git+https://github.com/matrix-org/matrix-rust-sdk?rev=9174f120b43453b85202339c21ba6a76bdf610c9#9174f120b43453b85202339c21ba6a76bdf610c9"
+source = "git+https://github.com/matrix-org/matrix-rust-sdk?rev=783adb424e23eeac8067844bcf5510f9bede70e1#783adb424e23eeac8067844bcf5510f9bede70e1"
 dependencies = [
+ "async-trait",
  "futures-core",
  "futures-util",
  "gloo-timers",
@@ -1098,6 +1099,7 @@ dependencies = [
  "ruma",
  "serde",
  "serde_json",
+ "thiserror",
  "tokio",
  "tracing",
  "wasm-bindgen-futures",
@@ -1106,7 +1108,7 @@ dependencies = [
 [[package]]
 name = "matrix-sdk-crypto"
 version = "0.6.0"
-source = "git+https://github.com/matrix-org/matrix-rust-sdk?rev=9174f120b43453b85202339c21ba6a76bdf610c9#9174f120b43453b85202339c21ba6a76bdf610c9"
+source = "git+https://github.com/matrix-org/matrix-rust-sdk?rev=783adb424e23eeac8067844bcf5510f9bede70e1#783adb424e23eeac8067844bcf5510f9bede70e1"
 dependencies = [
  "aes",
  "async-std",
@@ -1167,7 +1169,7 @@ dependencies = [
 [[package]]
 name = "matrix-sdk-indexeddb"
 version = "0.2.0"
-source = "git+https://github.com/matrix-org/matrix-rust-sdk?rev=9174f120b43453b85202339c21ba6a76bdf610c9#9174f120b43453b85202339c21ba6a76bdf610c9"
+source = "git+https://github.com/matrix-org/matrix-rust-sdk?rev=783adb424e23eeac8067844bcf5510f9bede70e1#783adb424e23eeac8067844bcf5510f9bede70e1"
 dependencies = [
  "anyhow",
  "async-trait",
@@ -1192,7 +1194,7 @@ dependencies = [
 [[package]]
 name = "matrix-sdk-qrcode"
 version = "0.4.0"
-source = "git+https://github.com/matrix-org/matrix-rust-sdk?rev=9174f120b43453b85202339c21ba6a76bdf610c9#9174f120b43453b85202339c21ba6a76bdf610c9"
+source = "git+https://github.com/matrix-org/matrix-rust-sdk?rev=783adb424e23eeac8067844bcf5510f9bede70e1#783adb424e23eeac8067844bcf5510f9bede70e1"
 dependencies = [
  "byteorder",
  "qrcode",
@@ -1204,7 +1206,7 @@ dependencies = [
 [[package]]
 name = "matrix-sdk-store-encryption"
 version = "0.2.0"
-source = "git+https://github.com/matrix-org/matrix-rust-sdk?rev=9174f120b43453b85202339c21ba6a76bdf610c9#9174f120b43453b85202339c21ba6a76bdf610c9"
+source = "git+https://github.com/matrix-org/matrix-rust-sdk?rev=783adb424e23eeac8067844bcf5510f9bede70e1#783adb424e23eeac8067844bcf5510f9bede70e1"
 dependencies = [
  "blake3",
  "chacha20poly1305",
