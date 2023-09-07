@@ -40,9 +40,9 @@ console_error_panic_hook = "0.1.7"
 futures-util = "0.3.27"
 http = "0.2.6"
 js-sys = "0.3.49"
-matrix-sdk-common = { git = "https://github.com/matrix-org/matrix-rust-sdk", rev = "9174f120b43453b85202339c21ba6a76bdf610c9", features = ["js"] }
-matrix-sdk-indexeddb = { git = "https://github.com/matrix-org/matrix-rust-sdk", rev = "9174f120b43453b85202339c21ba6a76bdf610c9" }
-matrix-sdk-qrcode = { git = "https://github.com/matrix-org/matrix-rust-sdk", rev = "9174f120b43453b85202339c21ba6a76bdf610c9", optional = true }
+matrix-sdk-common = { git = "https://github.com/matrix-org/matrix-rust-sdk", rev = "783adb424e23eeac8067844bcf5510f9bede70e1", features = ["js"] }
+matrix-sdk-indexeddb = { git = "https://github.com/matrix-org/matrix-rust-sdk", rev = "783adb424e23eeac8067844bcf5510f9bede70e1" }
+matrix-sdk-qrcode = { git = "https://github.com/matrix-org/matrix-rust-sdk", rev = "783adb424e23eeac8067844bcf5510f9bede70e1", optional = true }
 serde_json = "1.0.91"
 serde-wasm-bindgen = "0.5.0"
 tracing = { version = "0.1.36", default-features = false, features = ["std"] }
@@ -53,6 +53,6 @@ zeroize = "1.6.0"
 
 [dependencies.matrix-sdk-crypto]
 git = "https://github.com/matrix-org/matrix-rust-sdk"
-rev = "9174f120b43453b85202339c21ba6a76bdf610c9"
+rev = "783adb424e23eeac8067844bcf5510f9bede70e1"
 default_features = false
 features = ["js", "backups_v1", "automatic-room-key-forwarding"]
