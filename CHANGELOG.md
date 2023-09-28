@@ -2,6 +2,8 @@
 
 -   Add `OlmMachine.registerUserIdentityUpdatedCallback`.
 -   Expose new method `OlmMachine.getRoomEventEncryptionInfo`.
+-   Update `IndexeddbCryptoStore` to use a single store for outgoing secret
+    requests.
 
 # matrix-sdk-crypto-wasm v1.2.2
 
