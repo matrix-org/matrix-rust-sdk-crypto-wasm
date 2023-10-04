@@ -1174,7 +1174,7 @@ impl VerificationRequest {
     /// Generate a QR code that can be used by another client to start
     /// a QR code based verification.
     ///
-    /// Returns a `Qr`.
+    /// Returns a `Qr` or `undefined`.
     #[cfg(feature = "qrcode")]
     #[wasm_bindgen(js_name = "generateQrCode")]
     pub fn generate_qr_code(&self) -> Promise {
