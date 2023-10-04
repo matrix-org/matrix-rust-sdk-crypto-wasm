@@ -1,15 +1,16 @@
 //! The crypto specific Olm objects.
 
-use std::{collections::BTreeMap, ops::Deref, time::Duration};
+use core::task;
+use std::{collections::BTreeMap, ops::Deref, time::Duration, task::Waker};
 
-use futures_util::StreamExt;
+use futures_util::{StreamExt, FutureExt, future::join, Future};
 use js_sys::{Array, Function, Map, Promise, Set};
 use matrix_sdk_common::ruma::{self, serde::Raw, DeviceKeyAlgorithm, OwnedTransactionId, UInt};
 use matrix_sdk_crypto::{
     backups::MegolmV1BackupKey,
-    store::{DeviceChanges, IdentityChanges},
+    store::{DeviceChanges, IdentityChanges, Store},
     types::RoomKeyBackupInfo,
-    EncryptionSyncChanges,
+    EncryptionSyncChanges, GossippedSecret,
 };
 use serde_json::{json, Value as JsonValue};
 use serde_wasm_bindgen;
@@ -1093,6 +1094,43 @@ impl OlmMachine {
             stream.for_each(move |item| send_user_identities_to_callback(callback_ref, item)).await;
         });
     }
+    /// Register a callback which will be called whenever a secret is received.
+    ///
+    /// `callback` should be a function that takes 2 arguments the secret name and value (base64)
+    /// and returns a Promise.
+    #[wasm_bindgen(js_name = "registerReceiveSecretCallback")]
+        pub async fn register_secret_receive_callback(&self, callback: Function) {
+
+        let stream = self.inner.store().secrets_stream();
+        let store = self.inner.store().clone();
+        //fire up a promise chain which will call `cb` on each result from the stream
+        spawn_local(async move {
+            // take a reference to `callback` (which we then pass into the closure), to stop
+            // the callback being moved into the closure (which would mean we could only
+            // call the closure once)
+            let callback_ref = &callback;
+            stream.for_each( move |secret| {
+                let secret_name = secret.secret_name.as_str().to_owned();
+                let secret_value = secret.event.content.secret.to_owned();
+
+                let f_store = store.clone();
+                send_secret_gossip_to_callback(callback_ref, secret_name, secret_value)
+                .map(|_f| secret.secret_name)
+                .then(|secret_name| {
+                    async move {
+                        match f_store.delete_secrets_from_inbox(&secret_name).await {
+                            Ok(_) => (),
+                            Err(e) => {
+                                warn!("Error clearing secret inbox: {:?}", e);
+                            }
+                        }
+                    }
+                })                    
+            }).await;
+        });
+    }
+
+
 
     /// Shut down the `OlmMachine`.
     ///
@@ -1133,6 +1171,25 @@ async fn send_user_identities_to_callback(
             Err(e) => {
                 warn!("Error calling user-identity-updated callback: {:?}", e);
             }
+        }
+    }
+}
+
+async fn send_secret_gossip_to_callback(
+    callback: &Function,
+    secret_name: String,
+    secret_value: String,
+) {
+    match promise_result_to_future(callback.call2(
+        &JsValue::NULL,
+         &(secret_name.into()),
+         &(secret_value.into()),
+        )).await {
+        Ok(_) =>  { 
+            ()
+        },
+        Err(e) => {
+            warn!("Error calling secret gossip send callback: {:?}", e);
         }
     }
 }
