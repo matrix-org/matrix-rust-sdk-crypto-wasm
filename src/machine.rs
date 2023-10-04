@@ -1107,12 +1107,7 @@ impl OlmMachine {
             pin_mut!(stream);
             while let Some(secret) = stream.next().await {
                 send_secret_gossip_to_callback(&callback, &secret).await;
-                match store.delete_secrets_from_inbox(&secret.secret_name).await {
-                    Ok(_) => (),
-                    Err(e) => {
-                        warn!("Error clearing secret inbox: {:?}", e);
-                    }
-                }
+                let _ = store.delete_secrets_from_inbox(&secret.secret_name).await;
             }
         });
     }
