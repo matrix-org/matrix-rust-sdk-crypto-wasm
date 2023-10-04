@@ -1103,14 +1103,10 @@ impl OlmMachine {
         let store = self.inner.store().clone();
         //fire up a promise chain which will call `cb` on each result from the stream
         spawn_local(async move {
-            // take a reference to `callback` (which we then pass into the closure), to stop
-            // the callback being moved into the closure (which would mean we could only
-            // call the closure once)
-            let callback_ref = &callback;
             // Pin the stream to ensure it can be safely moved across threads
             pin_mut!(stream);
             while let Some(secret) = stream.next().await {
-                send_secret_gossip_to_callback(callback_ref, &secret).await;
+                send_secret_gossip_to_callback(&callback, &secret).await;
                 match store.delete_secrets_from_inbox(&secret.secret_name).await {
                     Ok(_) => (),
                     Err(e) => {
