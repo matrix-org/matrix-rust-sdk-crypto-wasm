@@ -1,14 +1,13 @@
 //! The crypto specific Olm objects.
 
-use core::task;
-use std::{collections::BTreeMap, ops::Deref, task::Waker, time::Duration};
+use std::{collections::BTreeMap, ops::Deref, time::Duration};
 
-use futures_util::{future::join, Future, FutureExt, StreamExt};
+use futures_util::{pin_mut, StreamExt};
 use js_sys::{Array, Function, Map, Promise, Set};
 use matrix_sdk_common::ruma::{self, serde::Raw, DeviceKeyAlgorithm, OwnedTransactionId, UInt};
 use matrix_sdk_crypto::{
     backups::MegolmV1BackupKey,
-    store::{DeviceChanges, IdentityChanges, Store},
+    store::{DeviceChanges, IdentityChanges},
     types::RoomKeyBackupInfo,
     EncryptionSyncChanges, GossippedSecret,
 };
@@ -1108,24 +1107,17 @@ impl OlmMachine {
             // the callback being moved into the closure (which would mean we could only
             // call the closure once)
             let callback_ref = &callback;
-            stream
-                .for_each(move |secret| {
-                    let secret_name = secret.secret_name.as_str().to_owned();
-                    let secret_value = secret.event.content.secret.to_owned();
-
-                    let f_store = store.clone();
-                    send_secret_gossip_to_callback(callback_ref, secret_name, secret_value)
-                        .map(|_f| secret.secret_name)
-                        .then(|secret_name| async move {
-                            match f_store.delete_secrets_from_inbox(&secret_name).await {
-                                Ok(_) => (),
-                                Err(e) => {
-                                    warn!("Error clearing secret inbox: {:?}", e);
-                                }
-                            }
-                        })
-                })
-                .await;
+            // Pin the stream to ensure it can be safely moved across threads
+            pin_mut!(stream);
+            while let Some(secret) = stream.next().await {
+                send_secret_gossip_to_callback(callback_ref, &secret).await;
+                match store.delete_secrets_from_inbox(&secret.secret_name).await {
+                    Ok(_) => (),
+                    Err(e) => {
+                        warn!("Error clearing secret inbox: {:?}", e);
+                    }
+                }
+            }
         });
     }
 
@@ -1172,15 +1164,11 @@ async fn send_user_identities_to_callback(
     }
 }
 
-async fn send_secret_gossip_to_callback(
-    callback: &Function,
-    secret_name: String,
-    secret_value: String,
-) {
+async fn send_secret_gossip_to_callback(callback: &Function, secret: &GossippedSecret) {
     match promise_result_to_future(callback.call2(
         &JsValue::NULL,
-        &(secret_name.into()),
-        &(secret_value.into()),
+        &(secret.secret_name.as_str().into()),
+        &(&secret.event.content.secret.to_owned().into()),
     ))
     .await
     {
