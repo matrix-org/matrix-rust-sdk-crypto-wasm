@@ -4,7 +4,10 @@ use std::{collections::BTreeMap, ops::Deref, sync::Arc, time::Duration};
 
 use futures_util::{pin_mut, StreamExt};
 use js_sys::{Array, Function, Map, Promise, Set};
-use matrix_sdk_common::ruma::{self, serde::Raw, DeviceKeyAlgorithm, OwnedTransactionId, UInt};
+use matrix_sdk_common::ruma::{
+    self, events::secret::request::SecretName, serde::Raw, DeviceKeyAlgorithm, OwnedTransactionId,
+    UInt,
+};
 use matrix_sdk_crypto::{
     backups::MegolmV1BackupKey,
     store::{DeviceChanges, IdentityChanges},
@@ -1130,6 +1133,29 @@ impl OlmMachine {
                 }
             }
         });
+    }
+
+    /// Get all the secrets with the given secret_name we have currently
+    /// stored.
+    ///
+    /// Usually you would just register a callback with
+    /// [`register_receive_secret_callback`], but if the clients is shutdown
+    /// before handling them, this method can be used to retrieve them.
+    ///
+    /// Returns a `Promise` for a `Set` of `String` corresponding to the secret
+    /// values.
+    #[wasm_bindgen(js_name = "getSecretsFromInbox")]
+    pub async fn get_secrets_from_inbox(&self, secret_name: String) -> Result<Promise, JsError> {
+        let set = Set::new(&JsValue::UNDEFINED);
+        let me = self.inner.clone();
+
+        Ok(future_to_promise(async move {
+            let name = SecretName::from(secret_name);
+            for gossip in me.store().get_secrets_from_inbox(&name).await? {
+                set.add(&JsValue::from_str(&gossip.event.content.secret));
+            }
+            Ok(set)
+        }))
     }
 
     /// Shut down the `OlmMachine`.
