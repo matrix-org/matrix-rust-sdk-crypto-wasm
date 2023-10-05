@@ -1116,11 +1116,10 @@ impl OlmMachine {
         let store_weak = Arc::downgrade(&store);
         // fire up a promise chain which will call `cb` on each result from the stream
         spawn_local(async move {
-            let callback_ref = &callback;
             // Pin the stream to ensure it can be safely moved across threads
             pin_mut!(stream);
             while let Some(secret) = stream.next().await {
-                send_secret_gossip_to_callback(callback_ref, &secret).await;
+                send_secret_gossip_to_callback(&callback, &secret).await;
                 if let Some(store) = store_weak.upgrade() {
                     match store.delete_secrets_from_inbox(&secret.secret_name).await {
                         Ok(_) => (),
