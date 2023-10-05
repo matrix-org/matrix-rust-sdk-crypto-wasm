@@ -1,6 +1,6 @@
 //! The crypto specific Olm objects.
 
-use std::{collections::BTreeMap, ops::Deref, rc::Rc, sync::Arc, time::Duration};
+use std::{collections::BTreeMap, ops::Deref, sync::Arc, time::Duration};
 
 use futures_util::{pin_mut, StreamExt};
 use js_sys::{Array, Function, Map, Promise, Set};
