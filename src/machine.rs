@@ -1,6 +1,6 @@
 //! The crypto specific Olm objects.
 
-use std::{collections::BTreeMap, ops::Deref, time::Duration};
+use std::{collections::BTreeMap, ops::Deref, rc::Rc, sync::Arc, time::Duration};
 
 use futures_util::{pin_mut, StreamExt};
 use js_sys::{Array, Function, Map, Promise, Set};
@@ -1093,27 +1093,42 @@ impl OlmMachine {
             stream.for_each(move |item| send_user_identities_to_callback(callback_ref, item)).await;
         });
     }
-    /// Register a callback which will be called whenever a secret is received.
+
+    /// Register a callback which will be called whenever a secret
+    /// (`m.secret.send`) is received.
+    ///
+    /// To request a secret from other devices, a client sends an
+    /// `m.secret.request` device event with action set to request and name set
+    /// to the identifier of the secret. A device that wishes to share the
+    /// secret will reply with an m.secret.send event, encrypted using olm.
+    ///
+    /// The secrets are guaranteed to have been received over a 1-to-1 encrypted
+    /// to_device message from a verified own device.
+    ///
+    /// See https://matrix-org.github.io/matrix-rust-sdk/matrix_sdk_crypto/store/struct.Store.html#method.secrets_stream for more information.
     ///
     /// `callback` should be a function that takes 2 arguments the secret name
-    /// and value (base64) and returns a Promise.
+    /// and value and returns a Promise.
     #[wasm_bindgen(js_name = "registerReceiveSecretCallback")]
-    pub async fn register_secret_receive_callback(&self, callback: Function) {
+    pub async fn register_receive_secret_callback(&self, callback: Function) {
         let stream = self.inner.store().secrets_stream();
-        let store = self.inner.store().clone();
-        //fire up a promise chain which will call `cb` on each result from the stream
+        let store = Arc::new(self.inner.store().clone());
+        let store_weak = Arc::downgrade(&store);
+        // fire up a promise chain which will call `cb` on each result from the stream
         spawn_local(async move {
             let callback_ref = &callback;
             // Pin the stream to ensure it can be safely moved across threads
             pin_mut!(stream);
             while let Some(secret) = stream.next().await {
                 send_secret_gossip_to_callback(callback_ref, &secret).await;
-                match store.delete_secrets_from_inbox(&secret.secret_name).await {
-                    Ok(_) => (),
-                    Err(e) => {
-                        warn!("Error clearing secret inbox: {:?}", e);
-                    }
-                };
+                if let Some(store) = store_weak.upgrade() {
+                    match store.delete_secrets_from_inbox(&secret.secret_name).await {
+                        Ok(_) => (),
+                        Err(e) => {
+                            warn!("Error clearing secret inbox: {:?}", e);
+                        }
+                    };
+                }
             }
         });
     }
@@ -1143,8 +1158,8 @@ async fn send_room_key_info_to_callback(
     }
 }
 
-// helper for register_user_identity_updated_callback: passes the user ID into
-// the javascript function
+// helper for register_secret_receive_callback: passes the secret name and value
+// into the javascript function
 async fn send_user_identities_to_callback(
     callback: &Function,
     (identity_updates, _): (IdentityChanges, DeviceChanges),
@@ -1161,6 +1176,8 @@ async fn send_user_identities_to_callback(
     }
 }
 
+// helper for register_user_identity_updated_callback: passes the user ID into
+// the javascript function
 async fn send_secret_gossip_to_callback(callback: &Function, secret: &GossippedSecret) {
     match promise_result_to_future(callback.call2(
         &JsValue::NULL,
@@ -1171,7 +1188,7 @@ async fn send_secret_gossip_to_callback(callback: &Function, secret: &GossippedS
     {
         Ok(_) => (),
         Err(e) => {
-            warn!("Error calling secret gossip send callback: {:?}", e);
+            warn!("Error calling receive secret callback: {:?}", e);
         }
     }
 }
