@@ -1157,8 +1157,8 @@ async fn send_room_key_info_to_callback(
     }
 }
 
-// helper for register_secret_receive_callback: passes the secret name and value
-// into the javascript function
+// helper for register_user_identity_updated_callback: passes the user ID into
+// the javascript function
 async fn send_user_identities_to_callback(
     callback: &Function,
     (identity_updates, _): (IdentityChanges, DeviceChanges),
@@ -1175,8 +1175,8 @@ async fn send_user_identities_to_callback(
     }
 }
 
-// helper for register_user_identity_updated_callback: passes the user ID into
-// the javascript function
+// helper for register_secret_receive_callback: passes the secret name and value
+// into the javascript function
 async fn send_secret_gossip_to_callback(callback: &Function, secret: &GossippedSecret) {
     match promise_result_to_future(callback.call2(
         &JsValue::NULL,
