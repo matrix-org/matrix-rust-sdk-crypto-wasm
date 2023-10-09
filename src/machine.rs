@@ -1,6 +1,6 @@
 //! The crypto specific Olm objects.
 
-use std::{collections::BTreeMap, ops::Deref, sync::Arc, time::Duration};
+use std::{collections::BTreeMap, ops::Deref, time::Duration};
 
 use futures_util::{pin_mut, StreamExt};
 use js_sys::{Array, Function, Map, Promise, Set};
@@ -1110,27 +1110,21 @@ impl OlmMachine {
     ///
     /// See https://matrix-org.github.io/matrix-rust-sdk/matrix_sdk_crypto/store/struct.Store.html#method.secrets_stream for more information.
     ///
-    /// `callback` should be a function that takes 2 arguments the secret name
+    /// `callback` should be a function that takes 2 arguments the secret name.
+    /// If the secret is valid and handled on the javascript side, the secret
+    /// inbox should be cleared by calling `delete_secrets_from_inbox`.
+    ///
     /// and value and returns a Promise.
     #[wasm_bindgen(js_name = "registerReceiveSecretCallback")]
     pub async fn register_receive_secret_callback(&self, callback: Function) {
         let stream = self.inner.store().secrets_stream();
-        let store = Arc::new(self.inner.store().clone());
-        let store_weak = Arc::downgrade(&store);
-        // fire up a promise chain which will call `cb` on each result from the stream
+        // fire up a promise chain which will call `callback` on each result from the
+        // stream
         spawn_local(async move {
             // Pin the stream to ensure it can be safely moved across threads
             pin_mut!(stream);
             while let Some(secret) = stream.next().await {
                 send_secret_gossip_to_callback(&callback, &secret).await;
-                if let Some(store) = store_weak.upgrade() {
-                    match store.delete_secrets_from_inbox(&secret.secret_name).await {
-                        Ok(_) => (),
-                        Err(e) => {
-                            warn!("Error clearing secret inbox: {:?}", e);
-                        }
-                    };
-                }
             }
         });
     }
@@ -1142,20 +1136,41 @@ impl OlmMachine {
     /// [`register_receive_secret_callback`], but if the clients is shutdown
     /// before handling them, this method can be used to retrieve them.
     ///
+    /// The secrets are guaranteed to have been received over a 1-to-1 encrypted
+    /// to_device message from a verified own device.
+    ///
     /// Returns a `Promise` for a `Set` of `String` corresponding to the secret
     /// values.
     #[wasm_bindgen(js_name = "getSecretsFromInbox")]
-    pub async fn get_secrets_from_inbox(&self, secret_name: String) -> Result<Promise, JsError> {
+    pub async fn get_secrets_from_inbox(&self, secret_name: String) -> Promise {
         let set = Set::new(&JsValue::UNDEFINED);
         let me = self.inner.clone();
 
-        Ok(future_to_promise(async move {
+        future_to_promise(async move {
             let name = SecretName::from(secret_name);
             for gossip in me.store().get_secrets_from_inbox(&name).await? {
                 set.add(&JsValue::from_str(&gossip.event.content.secret));
             }
             Ok(set)
-        }))
+        })
+    }
+
+    /// Delete all secrets with the given secret name from the inbox.
+    ///
+    /// Should be called after handling the secrets with
+    /// `get_secrets_from_inbox`.
+    ///
+    /// # Arguments
+    ///
+    /// * `secret_name` - The name of the secret to delete.
+    #[wasm_bindgen(js_name = "deleteSecretsFromInbox")]
+    pub async fn delete_secrets_from_inbox(&self, secret_name: String) -> Promise {
+        let me = self.inner.clone();
+        future_to_promise(async move {
+            let name = SecretName::from(secret_name);
+            me.store().delete_secrets_from_inbox(&name).await?;
+            Ok(JsValue::UNDEFINED)
+        })
     }
 
     /// Shut down the `OlmMachine`.
