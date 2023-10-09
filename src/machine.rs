@@ -1113,8 +1113,6 @@ impl OlmMachine {
     /// `callback` should be a function that takes 2 arguments the secret name.
     /// If the secret is valid and handled on the javascript side, the secret
     /// inbox should be cleared by calling `delete_secrets_from_inbox`.
-    ///
-    /// and value and returns a Promise.
     #[wasm_bindgen(js_name = "registerReceiveSecretCallback")]
     pub async fn register_receive_secret_callback(&self, callback: Function) {
         let stream = self.inner.store().secrets_stream();
@@ -1141,6 +1139,9 @@ impl OlmMachine {
     ///
     /// Returns a `Promise` for a `Set` of `String` corresponding to the secret
     /// values.
+    ///
+    /// If the secret is valid and handled, the secret inbox should be cleared
+    /// by calling `delete_secrets_from_inbox`.
     #[wasm_bindgen(js_name = "getSecretsFromInbox")]
     pub async fn get_secrets_from_inbox(&self, secret_name: String) -> Promise {
         let set = Set::new(&JsValue::UNDEFINED);
