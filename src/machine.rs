@@ -1111,7 +1111,8 @@ impl OlmMachine {
     /// See https://matrix-org.github.io/matrix-rust-sdk/matrix_sdk_crypto/store/struct.Store.html#method.secrets_stream for more information.
     ///
     /// `callback` should be a function that takes 2 arguments the secret name.
-    /// If the secret is valid and handled on the javascript side, the secret
+    ///
+    /// **Note**: if the secret is valid and handled on the javascript side, the secret
     /// inbox should be cleared by calling `delete_secrets_from_inbox`.
     #[wasm_bindgen(js_name = "registerReceiveSecretCallback")]
     pub async fn register_receive_secret_callback(&self, callback: Function) {
