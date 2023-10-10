@@ -1100,20 +1100,26 @@ impl OlmMachine {
     /// Register a callback which will be called whenever a secret
     /// (`m.secret.send`) is received.
     ///
+    /// The only secret this will currently broadcast is the
+    /// `m.megolm_backup.v1` (the cross signing secrets are handled internaly).
+    ///
     /// To request a secret from other devices, a client sends an
-    /// `m.secret.request` device event with `action` set to `request` and `name` set
-    /// to the identifier of the secret. A device that wishes to share the
-    /// secret will reply with an `m.secret.send` event, encrypted using olm.
+    /// `m.secret.request` device event with `action` set to `request` and
+    /// `name` set to the identifier of the secret. A device that wishes to
+    /// share the secret will reply with an `m.secret.send` event, encrypted
+    /// using olm.
     ///
     /// The secrets are guaranteed to have been received over a 1-to-1 encrypted
     /// to_device message from a one of the user's own verified devices.
     ///
     /// See https://matrix-org.github.io/matrix-rust-sdk/matrix_sdk_crypto/store/struct.Store.html#method.secrets_stream for more information.
     ///
-    /// `callback` should be a function that takes 2 arguments the secret name.
+    /// `callback` should be a function that takes 2 arguments: the secret name
+    /// (string) and value (string).
     ///
-    /// **Note**: if the secret is valid and handled on the javascript side, the secret
-    /// inbox should be cleared by calling `delete_secrets_from_inbox`.
+    /// **Note**: if the secret is valid and handled on the javascript side, the
+    /// secret inbox should be cleared by calling
+    /// `delete_secrets_from_inbox`.
     #[wasm_bindgen(js_name = "registerReceiveSecretCallback")]
     pub async fn register_receive_secret_callback(&self, callback: Function) {
         let stream = self.inner.store().secrets_stream();
@@ -1130,6 +1136,8 @@ impl OlmMachine {
 
     /// Get all the secrets with the given secret_name we have currently
     /// stored.
+    /// The only secret this will currently be returned is the
+    /// `m.megolm_backup.v1` secret.
     ///
     /// Usually you would just register a callback with
     /// [`register_receive_secret_callback`], but if the client is shut down
