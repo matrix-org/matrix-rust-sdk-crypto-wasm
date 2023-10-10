@@ -1132,7 +1132,7 @@ impl OlmMachine {
     /// stored.
     ///
     /// Usually you would just register a callback with
-    /// [`register_receive_secret_callback`], but if the clients is shutdown
+    /// [`register_receive_secret_callback`], but if the client is shut down
     /// before handling them, this method can be used to retrieve them.
     ///
     /// The secrets are guaranteed to have been received over a 1-to-1 encrypted
