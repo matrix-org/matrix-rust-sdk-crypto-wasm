@@ -1106,7 +1106,7 @@ impl OlmMachine {
     /// secret will reply with an `m.secret.send` event, encrypted using olm.
     ///
     /// The secrets are guaranteed to have been received over a 1-to-1 encrypted
-    /// to_device message from a verified own device.
+    /// to_device message from a one of the user's own verified devices.
     ///
     /// See https://matrix-org.github.io/matrix-rust-sdk/matrix_sdk_crypto/store/struct.Store.html#method.secrets_stream for more information.
     ///
