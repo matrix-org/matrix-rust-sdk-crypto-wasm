@@ -1134,6 +1134,8 @@ impl OlmMachine {
     /// Usually you would just register a callback with
     /// [`register_receive_secret_callback`], but if the client is shut down
     /// before handling them, this method can be used to retrieve them.
+    /// This method should therefore be called at client startup to retrieve any
+    /// secrets received during the previous session.
     ///
     /// The secrets are guaranteed to have been received over a 1-to-1 encrypted
     /// to_device message from a verified own device.
