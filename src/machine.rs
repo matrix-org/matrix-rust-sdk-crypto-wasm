@@ -1138,7 +1138,7 @@ impl OlmMachine {
     /// secrets received during the previous session.
     ///
     /// The secrets are guaranteed to have been received over a 1-to-1 encrypted
-    /// to_device message from a verified own device.
+    /// to_device message from one of the user's own verified devices.
     ///
     /// Returns a `Promise` for a `Set` of `String` corresponding to the secret
     /// values.
