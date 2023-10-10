@@ -1103,7 +1103,7 @@ impl OlmMachine {
     /// To request a secret from other devices, a client sends an
     /// `m.secret.request` device event with action set to request and name set
     /// to the identifier of the secret. A device that wishes to share the
-    /// secret will reply with an m.secret.send event, encrypted using olm.
+    /// secret will reply with an `m.secret.send` event, encrypted using olm.
     ///
     /// The secrets are guaranteed to have been received over a 1-to-1 encrypted
     /// to_device message from a verified own device.
