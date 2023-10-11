@@ -580,7 +580,7 @@ impl OlmMachine {
     pub fn sign(&self, message: String) -> Promise {
         let me = self.inner.clone();
 
-        future_to_promise::<_, types::Signatures>(async move { Ok(me.sign(&message).await.into()) })
+        future_to_promise::<_, types::Signatures>(async move { Ok(me.sign(&message).await?.into()) })
     }
 
     /// Invalidate the currently active outbound group session for the

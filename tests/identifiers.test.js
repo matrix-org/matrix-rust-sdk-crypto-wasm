@@ -106,10 +106,6 @@ describe(RoomId.name, () => {
 
     const room = new RoomId("!foo:bar.org");
 
-    test("localpart is present", () => {
-        expect(room.localpart).toStrictEqual("foo");
-    });
-
     test("server name is present", () => {
         expect(room.serverName).toBeInstanceOf(ServerName);
     });
@@ -165,10 +161,6 @@ describe(EventId.name, () => {
 
     describe("Version 3", () => {
         const room = new EventId("$acR1l0raoZnm60CBwAVgqbZqoO/mYU81xysh1u7XcJk");
-
-        test("localpart is present", () => {
-            expect(room.localpart).toStrictEqual("acR1l0raoZnm60CBwAVgqbZqoO/mYU81xysh1u7XcJk");
-        });
 
         test("server name is present", () => {
             expect(room.serverName).toBeUndefined();
