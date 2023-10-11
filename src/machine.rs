@@ -1101,7 +1101,7 @@ impl OlmMachine {
     /// (`m.secret.send`) is received.
     ///
     /// The only secret this will currently broadcast is the
-    /// `m.megolm_backup.v1` (the cross signing secrets are handled internaly).
+    /// `m.megolm_backup.v1` (the cross signing secrets are handled internally).
     ///
     /// To request a secret from other devices, a client sends an
     /// `m.secret.request` device event with `action` set to `request` and
@@ -1136,7 +1136,7 @@ impl OlmMachine {
 
     /// Get all the secrets with the given secret_name we have currently
     /// stored.
-    /// The only secret this will currently be returned is the
+    /// The only secret this will currently return is the
     /// `m.megolm_backup.v1` secret.
     ///
     /// Usually you would just register a callback with

@@ -143,6 +143,8 @@ describe(OlmMachine.name, () => {
         expect(dev.signatures).toBeInstanceOf(Signatures);
         expect(dev.isBlacklisted()).toStrictEqual(false);
         expect(dev.isDeleted()).toStrictEqual(false);
+
+        m.close();
     });
 });
 
@@ -562,6 +564,9 @@ describe("Key Verification", () => {
             expect(verificationRequest1.phase()).toStrictEqual(VerificationRequestPhase.Done);
             expect(verificationRequest2.phase()).toStrictEqual(VerificationRequestPhase.Done);
         }
+
+        m1.close();
+        m2.close();
     });
 
     it("can verify via SAS without an m.key.verification.request", async () => {
@@ -705,6 +710,9 @@ describe("Key Verification", () => {
             expect(toDeviceRequest).toBeInstanceOf(ToDeviceRequest);
             expect(toDeviceRequest.event_type).toStrictEqual("m.key.verification.done");
         }
+
+        m1.close();
+        m2.close();
     });
 
     it("QR Code", async () => {
@@ -1028,6 +1036,9 @@ describe("Key Verification", () => {
             expect(qr2.state()).toEqual(QrState.Confirmed);
             expect(qr2.hasBeenConfirmed()).toStrictEqual(true);
         }
+
+        m1.close();
+        m2.close();
     });
 });
 

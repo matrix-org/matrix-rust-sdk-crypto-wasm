@@ -45,7 +45,9 @@ describe("Versions", () => {
 
 describe(OlmMachine.name, () => {
     test("can be instantiated with the async initializer", async () => {
-        expect(await OlmMachine.initialize(new UserId("@foo:bar.org"), new DeviceId("baz"))).toBeInstanceOf(OlmMachine);
+        const machine = await OlmMachine.initialize(new UserId("@foo:bar.org"), new DeviceId("baz"));
+        expect(machine).toBeInstanceOf(OlmMachine);
+        machine.close();
     });
 
     test("can be instantiated with a store", async () => {
@@ -58,9 +60,13 @@ describe(OlmMachine.name, () => {
         expect((await indexedDB.databases()).filter(by_store_name)).toHaveLength(0);
 
         // Creating a new Olm machine.
-        expect(
-            await OlmMachine.initialize(new UserId("@foo:bar.org"), new DeviceId("baz"), store_name, store_passphrase),
-        ).toBeInstanceOf(OlmMachine);
+        const machine = await OlmMachine.initialize(
+            new UserId("@foo:bar.org"),
+            new DeviceId("baz"),
+            store_name,
+            store_passphrase,
+        );
+        expect(machine).toBeInstanceOf(OlmMachine);
 
         // Oh, there is 2 databases now, prefixed by `store_name`.
         let databases = (await indexedDB.databases()).filter(by_store_name);
@@ -78,6 +84,7 @@ describe(OlmMachine.name, () => {
 
         // Same number of databases.
         expect((await indexedDB.databases()).filter(by_store_name)).toHaveLength(2);
+        machine.close();
     });
 
     describe("cannot be instantiated with a store", () => {
@@ -180,22 +187,30 @@ describe(OlmMachine.name, () => {
     });
 
     test("can read user ID", async () => {
-        expect((await machine()).userId.toString()).toStrictEqual(user.toString());
+        const m = await machine();
+        expect(m.userId.toString()).toStrictEqual(user.toString());
+        m.close();
     });
 
     test("can read device ID", async () => {
-        expect((await machine()).deviceId.toString()).toStrictEqual(device.toString());
+        const m = await machine();
+        expect(m.deviceId.toString()).toStrictEqual(device.toString());
+        m.close();
     });
 
     test("can read identity keys", async () => {
-        const identityKeys = (await machine()).identityKeys;
+        const m = await machine();
+        const identityKeys = m.identityKeys;
 
         expect(identityKeys.ed25519.toBase64()).toMatch(/^[A-Za-z0-9+/]+$/);
         expect(identityKeys.curve25519.toBase64()).toMatch(/^[A-Za-z0-9+/]+$/);
+        m.close();
     });
 
     test("can read display name", async () => {
+        const m = await machine();
         expect(await machine().displayName).toBeUndefined();
+        m.close();
     });
 
     test("can read tracked users", async () => {
@@ -204,12 +219,14 @@ describe(OlmMachine.name, () => {
 
         expect(trackedUsers).toBeInstanceOf(Set);
         expect(trackedUsers.size).toStrictEqual(0);
+        m.close();
     });
 
     test("can update tracked users", async () => {
         const m = await machine();
 
         expect(await m.updateTrackedUsers([user])).toStrictEqual(undefined);
+        m.close();
     });
 
     test("can receive sync changes", async () => {
@@ -224,6 +241,7 @@ describe(OlmMachine.name, () => {
         );
 
         expect(receiveSyncChanges).toEqual([]);
+        m.close();
     });
 
     test("can receive sync changes with unusedFallbackKeys as undefined", async () => {
@@ -237,6 +255,7 @@ describe(OlmMachine.name, () => {
         );
 
         expect(receiveSyncChanges).toEqual([]);
+        m.close();
     });
 
     test("can get the outgoing requests that need to be sent out", async () => {
@@ -277,6 +296,7 @@ describe(OlmMachine.name, () => {
             expect(body.timeout).toBeDefined();
             expect(body.device_keys).toBeDefined();
         }
+        m.close();
     });
 
     test("Can build a key query request", async () => {
@@ -285,6 +305,7 @@ describe(OlmMachine.name, () => {
         expect(request).toBeInstanceOf(KeysQueryRequest);
         const body = JSON.parse(request.body);
         expect(Object.keys(body.device_keys)).toContain("@alice:example.org");
+        m.close();
     });
 
     describe("setup workflow to mark requests as sent", () => {
@@ -308,6 +329,10 @@ describe(OlmMachine.name, () => {
             outgoingRequests = await m.outgoingRequests();
 
             expect(outgoingRequests).toHaveLength(2);
+        });
+
+        afterAll(async () => {
+            m.close();
         });
 
         test("can mark requests as sent", async () => {
@@ -971,6 +996,8 @@ describe(OlmMachine.name, () => {
 
             expect(state.deviceState).toStrictEqual(SignatureState.Missing);
             expect(state.userState).toStrictEqual(SignatureState.Missing);
+
+            m.close();
         });
 
         test("accepts own signatures", async () => {
@@ -999,6 +1026,8 @@ describe(OlmMachine.name, () => {
 
             expect(state.deviceState).toStrictEqual(SignatureState.ValidAndTrusted);
             expect(state.userState).toStrictEqual(SignatureState.ValidAndTrusted);
+
+            m.close();
         });
     });
 
@@ -1046,6 +1075,8 @@ describe(OlmMachine.name, () => {
 
             expect(newCounts.total).toStrictEqual(1);
             expect(newCounts.backedUp).toStrictEqual(1);
+
+            m.close();
         });
 
         test("can save and get private key", async () => {
@@ -1060,6 +1091,8 @@ describe(OlmMachine.name, () => {
             expect(savedKey.decryptionKey.toBase64()).toStrictEqual(keyBackupKey.toBase64());
             expect(savedKey.decryptionKeyBase64).toStrictEqual(keyBackupKey.toBase64());
             expect(savedKey.backupVersion).toStrictEqual("3");
+
+            m.close();
         });
     });
 });

@@ -73,12 +73,14 @@ describe(Tracing.name, () => {
                 };
 
                 // Do something that emits a `DEBUG` log.
-                await OlmMachine.initialize(new UserId("@alice:example.org"), new DeviceId("foo"));
+                const m = await OlmMachine.initialize(new UserId("@alice:example.org"), new DeviceId("foo"));
 
                 console.debug = originalConsoleDebug;
                 testPostState();
 
                 expect(gotcha).toStrictEqual(expectedGotcha);
+
+                m.close();
             });
         }
     } else {
