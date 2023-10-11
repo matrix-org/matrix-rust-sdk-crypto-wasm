@@ -1687,9 +1687,9 @@ dependencies = [
 
 [[package]]
 name = "ruma-identifiers-validation"
-version = "0.9.2"
+version = "0.9.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "c25112499dd02847c32fbae85ebf96719d89e6095dca560521576fecc44f71c8"
+checksum = "bf8ad1259274f2f57c20901bd1cc5e4a8f23169d1c1d887b6338b02f058e9b41"
 dependencies = [
  "js_int",
  "thiserror",

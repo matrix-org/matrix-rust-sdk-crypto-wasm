@@ -98,17 +98,7 @@ describe("DeviceKeyAlgorithmName", () => {
 });
 
 describe(RoomId.name, () => {
-    test("cannot be invalid", () => {
-        expect(() => {
-            new RoomId("!foo");
-        }).toThrow();
-    });
-
     const room = new RoomId("!foo:bar.org");
-
-    test("server name is present", () => {
-        expect(room.serverName).toBeInstanceOf(ServerName);
-    });
 
     test("can read the room ID as string", () => {
         expect(room.toString()).toStrictEqual("!foo:bar.org");
