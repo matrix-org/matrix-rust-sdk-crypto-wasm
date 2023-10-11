@@ -218,7 +218,14 @@ impl RoomId {
         Ok(Self::from(ruma::RoomId::parse(id)?))
     }
 
-    /// Returns the server name of the room ID.
+    /// Returns the server name of the room ID or None if not a valid server
+    /// name. [server name]: https://spec.matrix.org/latest/appendices/#server-name
+    ///
+    /// The format of RoomIds is subject to change as new proposals for roomId
+    /// formats are introduced. To ensure forward compatibility with these
+    /// proposals, Ruma has relaxed the rules on RoomId format. As a result,
+    /// this method may return None if the RoomId does not conform to the
+    /// current format.
     #[wasm_bindgen(getter, js_name = "serverName")]
     pub fn server_name(&self) -> Option<ServerName> {
         self.inner.server_name().map(|s| ServerName { inner: s.to_owned() })
