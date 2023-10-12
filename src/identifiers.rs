@@ -218,18 +218,6 @@ impl RoomId {
         Ok(Self::from(ruma::RoomId::parse(id)?))
     }
 
-    /// Returns the user's localpart.
-    #[wasm_bindgen(getter)]
-    pub fn localpart(&self) -> String {
-        self.inner.localpart().to_owned()
-    }
-
-    /// Returns the server name of the room ID.
-    #[wasm_bindgen(getter, js_name = "serverName")]
-    pub fn server_name(&self) -> ServerName {
-        ServerName { inner: self.inner.server_name().to_owned() }
-    }
-
     /// Return the room ID as a string.
     #[wasm_bindgen(js_name = "toString")]
     #[allow(clippy::inherent_to_string)]

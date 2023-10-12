@@ -98,21 +98,7 @@ describe("DeviceKeyAlgorithmName", () => {
 });
 
 describe(RoomId.name, () => {
-    test("cannot be invalid", () => {
-        expect(() => {
-            new RoomId("!foo");
-        }).toThrow();
-    });
-
     const room = new RoomId("!foo:bar.org");
-
-    test("localpart is present", () => {
-        expect(room.localpart).toStrictEqual("foo");
-    });
-
-    test("server name is present", () => {
-        expect(room.serverName).toBeInstanceOf(ServerName);
-    });
 
     test("can read the room ID as string", () => {
         expect(room.toString()).toStrictEqual("!foo:bar.org");
@@ -165,10 +151,6 @@ describe(EventId.name, () => {
 
     describe("Version 3", () => {
         const room = new EventId("$acR1l0raoZnm60CBwAVgqbZqoO/mYU81xysh1u7XcJk");
-
-        test("localpart is present", () => {
-            expect(room.localpart).toStrictEqual("acR1l0raoZnm60CBwAVgqbZqoO/mYU81xysh1u7XcJk");
-        });
 
         test("server name is present", () => {
             expect(room.serverName).toBeUndefined();

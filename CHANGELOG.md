@@ -1,3 +1,12 @@
+# matrix-sdk-crypto-wasm vx.x.x
+
+-   Updated rust sdk version to revision [c2bb76029ae6d99c741727e0f87abcd734377016](https://github.com/matrix-org/matrix-rust-sdk/commit/c2bb76029ae6d99c741727e0f87abcd734377016), including:
+    -   [Remove dashmap crate usage from matrix-sdk-crypto](https://github.com/matrix-org/matrix-rust-sdk/pull/2669)
+    -   [Bugfix for invalidated private cross signing keys not being persisted](https://github.com/matrix-org/matrix-rust-sdk/pull/2676)
+-   API Break: `RoomId.localpart` and `RoomId.serverName` have been removed.
+-   Add new secrets API `OlmMachine.registerReceiveSecretCallback`,
+    `OlmMachine.getSecretsFromInbox`, `OlmMachine.deleteSecretsFromInbox`.
+
 # matrix-sdk-crypto-wasm v1.3.0
 
 -   Add `OlmMachine.registerUserIdentityUpdatedCallback`.
