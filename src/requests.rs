@@ -526,7 +526,7 @@ impl TryFrom<OutgoingRequest> for JsValue {
             }
 
             OutgoingRequests::ToDeviceRequest(request) => {
-                JsValue::from(ToDeviceRequest::try_from((request.txn_id.to_string(), request))?)
+                JsValue::from(ToDeviceRequest::try_from((request_id, request))?)
             }
 
             OutgoingRequests::SignatureUpload(request) => {
