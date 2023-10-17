@@ -55,4 +55,4 @@ zeroize = "1.6.0"
 git = "https://github.com/matrix-org/matrix-rust-sdk"
 rev = "c2bb76029ae6d99c741727e0f87abcd734377016"
 default_features = false
-features = ["js", "backups_v1", "automatic-room-key-forwarding"]
+features = ["js", "backups_v1", "automatic-room-key-forwarding", "message-ids"]
