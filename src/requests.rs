@@ -142,6 +142,9 @@ impl KeysClaimRequest {
 #[wasm_bindgen(getter_with_clone)]
 pub struct ToDeviceRequest {
     /// The request ID.
+    /// For to-device request this would be the same value as `txn_id`. It is
+    /// exposed also as `id` so that the js bindings are consistent with the
+    /// other request types by using this field to mark as sent.
     #[wasm_bindgen(readonly)]
     pub id: JsString,
 
@@ -309,37 +312,6 @@ impl KeysBackupRequest {
     }
 }
 
-/** Other Requests * */
-
-/// Request that will publish a cross signing identity.
-///
-/// This uploads the public cross signing key triplet.
-#[wasm_bindgen(getter_with_clone)]
-#[derive(Debug)]
-pub struct SigningKeysUploadRequest {
-    /// A JSON-encoded string containing the rest of the payload: `master_key`,
-    /// `self_signing_key`, `user_signing_key`.
-    ///
-    /// It represents the body of the HTTP request.
-    #[wasm_bindgen(readonly)]
-    pub body: JsString,
-}
-
-#[wasm_bindgen]
-impl SigningKeysUploadRequest {
-    /// Create a new `SigningKeysUploadRequest`.
-    #[wasm_bindgen(constructor)]
-    pub fn new(body: JsString) -> SigningKeysUploadRequest {
-        Self { body }
-    }
-
-    /// Get its request type.
-    #[wasm_bindgen(getter, js_name = "type")]
-    pub fn request_type(&self) -> RequestType {
-        RequestType::SigningKeysUpload
-    }
-}
-
 macro_rules! request {
     (
         $destination_request:ident from $source_request:ident
@@ -409,10 +381,10 @@ macro_rules! request {
     };
 }
 
-// Outgoing Requests
 // Generate the methods needed to convert rust `OutgoingRequests` into the js
-// counter part. Technically it's converting tuples `TryFrom<(String,
-// &Orignial)>` into js requests. Used by `TryFrom<OutgoingRequest> for JsValue`
+// counterpart. Technically it's converting tuples `(String, &Original)`, where
+// the first member  is the request ID, into js requests. Used by
+// `TryFrom<OutgoingRequest> for JsValue`.
 request!(KeysUploadRequest from OriginalKeysUploadRequest groups device_keys, one_time_keys, fallback_keys);
 request!(KeysQueryRequest from OriginalKeysQueryRequest groups timeout, device_keys);
 request!(KeysClaimRequest from OriginalKeysClaimRequest groups timeout, one_time_keys);
@@ -434,34 +406,6 @@ impl TryFrom<&OriginalSignatureUploadRequest> for SignatureUploadRequest {
     }
 }
 
-// Not handled by macro as there is no request_id.
-impl TryFrom<&OriginalUploadSigningKeysRequest> for SigningKeysUploadRequest {
-    type Error = serde_json::Error;
-    fn try_from(request: &OriginalUploadSigningKeysRequest) -> Result<Self, Self::Error> {
-        {
-            Ok(SigningKeysUploadRequest {
-                body: {
-                    let mut map = serde_json::Map::new();
-                    map.insert(
-                        "master_key".to_owned(),
-                        serde_json::to_value(&request.master_key).unwrap(),
-                    );
-                    map.insert(
-                        "self_signing_key".to_owned(),
-                        serde_json::to_value(&request.self_signing_key).unwrap(),
-                    );
-                    map.insert(
-                        "user_signing_key".to_owned(),
-                        serde_json::to_value(&request.user_signing_key).unwrap(),
-                    );
-                    let object = serde_json::Value::Object(map);
-                    serde_json::to_string(&object)?.into()
-                },
-            })
-        }
-    }
-}
-
 // Manual into/from for signature upload requests as the id is optional.
 impl TryFrom<(String, &OriginalSignatureUploadRequest)> for SignatureUploadRequest {
     type Error = serde_json::Error;
@@ -477,13 +421,20 @@ impl TryFrom<(String, &OriginalSignatureUploadRequest)> for SignatureUploadReque
     }
 }
 
-// Specific conversion for to-device as they can be returned directly instead of
-// via outgoing requests. See `share_room_key`, the request_id is the txn_id.
+// ToDeviceRequests can be returned directly from `OlmMachine::share_room_key`,
+// instead of being wrapped in a `matrix_sdk_crypto::OutgoingRequest` via
+// `OlmMachine::outgoing_requests`.
+//
+// We therefore need a custom conversion implementation to deal with that case.
 impl TryFrom<&OriginalToDeviceRequest> for ToDeviceRequest {
     type Error = serde_json::Error;
     fn try_from(request: &OriginalToDeviceRequest) -> Result<Self, Self::Error> {
         {
             Ok(ToDeviceRequest {
+                // When matrix_sdk_crypto returns requests via `share_room_key`, they must be sent
+                // out to the server and the responses need to be passed back to the
+                // olmMachine using [`mark_request_as_sent`], using the `txn_id` as
+                // `request_id`
                 id: request.txn_id.to_string().into(),
                 event_type: request.event_type.to_string().into(),
                 txn_id: request.txn_id.to_string().into(),
@@ -568,7 +519,56 @@ pub enum RequestType {
 
     /// Represents a `KeysBackupRequest`.
     KeysBackup,
+}
 
-    /// Represents a `SigningKeysUploadRequest`
-    SigningKeysUpload,
+/** Other Requests * */
+
+/// Request that will publish a cross signing identity.
+///
+/// This uploads the public cross signing key triplet.
+#[wasm_bindgen(getter_with_clone)]
+#[derive(Debug)]
+pub struct SigningKeysUploadRequest {
+    /// A JSON-encoded string containing the rest of the payload: `master_key`,
+    /// `self_signing_key`, `user_signing_key`.
+    ///
+    /// It represents the body of the HTTP request.
+    #[wasm_bindgen(readonly)]
+    pub body: JsString,
+}
+
+#[wasm_bindgen]
+impl SigningKeysUploadRequest {
+    /// Create a new `SigningKeysUploadRequest`.
+    #[wasm_bindgen(constructor)]
+    pub fn new(body: JsString) -> SigningKeysUploadRequest {
+        Self { body }
+    }
+}
+
+impl TryFrom<&OriginalUploadSigningKeysRequest> for SigningKeysUploadRequest {
+    type Error = serde_json::Error;
+    fn try_from(request: &OriginalUploadSigningKeysRequest) -> Result<Self, Self::Error> {
+        {
+            Ok(SigningKeysUploadRequest {
+                body: {
+                    let mut map = serde_json::Map::new();
+                    map.insert(
+                        "master_key".to_owned(),
+                        serde_json::to_value(&request.master_key).unwrap(),
+                    );
+                    map.insert(
+                        "self_signing_key".to_owned(),
+                        serde_json::to_value(&request.self_signing_key).unwrap(),
+                    );
+                    map.insert(
+                        "user_signing_key".to_owned(),
+                        serde_json::to_value(&request.user_signing_key).unwrap(),
+                    );
+                    let object = serde_json::Value::Object(map);
+                    serde_json::to_string(&object)?.into()
+                },
+            })
+        }
+    }
 }

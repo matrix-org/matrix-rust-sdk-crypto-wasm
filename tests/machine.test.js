@@ -485,9 +485,12 @@ describe(OlmMachine.name, () => {
             expect(requests[0].event_type).toEqual("m.room.encrypted");
             expect(requests[0].txn_id).toBeDefined();
             expect(requests[0].id).toBeDefined();
-            expect(requests[0].id).toEqual(requests[0].txn_id);
             const content = JSON.parse(requests[0].body);
             expect(Object.keys(content.messages)).toEqual(["@example:localhost"]);
+
+            await m.markRequestAsSent(requests[0].id, RequestType.ToDevice, "{}");
+            const requestsAfterMarkedAsSent = await m.shareRoomKey(room, other_users, new EncryptionSettings());
+            expect(requestsAfterMarkedAsSent).toHaveLength(0);
         });
 
         let encrypted;

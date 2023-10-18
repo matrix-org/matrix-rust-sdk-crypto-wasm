@@ -1,6 +1,6 @@
 # matrix-sdk-crypto-wasm vx.x.x
 
--   BugFix: `ToDeviceRequest` returned by `shareRoomKey(..)` always had an `undefinied` `id` field.
+-   BugFix: `ToDeviceRequest` returned by `shareRoomKey(..)` always had an `undefined` `id` field.
 
 # matrix-sdk-crypto-wasm v2.0.0
 
