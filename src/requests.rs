@@ -393,8 +393,8 @@ request!(RoomMessageRequest from OriginalRoomMessageRequest extracts room_id: st
 request!(KeysBackupRequest from OriginalKeysBackupRequest extracts version: string and groups rooms);
 
 // Specific conversion for signature upload as they can be returned directly by
-// some verification API and not via outgoing requests. If returned by outgoing
-// requests they would need to be marked as sent using `id`, otherwise no need
+// some verification API and not via `outgoing_requests()`. If returned by 
+// `outgoing_requests()` they would need to be marked as sent using `id`, otherwise no need
 // to mark them as sent. This is why `SignatureUploadRequest` has an optional
 // `id` field. It is set to some when converting from `OutgoingRequest`, and
 // to None if not.
