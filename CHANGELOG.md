@@ -1,4 +1,8 @@
-# matrix-sdk-crypto-wasm vx.x.x
+# UNRELEASED
+
+-   Improve logging output to include more information, including data that is
+    attached to tracing spans. Remove the `tracing` feature: tracing support is
+    now always included.
 
 -   BugFix: `ToDeviceRequest` returned by `shareRoomKey(..)` always had an `undefined` `id` field.
 
