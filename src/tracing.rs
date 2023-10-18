@@ -1,10 +1,10 @@
 use std::{
     fmt,
-    sync::{Arc, Mutex, Once},
+    sync::{Arc, Mutex, OnceLock},
 };
 
-use ::tracing::Level;
 use matrix_sdk_common::js_tracing::{JsLoggingSubscriber, MakeJsLogWriter};
+use tracing::Level;
 use tracing_subscriber::{filter::LevelFilter, prelude::*, reload};
 use wasm_bindgen::prelude::*;
 
@@ -64,38 +64,38 @@ impl fmt::Debug for Tracing {
 #[wasm_bindgen]
 impl Tracing {
     /// Check whether the `tracing` feature has been enabled.
+    ///
+    /// @deprecated: `tracing` is now always enabled.
     #[wasm_bindgen(js_name = "isAvailable")]
     pub fn is_available() -> bool {
         true
     }
 
     fn install_or_get_inner() -> Arc<Mutex<TracingInner>> {
-        static mut INSTALL: Option<Arc<Mutex<TracingInner>>> = None;
-        static INSTALLED: Once = Once::new();
+        static INSTALL: OnceLock<Arc<Mutex<TracingInner>>> = OnceLock::new();
 
         // if this is the first Tracing to be created, create the TracingInner singleton
         // and stash it in `INSTALL`
-        INSTALLED.call_once(|| {
-            let format = tracing_subscriber::fmt::format().without_time().pretty();
-            let subscriber = tracing_subscriber::fmt()
-                .with_max_level(Level::TRACE)
-                .with_writer(MakeJsLogWriter::new())
-                .with_ansi(false)
-                .event_format(format)
-                .finish();
+        INSTALL
+            .get_or_init(|| {
+                let format = tracing_subscriber::fmt::format().without_time().pretty();
+                let subscriber = tracing_subscriber::fmt()
+                    .with_max_level(Level::TRACE)
+                    .with_writer(MakeJsLogWriter::new())
+                    .with_ansi(false)
+                    .event_format(format)
+                    .finish();
 
-            let (level_filter, level_filter_reload_handle) = reload::Layer::new(LevelFilter::OFF);
-            subscriber.with(level_filter).init();
+                let (level_filter, level_filter_reload_handle) =
+                    reload::Layer::new(LevelFilter::OFF);
+                subscriber.with(level_filter).init();
 
-            let inner = Arc::new(Mutex::new(TracingInner {
-                level: Level::ERROR,
-                level_filter_reload_handle,
-            }));
-
-            unsafe { INSTALL = Some(inner) };
-        });
-
-        unsafe { INSTALL.as_ref() }.cloned().expect("`Tracing` has not been installed correctly")
+                Arc::new(Mutex::new(TracingInner {
+                    level: Level::ERROR,
+                    level_filter_reload_handle,
+                }))
+            })
+            .clone()
     }
 
     /// Install the tracing layer.
