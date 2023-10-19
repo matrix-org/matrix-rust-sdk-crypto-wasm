@@ -486,6 +486,8 @@ describe(OlmMachine.name, () => {
             expect(requests[0].txn_id).toBeDefined();
             const content = JSON.parse(requests[0].body);
             expect(Object.keys(content.messages)).toEqual(["@example:localhost"]);
+            const messageContent = content.messages["@example:localhost"]["AFGUOBTZWM"];
+            expect(messageContent["org.matrix.msgid"]).toBeDefined();
         });
 
         let encrypted;
