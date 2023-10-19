@@ -1,5 +1,8 @@
 # UNRELEASED
 
+-   Attach message IDs to outgoing to-device messages, and log the IDs on
+    incoming messages.
+
 -   Improve logging output to include more information, including data that is
     attached to tracing spans. Remove the `tracing` feature: tracing support is
     now always included.

@@ -488,6 +488,8 @@ describe(OlmMachine.name, () => {
             expect(requests[0].id).toBeDefined();
             const content = JSON.parse(requests[0].body);
             expect(Object.keys(content.messages)).toEqual(["@example:localhost"]);
+            const messageContent = content.messages["@example:localhost"]["AFGUOBTZWM"];
+            expect(messageContent["org.matrix.msgid"]).toBeDefined();
 
             await m.markRequestAsSent(requests[0].id, RequestType.ToDevice, "{}");
             const requestsAfterMarkedAsSent = await m.shareRoomKey(room, other_users, new EncryptionSettings());
