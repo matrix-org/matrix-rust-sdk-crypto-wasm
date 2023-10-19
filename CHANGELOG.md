@@ -1,4 +1,4 @@
-# UNRELEASED
+# matrix-sdk-crypto-wasm v2.1.0
 
 -   Attach message IDs to outgoing to-device messages, and log the IDs on
     incoming messages.
