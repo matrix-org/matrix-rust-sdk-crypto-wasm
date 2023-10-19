@@ -1,4 +1,4 @@
-# UNRELEASED
+# matrix-sdk-crypto-wasm v2.0.1
 
 -   Improve logging output to include more information, including data that is
     attached to tracing spans. Remove the `tracing` feature: tracing support is
