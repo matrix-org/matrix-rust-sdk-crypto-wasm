@@ -127,7 +127,8 @@ describe(OlmMachine.name, () => {
     const room = new RoomId("!baz:matrix.org");
 
     function machine(new_user, new_device) {
-        new RustSdkCryptoJs.Tracing(RustSdkCryptoJs.LoggerLevel.Trace).turnOn();
+        // Uncomment to enable debug logging for tests
+        // new RustSdkCryptoJs.Tracing(RustSdkCryptoJs.LoggerLevel.Trace).turnOn();
         return OlmMachine.initialize(new_user || user, new_device || device);
     }
 
