@@ -7,7 +7,6 @@ pub(crate) use matrix_sdk_common::ruma::api::client::{
         claim_keys::v3::Response as KeysClaimResponse, get_keys::v3::Response as KeysQueryResponse,
         upload_keys::v3::Response as KeysUploadResponse,
         upload_signatures::v3::Response as SignatureUploadResponse,
-        upload_signing_keys::v3::Response as SigningKeysUploadResponse,
     },
     message::send_message_event::v3::Response as RoomMessageResponse,
     to_device::send_event_to_device::v3::Response as ToDeviceResponse,
@@ -35,7 +34,6 @@ pub(crate) enum OwnedResponse {
     SignatureUpload(SignatureUploadResponse),
     RoomMessage(RoomMessageResponse),
     KeysBackup(KeysBackupResponse),
-    SigningKeysUpload(SigningKeysUploadResponse),
 }
 
 impl From<KeysUploadResponse> for OwnedResponse {
@@ -77,12 +75,6 @@ impl From<RoomMessageResponse> for OwnedResponse {
 impl From<KeysBackupResponse> for OwnedResponse {
     fn from(r: KeysBackupResponse) -> Self {
         Self::KeysBackup(r)
-    }
-}
-
-impl From<SigningKeysUploadResponse> for OwnedResponse {
-    fn from(response: SigningKeysUploadResponse) -> OwnedResponse {
-        Self::SigningKeysUpload(response)
     }
 }
 
@@ -130,18 +122,6 @@ impl TryFrom<(RequestType, http::Response<Vec<u8>>)> for OwnedResponse {
             RequestType::KeysBackup => {
                 KeysBackupResponse::try_from_http_response(response).map(Into::into)
             }
-
-            RequestType::SigningKeysUpload => {
-                // SigningKeysUploadResponse::try_from_http_response returns a
-                // FromHttpResponseError<UiaaResponse> instead of a
-                // ruma_client_api::error::Error, so we have to handle it
-                // separately. In practice, the application is supposed to
-                // have dealt with UIA before we get here, so we just map it straight into a
-                // regular `JsError` anyway.
-                return SigningKeysUploadResponse::try_from_http_response(response)
-                    .map(Into::into)
-                    .map_err(JsError::from);
-            }
         }
         .map_err(JsError::from)
     }
@@ -161,9 +141,6 @@ impl<'a> From<&'a OwnedResponse> for IncomingResponse<'a> {
             OwnedResponse::SignatureUpload(response) => IncomingResponse::SignatureUpload(response),
             OwnedResponse::RoomMessage(response) => IncomingResponse::RoomMessage(response),
             OwnedResponse::KeysBackup(response) => IncomingResponse::KeysBackup(response),
-            OwnedResponse::SigningKeysUpload(response) => {
-                IncomingResponse::SigningKeysUpload(response)
-            }
         }
     }
 }
