@@ -3,6 +3,10 @@
 -   Attach message IDs to outgoing to-device messages, and log the IDs on
     incoming messages.
 
+-   Improve logging output to include more information, including data that is
+    attached to tracing spans. Remove the `tracing` feature: tracing support is
+    now always included.
+
 # matrix-sdk-crypto-wasm v2.0.0
 
 -   Updated rust sdk version to revision [c2bb76029ae6d99c741727e0f87abcd734377016](https://github.com/matrix-org/matrix-rust-sdk/commit/c2bb76029ae6d99c741727e0f87abcd734377016), including:

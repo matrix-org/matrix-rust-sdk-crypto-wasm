@@ -30,9 +30,8 @@ wasm-opt = ['-Oz']
 crate-type = ["cdylib"]
 
 [features]
-default = ["tracing", "qrcode"]
+default = ["qrcode"]
 qrcode = ["matrix-sdk-crypto/qrcode", "dep:matrix-sdk-qrcode"]
-tracing = []
 
 [dependencies]
 anyhow = "1.0.68"
@@ -40,19 +39,19 @@ console_error_panic_hook = "0.1.7"
 futures-util = "0.3.27"
 http = "0.2.6"
 js-sys = "0.3.49"
-matrix-sdk-common = { git = "https://github.com/matrix-org/matrix-rust-sdk", rev = "c2bb76029ae6d99c741727e0f87abcd734377016", features = ["js"] }
-matrix-sdk-indexeddb = { git = "https://github.com/matrix-org/matrix-rust-sdk", rev = "c2bb76029ae6d99c741727e0f87abcd734377016" }
-matrix-sdk-qrcode = { git = "https://github.com/matrix-org/matrix-rust-sdk", rev = "c2bb76029ae6d99c741727e0f87abcd734377016", optional = true }
+matrix-sdk-common = { git = "https://github.com/matrix-org/matrix-rust-sdk", rev = "7c958498bfdb41652823bd8bce6a4b25d7c13a97", features = ["js"] }
+matrix-sdk-indexeddb = { git = "https://github.com/matrix-org/matrix-rust-sdk", rev = "7c958498bfdb41652823bd8bce6a4b25d7c13a97" }
+matrix-sdk-qrcode = { git = "https://github.com/matrix-org/matrix-rust-sdk", rev = "7c958498bfdb41652823bd8bce6a4b25d7c13a97", optional = true }
 serde_json = "1.0.91"
 serde-wasm-bindgen = "0.5.0"
 tracing = { version = "0.1.36", default-features = false, features = ["std"] }
-tracing-subscriber = { version = "0.3.14", default-features = false, features = ["registry", "std"] }
+tracing-subscriber = { version = "0.3.14", default-features = false, features = ["registry", "std", "ansi"] }
 wasm-bindgen = "=0.2.84"
 wasm-bindgen-futures = "0.4.33"
 zeroize = "1.6.0"
 
 [dependencies.matrix-sdk-crypto]
 git = "https://github.com/matrix-org/matrix-rust-sdk"
-rev = "c2bb76029ae6d99c741727e0f87abcd734377016"
+rev = "7c958498bfdb41652823bd8bce6a4b25d7c13a97"
 default_features = false
 features = ["js", "backups_v1", "automatic-room-key-forwarding", "message-ids"]
