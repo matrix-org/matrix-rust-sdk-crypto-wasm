@@ -1,3 +1,15 @@
+# matrix-sdk-crypto-wasm v2.1.1
+
+## Changes in the underlying Rust crate
+
+-   Clean up the logging of to-device messages in `share_room_key`. Also fixes
+    some `panic` errors which were introduced in v2.1.0.
+
+-   Remove spurious "Unknown outgoing secret request" warning which was logged
+    for every outgoing secret request.
+
+-   Various other changes.
+
 # matrix-sdk-crypto-wasm v2.1.0
 
 -   Attach message IDs to outgoing to-device messages, and log the IDs on
