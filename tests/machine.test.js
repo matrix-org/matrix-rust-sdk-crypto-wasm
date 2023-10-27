@@ -40,6 +40,8 @@ describe("Versions", () => {
         expect(versions).toBeInstanceOf(Versions);
         expect(versions.vodozemac).toBeDefined();
         expect(versions.matrix_sdk_crypto).toBeDefined();
+        expect(versions.git_sha).toBeDefined();
+        expect(versions.git_description).toBeDefined();
     });
 });
 
