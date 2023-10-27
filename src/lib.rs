@@ -53,6 +53,13 @@ pub struct Versions {
     /// The version of the matrix-sdk-crypto crate.
     #[wasm_bindgen(readonly)]
     pub matrix_sdk_crypto: JsString,
+    /// The Git commit hash of the crate's source tree at build time.
+    #[wasm_bindgen(readonly)]
+    pub git_sha: JsString,
+    /// The build-time output of the `git describe` command of the source tree
+    /// of crate.
+    #[wasm_bindgen(readonly)]
+    pub git_description: JsString,
 }
 
 /// Get the versions of the Rust libraries we are using.
@@ -61,6 +68,8 @@ pub fn get_versions() -> Versions {
     Versions {
         vodozemac: matrix_sdk_crypto::vodozemac::VERSION.into(),
         matrix_sdk_crypto: matrix_sdk_crypto::VERSION.into(),
+        git_description: env!("VERGEN_GIT_DESCRIBE").to_owned().into(),
+        git_sha: env!("VERGEN_GIT_SHA").to_owned().into(),
     }
 }
 
