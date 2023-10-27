@@ -1,3 +1,8 @@
+# UNRELEASED
+
+-   Added bindings versions details to `getVersions()`. Two new fields `git_sha` and
+    `git_description` have been included in the returned `Versions` struct.
+
 # matrix-sdk-crypto-wasm v2.1.1
 
 ## Changes in the underlying Rust crate
