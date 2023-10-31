@@ -28,7 +28,7 @@ use crate::{
     identifiers, identities,
     js::downcast,
     olm, requests,
-    requests::{OutgoingRequest, ToDeviceRequest},
+    requests::{outgoing_request_to_js_value, ToDeviceRequest},
     responses::{self, response_from_string},
     store,
     store::RoomKeyInfo,
@@ -304,18 +304,18 @@ impl OlmMachine {
 
     /// Get the outgoing requests that need to be sent out.
     ///
-    /// This returns a list of `JsValue` to represent either:
-    ///   * `KeysUploadRequest`,
-    ///   * `KeysQueryRequest`,
-    ///   * `KeysClaimRequest`,
-    ///   * `ToDeviceRequest`,
-    ///   * `SignatureUploadRequest`,
-    ///   * `RoomMessageRequest` or
-    ///   * `KeysBackupRequest`.
+    /// This returns a list of values, each of which can be any of:
+    ///   * {@link KeysUploadRequest},
+    ///   * {@link KeysQueryRequest},
+    ///   * {@link KeysClaimRequest},
+    ///   * {@link ToDeviceRequest},
+    ///   * {@link SignatureUploadRequest},
+    ///   * {@link RoomMessageRequest}, or
+    ///   * {@link KeysBackupRequest}.
     ///
     /// Those requests need to be sent out to the server and the
-    /// responses need to be passed back to the state machine using
-    /// `mark_request_as_sent`.
+    /// responses need to be passed back to the state machine
+    /// using {@link OlmMachine.markRequestAsSent}.
     #[wasm_bindgen(js_name = "outgoingRequests")]
     pub fn outgoing_requests(&self) -> Promise {
         let me = self.inner.clone();
@@ -325,8 +325,7 @@ impl OlmMachine {
                 .outgoing_requests()
                 .await?
                 .into_iter()
-                .map(OutgoingRequest)
-                .map(TryFrom::try_from)
+                .map(outgoing_request_to_js_value)
                 .collect::<Result<Vec<JsValue>, _>>()?
                 .into_iter()
                 .collect::<Array>())

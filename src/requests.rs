@@ -456,47 +456,46 @@ impl TryFrom<&OriginalToDeviceRequest> for ToDeviceRequest {
     }
 }
 
-// JavaScript has no complex enums like Rust. To return structs of
-// different types, we have no choice that hiding everything behind a
-// `JsValue`.
-pub(crate) struct OutgoingRequest(pub(crate) matrix_sdk_crypto::OutgoingRequest);
+/// Convert an `OutgoingRequest` into a `JsValue`, ready to return to
+/// JavaScript.
+///
+/// JavaScript has no complex enums like Rust. To return structs of
+/// different types, we have no choice that hiding everything behind a
+/// `JsValue`.
+pub fn outgoing_request_to_js_value(
+    outgoing_request: matrix_sdk_crypto::OutgoingRequest,
+) -> Result<JsValue, serde_json::Error> {
+    let request_id = outgoing_request.request_id().to_string();
 
-impl TryFrom<OutgoingRequest> for JsValue {
-    type Error = serde_json::Error;
+    Ok(match outgoing_request.request() {
+        OutgoingRequests::KeysUpload(request) => {
+            JsValue::from(KeysUploadRequest::try_from((request_id, request))?)
+        }
 
-    fn try_from(outgoing_request: OutgoingRequest) -> Result<Self, Self::Error> {
-        let request_id = outgoing_request.0.request_id().to_string();
+        OutgoingRequests::KeysQuery(request) => {
+            JsValue::from(KeysQueryRequest::try_from((request_id, request))?)
+        }
 
-        Ok(match outgoing_request.0.request() {
-            OutgoingRequests::KeysUpload(request) => {
-                JsValue::from(KeysUploadRequest::try_from((request_id, request))?)
-            }
+        OutgoingRequests::KeysClaim(request) => {
+            JsValue::from(KeysClaimRequest::try_from((request_id, request))?)
+        }
 
-            OutgoingRequests::KeysQuery(request) => {
-                JsValue::from(KeysQueryRequest::try_from((request_id, request))?)
-            }
+        OutgoingRequests::ToDeviceRequest(request) => {
+            JsValue::from(ToDeviceRequest::try_from((request_id, request))?)
+        }
 
-            OutgoingRequests::KeysClaim(request) => {
-                JsValue::from(KeysClaimRequest::try_from((request_id, request))?)
-            }
+        OutgoingRequests::SignatureUpload(request) => {
+            JsValue::from(SignatureUploadRequest::try_from((request_id, request))?)
+        }
 
-            OutgoingRequests::ToDeviceRequest(request) => {
-                JsValue::from(ToDeviceRequest::try_from((request_id, request))?)
-            }
+        OutgoingRequests::RoomMessage(request) => {
+            JsValue::from(RoomMessageRequest::try_from((request_id, request))?)
+        }
 
-            OutgoingRequests::SignatureUpload(request) => {
-                JsValue::from(SignatureUploadRequest::try_from((request_id, request))?)
-            }
-
-            OutgoingRequests::RoomMessage(request) => {
-                JsValue::from(RoomMessageRequest::try_from((request_id, request))?)
-            }
-
-            OutgoingRequests::KeysBackup(request) => {
-                JsValue::from(KeysBackupRequest::try_from((request_id, request))?)
-            }
-        })
-    }
+        OutgoingRequests::KeysBackup(request) => {
+            JsValue::from(KeysBackupRequest::try_from((request_id, request))?)
+        }
+    })
 }
 
 /// Represent the type of a request.
