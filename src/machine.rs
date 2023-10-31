@@ -545,7 +545,7 @@ impl OlmMachine {
             let tuple = Array::new();
             tuple.set(
                 0,
-                requests::SigningKeysUploadRequest::try_from(&upload_signing_keys_request)?.into(),
+                requests::UploadSigningKeysRequest::try_from(&upload_signing_keys_request)?.into(),
             );
             tuple.set(
                 1,

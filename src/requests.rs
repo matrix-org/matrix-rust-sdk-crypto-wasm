@@ -532,7 +532,7 @@ pub enum RequestType {
 /// This uploads the public cross signing key triplet.
 #[wasm_bindgen(getter_with_clone)]
 #[derive(Debug)]
-pub struct SigningKeysUploadRequest {
+pub struct UploadSigningKeysRequest {
     /// A JSON-encoded string containing the rest of the payload: `master_key`,
     /// `self_signing_key`, `user_signing_key`.
     ///
@@ -542,19 +542,19 @@ pub struct SigningKeysUploadRequest {
 }
 
 #[wasm_bindgen]
-impl SigningKeysUploadRequest {
-    /// Create a new `SigningKeysUploadRequest`.
+impl UploadSigningKeysRequest {
+    /// Create a new `UploadSigningKeysRequest`.
     #[wasm_bindgen(constructor)]
-    pub fn new(body: JsString) -> SigningKeysUploadRequest {
+    pub fn new(body: JsString) -> UploadSigningKeysRequest {
         Self { body }
     }
 }
 
-impl TryFrom<&OriginalUploadSigningKeysRequest> for SigningKeysUploadRequest {
+impl TryFrom<&OriginalUploadSigningKeysRequest> for UploadSigningKeysRequest {
     type Error = serde_json::Error;
     fn try_from(request: &OriginalUploadSigningKeysRequest) -> Result<Self, Self::Error> {
         {
-            Ok(SigningKeysUploadRequest {
+            Ok(UploadSigningKeysRequest {
                 body: {
                     let mut map = serde_json::Map::new();
                     map.insert(
