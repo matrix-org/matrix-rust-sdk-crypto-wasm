@@ -17,7 +17,7 @@ use matrix_sdk_crypto::{
         ToDeviceRequest as OriginalToDeviceRequest,
         UploadSigningKeysRequest as OriginalUploadSigningKeysRequest,
     },
-    OutgoingRequests,
+    CrossSigningBootstrapRequests as OriginalCrossSigningBootstrapRequests, OutgoingRequests,
 };
 use wasm_bindgen::prelude::*;
 
@@ -29,7 +29,7 @@ use wasm_bindgen::prelude::*;
 /// Publishes end-to-end encryption keys for the device.
 ///
 /// [specification]: https://spec.matrix.org/unstable/client-server-api/#post_matrixclientv3keysupload
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 #[wasm_bindgen(getter_with_clone)]
 pub struct KeysUploadRequest {
     /// The request ID.
@@ -190,7 +190,7 @@ impl ToDeviceRequest {
 /// Publishes cross-signing signatures for the user.
 ///
 /// [specification]: https://spec.matrix.org/unstable/client-server-api/#post_matrixclientv3keyssignaturesupload
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 #[wasm_bindgen(getter_with_clone)]
 pub struct SignatureUploadRequest {
     /// The request ID.
@@ -530,7 +530,7 @@ pub enum RequestType {
 ///
 /// This uploads the public cross signing key triplet.
 #[wasm_bindgen(getter_with_clone)]
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct UploadSigningKeysRequest {
     /// A JSON-encoded string containing the rest of the payload: `master_key`,
     /// `self_signing_key`, `user_signing_key`.
@@ -573,5 +573,49 @@ impl TryFrom<&OriginalUploadSigningKeysRequest> for UploadSigningKeysRequest {
                 },
             })
         }
+    }
+}
+
+/// A set of requests to be executed when bootstrapping cross-signing using
+/// {@link OlmMachine.bootstrapCrossSigning}.
+#[wasm_bindgen(getter_with_clone)]
+#[derive(Debug)]
+pub struct CrossSigningBootstrapRequests {
+    /// An optional request to upload a device key.
+    ///
+    /// This will either be `undefined`, or an "outgoing request" as returned by
+    /// {@link OlmMachine.outgoingRequests}.
+    ///
+    /// If it is defined, the request should be sent first, and the result sent
+    /// back with {@link OlmMachine.markRequestAsSent}.
+    #[wasm_bindgen(readonly, js_name = "uploadKeysRequest")]
+    pub upload_keys_request: JsValue,
+
+    /// Request to upload the cross-signing keys.
+    ///
+    /// Should be sent second.
+    #[wasm_bindgen(readonly, js_name = "uploadSigningKeysRequest")]
+    pub upload_signing_keys_request: UploadSigningKeysRequest,
+
+    /// Request to upload key signatures, including those for the cross-signing
+    /// keys, and maybe some for the optional uploaded key too.
+    ///
+    /// Should be sent last.
+    #[wasm_bindgen(readonly, js_name = "uploadSignaturesRequest")]
+    pub upload_signatures_request: SignatureUploadRequest,
+}
+
+impl TryFrom<OriginalCrossSigningBootstrapRequests> for CrossSigningBootstrapRequests {
+    type Error = serde_json::Error;
+    fn try_from(request: OriginalCrossSigningBootstrapRequests) -> Result<Self, Self::Error> {
+        Ok(CrossSigningBootstrapRequests {
+            upload_keys_request: request
+                .upload_keys_req
+                .map(outgoing_request_to_js_value)
+                .transpose()?
+                .into(),
+            upload_signing_keys_request: (&request.upload_signing_keys_req).try_into()?,
+            upload_signatures_request: (&request.upload_signatures_req).try_into()?,
+        })
     }
 }

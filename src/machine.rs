@@ -28,7 +28,7 @@ use crate::{
     identifiers, identities,
     js::downcast,
     olm, requests,
-    requests::{outgoing_request_to_js_value, ToDeviceRequest},
+    requests::{outgoing_request_to_js_value, CrossSigningBootstrapRequests, ToDeviceRequest},
     responses::{self, response_from_string},
     store,
     store::RoomKeyInfo,
@@ -532,26 +532,14 @@ impl OlmMachine {
     ///   the same request multiple times, setting this argument to false
     ///   enables you to reuse the same request.
     ///
-    /// Returns an `Array` of `OutgoingRequest`s
+    /// Returns a {@link CrossSigningBootstrapRequests}.
     #[wasm_bindgen(js_name = "bootstrapCrossSigning")]
     pub fn bootstrap_cross_signing(&self, reset: bool) -> Promise {
         let me = self.inner.clone();
 
         future_to_promise(async move {
-            let (upload_signing_keys_request, upload_signatures_request) =
-                me.bootstrap_cross_signing(reset).await?;
-
-            let tuple = Array::new();
-            tuple.set(
-                0,
-                requests::UploadSigningKeysRequest::try_from(&upload_signing_keys_request)?.into(),
-            );
-            tuple.set(
-                1,
-                requests::SignatureUploadRequest::try_from(&upload_signatures_request)?.into(),
-            );
-
-            Ok(tuple)
+            let requests = me.bootstrap_cross_signing(reset).await?;
+            Ok(CrossSigningBootstrapRequests::try_from(requests)?)
         })
     }
 
