@@ -28,7 +28,7 @@ use crate::{
     identifiers, identities,
     js::downcast,
     olm, requests,
-    requests::{OutgoingRequest, ToDeviceRequest},
+    requests::{outgoing_request_to_js_value, CrossSigningBootstrapRequests, ToDeviceRequest},
     responses::{self, response_from_string},
     store,
     store::RoomKeyInfo,
@@ -304,18 +304,18 @@ impl OlmMachine {
 
     /// Get the outgoing requests that need to be sent out.
     ///
-    /// This returns a list of `JsValue` to represent either:
-    ///   * `KeysUploadRequest`,
-    ///   * `KeysQueryRequest`,
-    ///   * `KeysClaimRequest`,
-    ///   * `ToDeviceRequest`,
-    ///   * `SignatureUploadRequest`,
-    ///   * `RoomMessageRequest` or
-    ///   * `KeysBackupRequest`.
+    /// This returns a list of values, each of which can be any of:
+    ///   * {@link KeysUploadRequest},
+    ///   * {@link KeysQueryRequest},
+    ///   * {@link KeysClaimRequest},
+    ///   * {@link ToDeviceRequest},
+    ///   * {@link SignatureUploadRequest},
+    ///   * {@link RoomMessageRequest}, or
+    ///   * {@link KeysBackupRequest}.
     ///
     /// Those requests need to be sent out to the server and the
-    /// responses need to be passed back to the state machine using
-    /// `mark_request_as_sent`.
+    /// responses need to be passed back to the state machine
+    /// using {@link OlmMachine.markRequestAsSent}.
     #[wasm_bindgen(js_name = "outgoingRequests")]
     pub fn outgoing_requests(&self) -> Promise {
         let me = self.inner.clone();
@@ -325,8 +325,7 @@ impl OlmMachine {
                 .outgoing_requests()
                 .await?
                 .into_iter()
-                .map(OutgoingRequest)
-                .map(TryFrom::try_from)
+                .map(outgoing_request_to_js_value)
                 .collect::<Result<Vec<JsValue>, _>>()?
                 .into_iter()
                 .collect::<Array>())
@@ -533,26 +532,14 @@ impl OlmMachine {
     ///   the same request multiple times, setting this argument to false
     ///   enables you to reuse the same request.
     ///
-    /// Returns an `Array` of `OutgoingRequest`s
+    /// Returns a {@link CrossSigningBootstrapRequests}.
     #[wasm_bindgen(js_name = "bootstrapCrossSigning")]
     pub fn bootstrap_cross_signing(&self, reset: bool) -> Promise {
         let me = self.inner.clone();
 
         future_to_promise(async move {
-            let (upload_signing_keys_request, upload_signatures_request) =
-                me.bootstrap_cross_signing(reset).await?;
-
-            let tuple = Array::new();
-            tuple.set(
-                0,
-                requests::SigningKeysUploadRequest::try_from(&upload_signing_keys_request)?.into(),
-            );
-            tuple.set(
-                1,
-                requests::SignatureUploadRequest::try_from(&upload_signatures_request)?.into(),
-            );
-
-            Ok(tuple)
+            let requests = me.bootstrap_cross_signing(reset).await?;
+            Ok(CrossSigningBootstrapRequests::try_from(requests)?)
         })
     }
 

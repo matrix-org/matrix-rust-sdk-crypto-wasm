@@ -58,7 +58,8 @@ async function addMachineToMachine(machineToAdd, machine) {
     {
         expect(outgoingRequests[1]).toBeInstanceOf(KeysQueryRequest);
 
-        let [signingKeysUploadRequest, _] = await machineToAdd.bootstrapCrossSigning(true);
+        let bootstrapCrossSigningResult = await machineToAdd.bootstrapCrossSigning(true);
+        let signingKeysUploadRequest = bootstrapCrossSigningResult.uploadSigningKeysRequest;
 
         // Let's forge a `KeysQuery`'s response.
         let keyQueryResponse = {

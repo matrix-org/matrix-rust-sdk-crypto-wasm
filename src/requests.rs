@@ -17,7 +17,7 @@ use matrix_sdk_crypto::{
         ToDeviceRequest as OriginalToDeviceRequest,
         UploadSigningKeysRequest as OriginalUploadSigningKeysRequest,
     },
-    OutgoingRequests,
+    CrossSigningBootstrapRequests as OriginalCrossSigningBootstrapRequests, OutgoingRequests,
 };
 use wasm_bindgen::prelude::*;
 
@@ -190,7 +190,7 @@ impl ToDeviceRequest {
 /// Publishes cross-signing signatures for the user.
 ///
 /// [specification]: https://spec.matrix.org/unstable/client-server-api/#post_matrixclientv3keyssignaturesupload
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 #[wasm_bindgen(getter_with_clone)]
 pub struct SignatureUploadRequest {
     /// The request ID.
@@ -456,47 +456,46 @@ impl TryFrom<&OriginalToDeviceRequest> for ToDeviceRequest {
     }
 }
 
-// JavaScript has no complex enums like Rust. To return structs of
-// different types, we have no choice that hiding everything behind a
-// `JsValue`.
-pub(crate) struct OutgoingRequest(pub(crate) matrix_sdk_crypto::OutgoingRequest);
+/// Convert an `OutgoingRequest` into a `JsValue`, ready to return to
+/// JavaScript.
+///
+/// JavaScript has no complex enums like Rust. To return structs of
+/// different types, we have no choice that hiding everything behind a
+/// `JsValue`.
+pub fn outgoing_request_to_js_value(
+    outgoing_request: matrix_sdk_crypto::OutgoingRequest,
+) -> Result<JsValue, serde_json::Error> {
+    let request_id = outgoing_request.request_id().to_string();
 
-impl TryFrom<OutgoingRequest> for JsValue {
-    type Error = serde_json::Error;
+    Ok(match outgoing_request.request() {
+        OutgoingRequests::KeysUpload(request) => {
+            JsValue::from(KeysUploadRequest::try_from((request_id, request))?)
+        }
 
-    fn try_from(outgoing_request: OutgoingRequest) -> Result<Self, Self::Error> {
-        let request_id = outgoing_request.0.request_id().to_string();
+        OutgoingRequests::KeysQuery(request) => {
+            JsValue::from(KeysQueryRequest::try_from((request_id, request))?)
+        }
 
-        Ok(match outgoing_request.0.request() {
-            OutgoingRequests::KeysUpload(request) => {
-                JsValue::from(KeysUploadRequest::try_from((request_id, request))?)
-            }
+        OutgoingRequests::KeysClaim(request) => {
+            JsValue::from(KeysClaimRequest::try_from((request_id, request))?)
+        }
 
-            OutgoingRequests::KeysQuery(request) => {
-                JsValue::from(KeysQueryRequest::try_from((request_id, request))?)
-            }
+        OutgoingRequests::ToDeviceRequest(request) => {
+            JsValue::from(ToDeviceRequest::try_from((request_id, request))?)
+        }
 
-            OutgoingRequests::KeysClaim(request) => {
-                JsValue::from(KeysClaimRequest::try_from((request_id, request))?)
-            }
+        OutgoingRequests::SignatureUpload(request) => {
+            JsValue::from(SignatureUploadRequest::try_from((request_id, request))?)
+        }
 
-            OutgoingRequests::ToDeviceRequest(request) => {
-                JsValue::from(ToDeviceRequest::try_from((request_id, request))?)
-            }
+        OutgoingRequests::RoomMessage(request) => {
+            JsValue::from(RoomMessageRequest::try_from((request_id, request))?)
+        }
 
-            OutgoingRequests::SignatureUpload(request) => {
-                JsValue::from(SignatureUploadRequest::try_from((request_id, request))?)
-            }
-
-            OutgoingRequests::RoomMessage(request) => {
-                JsValue::from(RoomMessageRequest::try_from((request_id, request))?)
-            }
-
-            OutgoingRequests::KeysBackup(request) => {
-                JsValue::from(KeysBackupRequest::try_from((request_id, request))?)
-            }
-        })
-    }
+        OutgoingRequests::KeysBackup(request) => {
+            JsValue::from(KeysBackupRequest::try_from((request_id, request))?)
+        }
+    })
 }
 
 /// Represent the type of a request.
@@ -531,8 +530,8 @@ pub enum RequestType {
 ///
 /// This uploads the public cross signing key triplet.
 #[wasm_bindgen(getter_with_clone)]
-#[derive(Debug)]
-pub struct SigningKeysUploadRequest {
+#[derive(Debug, Clone)]
+pub struct UploadSigningKeysRequest {
     /// A JSON-encoded string containing the rest of the payload: `master_key`,
     /// `self_signing_key`, `user_signing_key`.
     ///
@@ -542,19 +541,19 @@ pub struct SigningKeysUploadRequest {
 }
 
 #[wasm_bindgen]
-impl SigningKeysUploadRequest {
-    /// Create a new `SigningKeysUploadRequest`.
+impl UploadSigningKeysRequest {
+    /// Create a new `UploadSigningKeysRequest`.
     #[wasm_bindgen(constructor)]
-    pub fn new(body: JsString) -> SigningKeysUploadRequest {
+    pub fn new(body: JsString) -> UploadSigningKeysRequest {
         Self { body }
     }
 }
 
-impl TryFrom<&OriginalUploadSigningKeysRequest> for SigningKeysUploadRequest {
+impl TryFrom<&OriginalUploadSigningKeysRequest> for UploadSigningKeysRequest {
     type Error = serde_json::Error;
     fn try_from(request: &OriginalUploadSigningKeysRequest) -> Result<Self, Self::Error> {
         {
-            Ok(SigningKeysUploadRequest {
+            Ok(UploadSigningKeysRequest {
                 body: {
                     let mut map = serde_json::Map::new();
                     map.insert(
@@ -574,5 +573,49 @@ impl TryFrom<&OriginalUploadSigningKeysRequest> for SigningKeysUploadRequest {
                 },
             })
         }
+    }
+}
+
+/// A set of requests to be executed when bootstrapping cross-signing using
+/// {@link OlmMachine.bootstrapCrossSigning}.
+#[wasm_bindgen(getter_with_clone)]
+#[derive(Debug)]
+pub struct CrossSigningBootstrapRequests {
+    /// An optional request to upload a device key.
+    ///
+    /// This will either be `undefined`, or an "outgoing request" as returned by
+    /// {@link OlmMachine.outgoingRequests}.
+    ///
+    /// If it is defined, the request should be sent first, and the result sent
+    /// back with {@link OlmMachine.markRequestAsSent}.
+    #[wasm_bindgen(readonly, js_name = "uploadKeysRequest")]
+    pub upload_keys_request: JsValue,
+
+    /// Request to upload the cross-signing keys.
+    ///
+    /// Should be sent second.
+    #[wasm_bindgen(readonly, js_name = "uploadSigningKeysRequest")]
+    pub upload_signing_keys_request: UploadSigningKeysRequest,
+
+    /// Request to upload key signatures, including those for the cross-signing
+    /// keys, and maybe some for the optional uploaded key too.
+    ///
+    /// Should be sent last.
+    #[wasm_bindgen(readonly, js_name = "uploadSignaturesRequest")]
+    pub upload_signatures_request: SignatureUploadRequest,
+}
+
+impl TryFrom<OriginalCrossSigningBootstrapRequests> for CrossSigningBootstrapRequests {
+    type Error = serde_json::Error;
+    fn try_from(request: OriginalCrossSigningBootstrapRequests) -> Result<Self, Self::Error> {
+        Ok(CrossSigningBootstrapRequests {
+            upload_keys_request: request
+                .upload_keys_req
+                .map(outgoing_request_to_js_value)
+                .transpose()?
+                .into(),
+            upload_signing_keys_request: (&request.upload_signing_keys_req).try_into()?,
+            upload_signatures_request: (&request.upload_signatures_req).try_into()?,
+        })
     }
 }

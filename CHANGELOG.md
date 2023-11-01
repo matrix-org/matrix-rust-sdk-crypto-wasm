@@ -1,5 +1,20 @@
 # UNRELEASED
 
+**BREAKING CHANGES**
+
+-   `OlmMachine.bootstrapCrossSigning` no longer returns an array of request
+    objects. Rather, it returns a new class (`CrossSigningBootstrapRequests`)
+    which contains the request objects within it.
+
+    As part of this work, `SigningKeysUploadRequest` (which was one of the
+    types formerly returned by `bootstrapCrossSigning`) has been renamed to
+    `UploadSigningKeysRequest` for consistency with the underlying SDK.
+
+## Other changes
+
+-   Olm decryption operations will no longer log large quantities of data about
+    the data `Store`.
+
 # matrix-sdk-crypto-wasm v2.2.0
 
 -   Added bindings versions details to `getVersions()`. Two new fields `git_sha` and
