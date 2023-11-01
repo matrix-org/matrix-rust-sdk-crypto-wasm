@@ -29,7 +29,7 @@ use wasm_bindgen::prelude::*;
 /// Publishes end-to-end encryption keys for the device.
 ///
 /// [specification]: https://spec.matrix.org/unstable/client-server-api/#post_matrixclientv3keysupload
-#[derive(Debug, Clone)]
+#[derive(Debug)]
 #[wasm_bindgen(getter_with_clone)]
 pub struct KeysUploadRequest {
     /// The request ID.
