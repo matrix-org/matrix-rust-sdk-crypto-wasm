@@ -14,7 +14,7 @@ use matrix_sdk_crypto::{
     types::RoomKeyBackupInfo,
     EncryptionSyncChanges, GossippedSecret,
 };
-use serde_json::{json, Value as JsonValue};
+use serde_json::json;
 use serde_wasm_bindgen;
 use tracing::warn;
 use wasm_bindgen::prelude::*;
@@ -383,12 +383,12 @@ impl OlmMachine {
         content: &str,
     ) -> Result<Promise, JsError> {
         let room_id = room_id.inner.clone();
-        let content: JsonValue = serde_json::from_str(content)?;
+        let content = serde_json::from_str(content)?;
         let me = self.inner.clone();
 
         Ok(future_to_promise(async move {
             Ok(serde_json::to_string(
-                &me.encrypt_room_event_raw(&room_id, content, event_type.as_ref()).await?,
+                &me.encrypt_room_event_raw(&room_id, event_type.as_ref(), &content).await?,
             )?)
         }))
     }

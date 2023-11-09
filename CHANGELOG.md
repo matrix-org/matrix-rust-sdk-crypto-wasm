@@ -1,4 +1,4 @@
-# matrix-sdk-crypto-wasm v3.0.0
+# unreleased
 
 **BREAKING CHANGES**
 
@@ -14,6 +14,10 @@
 
 -   Olm decryption operations will no longer log large quantities of data about
     the data `Store`.
+
+# matrix-sdk-crypto-wasm v3.0.0
+
+Do not use this release. It has a [critical bug[(https://github.com/matrix-org/matrix-rust-sdk/issues/2802).
 
 # matrix-sdk-crypto-wasm v2.2.0
 
