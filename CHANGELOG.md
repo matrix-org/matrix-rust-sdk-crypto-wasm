@@ -12,6 +12,10 @@
 
 ## Other changes
 
+-   Devices which have exhausted their one-time-keys will now be correctly
+    handled in `/keys/claim` responses (we will register them as "failed" and
+    stop attempting to send to them for a while.)
+
 -   Olm decryption operations will no longer log large quantities of data about
     the data `Store`.
 
