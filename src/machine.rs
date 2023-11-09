@@ -837,7 +837,8 @@ impl OlmMachine {
 
         Ok(future_to_promise(async move {
             let matrix_sdk_crypto::RoomKeyImportResult { imported_count, total_count, keys } = me
-                .import_room_keys(exported_room_keys, false, |progress, total| {
+                .store()
+                .import_exported_room_keys(exported_room_keys, |progress, total| {
                     let progress: u64 = progress.try_into().unwrap();
                     let total: u64 = total.try_into().unwrap();
 
