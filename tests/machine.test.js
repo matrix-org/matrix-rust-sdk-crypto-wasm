@@ -686,7 +686,7 @@ describe(OlmMachine.name, () => {
         expect(userId.toString()).toEqual(user.toString());
     });
 
-    test("can export room keys", async  () => {
+    test("can export room keys", async () => {
         let m = await machine();
         await m.shareRoomKey(room, [new UserId("@bob:example.org")], new EncryptionSettings());
 
@@ -713,7 +713,7 @@ describe(OlmMachine.name, () => {
             },
             forwarding_curve25519_key_chain: [],
         });
-    })
+    });
 
     describe("can process exported room keys", () => {
         let exportedRoomKeys;
@@ -773,11 +773,9 @@ describe(OlmMachine.name, () => {
 
             expect(result.importedCount).toStrictEqual(1);
             expect(result.totalCount).toStrictEqual(1);
-            expect(result.keys()).toMatchObject(new Map([[
-                room.toString(), new Map([[
-                    expect.any(String), new Set([expect.any(String)]),
-                ]]),
-            ]]));
+            expect(result.keys()).toMatchObject(
+                new Map([[room.toString(), new Map([[expect.any(String), new Set([expect.any(String)])]])]]),
+            );
         });
 
         test("importing room keys calls RoomKeyUpdatedCallback", async () => {
@@ -790,10 +788,8 @@ describe(OlmMachine.name, () => {
             let keyInfoList = callback.mock.calls[0][0];
             expect(keyInfoList.length).toEqual(1);
             expect(keyInfoList[0].roomId.toString()).toStrictEqual(room.toString());
-        })
+        });
     });
-
-
 
     describe("can do in-room verification", () => {
         let m;
@@ -1112,7 +1108,11 @@ describe(OlmMachine.name, () => {
                 decryptedKeyMap.set(new RoomId(roomId), decryptedRoomKeyMap);
                 for (const [sessionId, keyBackupData] of Object.entries(roomKeys.sessions)) {
                     const decrypted = JSON.parse(
-                        keyBackupKey.decryptV1(keyBackupData.session_data.ephemeral, keyBackupData.session_data.mac, keyBackupData.session_data.ciphertext),
+                        keyBackupKey.decryptV1(
+                            keyBackupData.session_data.ephemeral,
+                            keyBackupData.session_data.mac,
+                            keyBackupData.session_data.ciphertext,
+                        ),
                     );
                     expect(decrypted.algorithm).toStrictEqual("m.megolm.v1.aes-sha2");
                     decryptedRoomKeyMap.set(sessionId, decrypted);
@@ -1126,11 +1126,9 @@ describe(OlmMachine.name, () => {
             const result = await m2.importBackedUpRoomKeys(decryptedKeyMap, progressListener);
             expect(result.importedCount).toStrictEqual(1);
             expect(result.totalCount).toStrictEqual(1);
-            expect(result.keys()).toMatchObject(new Map([[
-                room.toString(), new Map([[
-                    expect.any(String), new Set([expect.any(String)]),
-                ]]),
-            ]]));
+            expect(result.keys()).toMatchObject(
+                new Map([[room.toString(), new Map([[expect.any(String), new Set([expect.any(String)])]])]]),
+            );
 
             expect(progressListener).toHaveBeenCalledTimes(1);
             expect(progressListener).toHaveBeenCalledWith(0, 1);
