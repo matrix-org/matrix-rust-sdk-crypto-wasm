@@ -686,52 +686,55 @@ describe(OlmMachine.name, () => {
         expect(userId.toString()).toEqual(user.toString());
     });
 
-    describe("can export/import room keys", () => {
+    test("can export room keys", async  () => {
+        let m = await machine();
+        await m.shareRoomKey(room, [new UserId("@bob:example.org")], new EncryptionSettings());
+
+        let exportedRoomKeys = await m.exportRoomKeys((session) => {
+            expect(session).toBeInstanceOf(InboundGroupSession);
+            expect(session.senderKey.toBase64()).toEqual(m.identityKeys.curve25519.toBase64());
+            expect(session.roomId.toString()).toStrictEqual(room.toString());
+            expect(session.sessionId).toBeDefined();
+            expect(session.hasBeenImported()).toStrictEqual(false);
+
+            return true;
+        });
+
+        const roomKeys = JSON.parse(exportedRoomKeys);
+        expect(roomKeys).toHaveLength(1);
+        expect(roomKeys[0]).toMatchObject({
+            algorithm: expect.any(String),
+            room_id: room.toString(),
+            sender_key: expect.any(String),
+            session_id: expect.any(String),
+            session_key: expect.any(String),
+            sender_claimed_keys: {
+                ed25519: expect.any(String),
+            },
+            forwarding_curve25519_key_chain: [],
+        });
+    })
+
+    describe("can process exported room keys", () => {
         let exportedRoomKeys;
 
-        test("can export room keys", async () => {
+        beforeEach(async () => {
             let m = await machine();
             await m.shareRoomKey(room, [new UserId("@bob:example.org")], new EncryptionSettings());
 
-            exportedRoomKeys = await m.exportRoomKeys((session) => {
-                expect(session).toBeInstanceOf(InboundGroupSession);
-                expect(session.senderKey.toBase64()).toEqual(m.identityKeys.curve25519.toBase64());
-                expect(session.roomId.toString()).toStrictEqual(room.toString());
-                expect(session.sessionId).toBeDefined();
-                expect(session.hasBeenImported()).toStrictEqual(false);
-
-                return true;
-            });
-
-            const roomKeys = JSON.parse(exportedRoomKeys);
-            expect(roomKeys).toHaveLength(1);
-            expect(roomKeys[0]).toMatchObject({
-                algorithm: expect.any(String),
-                room_id: room.toString(),
-                sender_key: expect.any(String),
-                session_id: expect.any(String),
-                session_key: expect.any(String),
-                sender_claimed_keys: {
-                    ed25519: expect.any(String),
-                },
-                forwarding_curve25519_key_chain: [],
-            });
+            exportedRoomKeys = await m.exportRoomKeys((_session) => true);
         });
 
-        let encryptedExportedRoomKeys;
-        let encryptionPassphrase = "Hello, Matrix!";
-
-        test("can encrypt the exported room keys", () => {
-            encryptedExportedRoomKeys = OlmMachine.encryptExportedRoomKeys(
+        test("can encrypt and decrypt the exported room keys", () => {
+            let encryptionPassphrase = "Hello, Matrix!";
+            let encryptedExportedRoomKeys = OlmMachine.encryptExportedRoomKeys(
                 exportedRoomKeys,
                 encryptionPassphrase,
                 100_000,
             );
 
             expect(encryptedExportedRoomKeys).toMatch(/^-----BEGIN MEGOLM SESSION DATA-----/);
-        });
 
-        test("can decrypt the exported room keys", () => {
             const decryptedExportedRoomKeys = OlmMachine.decryptExportedRoomKeys(
                 encryptedExportedRoomKeys,
                 encryptionPassphrase,
@@ -740,13 +743,13 @@ describe(OlmMachine.name, () => {
             expect(decryptedExportedRoomKeys).toStrictEqual(exportedRoomKeys);
         });
 
-        test("can import room keys", async () => {
+        test("can import room keys via importRoomKeys", async () => {
             const progressListener = (progress, total) => {
                 expect(progress).toBeLessThan(total);
 
                 // Since it's called only once, let's be crazy.
-                expect(progress).toStrictEqual(0n);
-                expect(total).toStrictEqual(1n);
+                expect(progress).toStrictEqual(0);
+                expect(total).toStrictEqual(1);
             };
 
             let m = await machine();
@@ -759,18 +762,38 @@ describe(OlmMachine.name, () => {
             });
         });
 
+        test("can import room keys via importExportedRoomKeys", async () => {
+            const progressListener = (progress, total) => {
+                expect(progress).toStrictEqual(0);
+                expect(total).toStrictEqual(1);
+            };
+
+            let m = await machine();
+            const result = await m.importExportedRoomKeys(exportedRoomKeys, progressListener);
+
+            expect(result.importedCount).toStrictEqual(1);
+            expect(result.totalCount).toStrictEqual(1);
+            expect(result.keys()).toMatchObject(new Map([[
+                room.toString(), new Map([[
+                    expect.any(String), new Set([expect.any(String)]),
+                ]]),
+            ]]));
+        });
+
         test("importing room keys calls RoomKeyUpdatedCallback", async () => {
             const callback = jest.fn();
             callback.mockImplementation(() => Promise.resolve(undefined));
             let m = await machine();
             m.registerRoomKeyUpdatedCallback(callback);
-            await m.importRoomKeys(exportedRoomKeys, (_, _1) => {});
+            await m.importRoomKeys(exportedRoomKeys, (_, _1) => undefined);
             expect(callback).toHaveBeenCalledTimes(1);
             let keyInfoList = callback.mock.calls[0][0];
             expect(keyInfoList.length).toEqual(1);
             expect(keyInfoList[0].roomId.toString()).toStrictEqual(room.toString());
-        });
+        })
     });
+
+
 
     describe("can do in-room verification", () => {
         let m;
@@ -1070,6 +1093,47 @@ describe(OlmMachine.name, () => {
             expect(savedKey.decryptionKey.toBase64()).toStrictEqual(keyBackupKey.toBase64());
             expect(savedKey.decryptionKeyBase64).toStrictEqual(keyBackupKey.toBase64());
             expect(savedKey.backupVersion).toStrictEqual("3");
+        });
+
+        test("can import keys via importBackedUpRoomKeys", async () => {
+            // first do a backup from one OlmMachine
+            const m = await machine();
+            await m.shareRoomKey(room, [new UserId("@bob:example.org")], new EncryptionSettings());
+            const keyBackupKey = BackupDecryptionKey.createRandomKey();
+            await m.enableBackupV1(keyBackupKey.megolmV1PublicKey.publicKeyBase64, "1");
+            const outgoing = await m.backupRoomKeys();
+            expect(outgoing.type).toStrictEqual(RequestType.KeysBackup);
+            const exportedKeys = JSON.parse(outgoing.body);
+
+            // decrypt the backup
+            const decryptedKeyMap = new Map();
+            for (const [roomId, roomKeys] of Object.entries(exportedKeys.rooms)) {
+                const decryptedRoomKeyMap = new Map();
+                decryptedKeyMap.set(new RoomId(roomId), decryptedRoomKeyMap);
+                for (const [sessionId, keyBackupData] of Object.entries(roomKeys.sessions)) {
+                    const decrypted = JSON.parse(
+                        keyBackupKey.decryptV1(keyBackupData.session_data.ephemeral, keyBackupData.session_data.mac, keyBackupData.session_data.ciphertext),
+                    );
+                    expect(decrypted.algorithm).toStrictEqual("m.megolm.v1.aes-sha2");
+                    decryptedRoomKeyMap.set(sessionId, decrypted);
+                }
+            }
+
+            // now import the backup into a new OlmMachine
+            const progressListener = jest.fn();
+            const m2 = await machine();
+            await m2.saveBackupDecryptionKey(keyBackupKey, "1");
+            const result = await m2.importBackedUpRoomKeys(decryptedKeyMap, progressListener);
+            expect(result.importedCount).toStrictEqual(1);
+            expect(result.totalCount).toStrictEqual(1);
+            expect(result.keys()).toMatchObject(new Map([[
+                room.toString(), new Map([[
+                    expect.any(String), new Set([expect.any(String)]),
+                ]]),
+            ]]));
+
+            expect(progressListener).toHaveBeenCalledTimes(1);
+            expect(progressListener).toHaveBeenCalledWith(0, 1);
         });
     });
 });

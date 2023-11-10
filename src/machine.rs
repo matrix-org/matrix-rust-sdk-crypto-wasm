@@ -3,16 +3,17 @@
 use std::{collections::BTreeMap, ops::Deref, time::Duration};
 
 use futures_util::{pin_mut, StreamExt};
-use js_sys::{Array, Function, Map, Promise, Set};
+use js_sys::{Array, Function, JsString, Map, Promise, Set};
 use matrix_sdk_common::ruma::{
     self, events::secret::request::SecretName, serde::Raw, DeviceKeyAlgorithm, OwnedTransactionId,
     UInt,
 };
 use matrix_sdk_crypto::{
     backups::MegolmV1BackupKey,
+    olm::BackedUpRoomKey,
     store::{DeviceChanges, IdentityChanges},
     types::RoomKeyBackupInfo,
-    EncryptionSyncChanges, GossippedSecret,
+    CryptoStoreError, EncryptionSyncChanges, GossippedSecret,
 };
 use serde_json::json;
 use serde_wasm_bindgen;
@@ -33,7 +34,7 @@ use crate::{
     store,
     store::RoomKeyInfo,
     sync_events,
-    types::{self, SignatureVerification},
+    types::{self, RoomKeyImportResult, SignatureVerification},
     verification, vodozemac,
 };
 
@@ -819,12 +820,10 @@ impl OlmMachine {
 
     /// Import the given room keys into our store.
     ///
-    /// `exported_keys` is a list of previously exported keys that should be
-    /// imported into our store. If we already have a better version of a key,
-    /// the key will _not_ be imported.
+    /// Mostly, a deprecated alias for `importExportedRoomKeys`, though the
+    /// return type is different.
     ///
-    /// `progress_listener` is a closure that takes 2 arguments: `progress` and
-    /// `total`, and returns nothing.
+    /// @deprecated Use `importExportedRoomKeys` or `importBackedUpRoomKeys`.
     #[wasm_bindgen(js_name = "importRoomKeys")]
     pub fn import_room_keys(
         &self,
@@ -832,27 +831,125 @@ impl OlmMachine {
         progress_listener: Function,
     ) -> Result<Promise, JsError> {
         let me = self.inner.clone();
-        let exported_room_keys: Vec<matrix_sdk_crypto::olm::ExportedRoomKey> =
-            serde_json::from_str(exported_room_keys)?;
+        let exported_room_keys = serde_json::from_str(exported_room_keys)?;
 
         Ok(future_to_promise(async move {
-            let matrix_sdk_crypto::RoomKeyImportResult { imported_count, total_count, keys } = me
-                .store()
-                .import_exported_room_keys(exported_room_keys, |progress, total| {
-                    let progress: u64 = progress.try_into().unwrap();
-                    let total: u64 = total.try_into().unwrap();
-
-                    progress_listener
-                        .call2(&JsValue::NULL, &JsValue::from(progress), &JsValue::from(total))
-                        .expect("Progress listener passed to `import_room_keys` failed");
-                })
-                .await?;
+            let matrix_sdk_crypto::RoomKeyImportResult { imported_count, total_count, keys } =
+                Self::import_exported_room_keys_helper(&me, exported_room_keys, progress_listener)
+                    .await?;
 
             Ok(serde_json::to_string(&json!({
                 "imported_count": imported_count,
                 "total_count": total_count,
                 "keys": keys,
             }))?)
+        }))
+    }
+
+    /// Import the given room keys into our store.
+    ///
+    /// `exported_keys` is a JSON-encoded list of previously exported keys that
+    /// should be imported into our store. If we already have a better
+    /// version of a key, the key will _not_ be imported.
+    ///
+    /// `progress_listener` is a closure that takes 2 `BigInt` arguments:
+    /// `progress` and `total`, and returns nothing.
+    ///
+    /// Returns a {@link RoomKeyImportResult}.
+    #[wasm_bindgen(js_name = "importExportedRoomKeys")]
+    pub fn import_exported_room_keys(
+        &self,
+        exported_room_keys: &str,
+        progress_listener: Function,
+    ) -> Result<Promise, JsError> {
+        let me = self.inner.clone();
+        let exported_room_keys = serde_json::from_str(exported_room_keys)?;
+
+        Ok(future_to_promise(async move {
+            let result: RoomKeyImportResult =
+                Self::import_exported_room_keys_helper(&me, exported_room_keys, progress_listener)
+                    .await?
+                    .into();
+            Ok(result)
+        }))
+    }
+
+    /// Shared helper for `import_exported_room_keys` and `import_room_keys`.
+    ///
+    /// Wraps the progress listener in a Rust closure and runs
+    /// `Store::import_exported_room_keys`
+    async fn import_exported_room_keys_helper(
+        inner: &matrix_sdk_crypto::OlmMachine,
+        exported_room_keys: Vec<matrix_sdk_crypto::olm::ExportedRoomKey>,
+        progress_listener: Function,
+    ) -> Result<matrix_sdk_crypto::RoomKeyImportResult, CryptoStoreError> {
+        inner
+            .store()
+            .import_exported_room_keys(exported_room_keys, |progress, total| {
+                progress_listener
+                    .call2(&JsValue::NULL, &JsValue::from(progress), &JsValue::from(total))
+                    .expect("Progress listener passed to `importExportedRoomKeys` failed");
+            })
+            .await
+    }
+
+    /// Import the given room keys into our store.
+    ///
+    /// # Arguments
+    ///
+    /// * `backed_up_room_keys`: keys that were retrieved from backup and that
+    ///   should be added to our store (provided they are better than our
+    ///   current versions of those keys). Specifically, it should be a Map from
+    ///   {@link RoomId}, to a Map from session ID to a (decrypted) session data
+    ///   structure.
+    ///
+    /// * `progress_listener`: an optional callback that takes 2 arguments:
+    ///   `progress` and `total`, and returns nothing.
+    ///
+    /// # Returns
+    ///
+    /// A {@link RoomKeyImportResult}.
+    #[wasm_bindgen(js_name = "importBackedUpRoomKeys")]
+    pub fn import_backed_up_room_keys(
+        &self,
+        backed_up_room_keys: &Map,
+        progress_listener: Option<Function>,
+    ) -> Result<Promise, JsValue> {
+        let me = self.inner.clone();
+
+        // convert the js-side data into rust data
+        let mut keys: BTreeMap<_, BTreeMap<_, _>> = BTreeMap::new();
+        for backed_up_room_keys_entry in backed_up_room_keys.entries() {
+            let backed_up_room_keys_entry: Array = backed_up_room_keys_entry?.dyn_into()?;
+            let room_id =
+                &downcast::<identifiers::RoomId>(&backed_up_room_keys_entry.get(0), "RoomId")?
+                    .inner;
+
+            let room_room_keys: Map = backed_up_room_keys_entry.get(1).dyn_into()?;
+
+            for room_room_keys_entry in room_room_keys.entries() {
+                let room_room_keys_entry: Array = room_room_keys_entry?.dyn_into()?;
+                let session_id: JsString = room_room_keys_entry.get(0).dyn_into()?;
+                let key: BackedUpRoomKey =
+                    serde_wasm_bindgen::from_value(room_room_keys_entry.get(1))?;
+
+                keys.entry(room_id.clone()).or_default().insert(session_id.into(), key);
+            }
+        }
+
+        Ok(future_to_promise(async move {
+            let result: RoomKeyImportResult = me
+                .backup_machine()
+                .import_backed_up_room_keys(keys, |progress, total| {
+                    if let Some(callback) = &progress_listener {
+                        callback
+                            .call2(&JsValue::NULL, &JsValue::from(progress), &JsValue::from(total))
+                            .expect("Progress listener passed to `importBackedUpRoomKeys` failed");
+                    }
+                })
+                .await?
+                .into();
+            Ok(result)
         }))
     }
 
