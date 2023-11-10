@@ -21,7 +21,7 @@
 
 # matrix-sdk-crypto-wasm v3.0.0
 
-Do not use this release. It has a [critical bug[(https://github.com/matrix-org/matrix-rust-sdk/issues/2802).
+Do not use this release. It has a [critical bug](https://github.com/matrix-org/matrix-rust-sdk/issues/2802).
 
 # matrix-sdk-crypto-wasm v2.2.0
 
