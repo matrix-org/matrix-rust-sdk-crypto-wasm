@@ -1,4 +1,4 @@
-# unreleased
+# matrix-sdk-crypto-wasm v3.0.1
 
 **BREAKING CHANGES**
 
