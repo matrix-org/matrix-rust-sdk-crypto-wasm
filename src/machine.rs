@@ -823,6 +823,13 @@ impl OlmMachine {
     /// Mostly, a deprecated alias for `importExportedRoomKeys`, though the
     /// return type is different.
     ///
+    /// Returns a String containing a JSON-encoded object, holding three
+    /// properties:
+    ///  * `total_count` (the total number of keys found in the export data).
+    ///  * `imported_count` (the number of keys that were imported).
+    ///  * `keys` (the keys that were imported; a map from room id to a map of
+    ///    the sender key to a list of session ids).
+    ///
     /// @deprecated Use `importExportedRoomKeys` or `importBackedUpRoomKeys`.
     #[wasm_bindgen(js_name = "importRoomKeys")]
     pub fn import_room_keys(

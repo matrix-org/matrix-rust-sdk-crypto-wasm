@@ -265,7 +265,7 @@ impl RoomKeyImportResult {
             key_map.set(&JsString::from(room_id.to_string()), &room_map);
 
             for (sender_key, sessions) in room_result.iter() {
-                let s: Array = sessions.iter().map(String::as_ref).map(JsString::from).collect();
+                let s: Array = sessions.iter().map(|s| JsString::from(s.as_ref())).collect();
                 room_map.set(&JsString::from(sender_key.as_ref()), &Set::new(&s));
             }
         }
