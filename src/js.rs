@@ -13,7 +13,7 @@ where
     let constructor_name = Object::get_prototype_of(value).constructor().name();
 
     if constructor_name == classname {
-        let pointer = Reflect::get(value, &JsValue::from_str("ptr"))
+        let pointer = Reflect::get(value, &JsValue::from_str("__wbg_ptr"))
             .map_err(|_| JsError::new("Failed to read the `JsValue` pointer"))?;
         let pointer = pointer
             .as_f64()
