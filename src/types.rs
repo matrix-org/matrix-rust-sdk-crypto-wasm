@@ -1,6 +1,9 @@
 //! Extra types, like `Signatures`.
 
-use js_sys::{JsString, Map};
+use std::collections::{BTreeMap, BTreeSet};
+
+use js_sys::{Array, JsString, Map, Set};
+use matrix_sdk_common::ruma::OwnedRoomId;
 use matrix_sdk_crypto::backups::{
     SignatureState as InnerSignatureState, SignatureVerification as InnerSignatureVerification,
 };
@@ -225,5 +228,58 @@ impl SignatureVerification {
     #[wasm_bindgen()]
     pub fn trusted(&self) -> bool {
         self.inner.trusted()
+    }
+}
+
+/// The result of a call to {@link OlmMachine.importExportedRoomKeys} or
+/// {@link OlmMachine.importBackedUpRoomKeys}.
+#[derive(Clone, Debug)]
+#[wasm_bindgen]
+pub struct RoomKeyImportResult {
+    /// The number of room keys that were imported.
+    #[wasm_bindgen(readonly, js_name = "importedCount")]
+    pub imported_count: usize,
+
+    /// The total number of room keys that were found in the export.
+    #[wasm_bindgen(readonly, js_name = "totalCount")]
+    pub total_count: usize,
+
+    /// The map of keys that were imported.
+    ///
+    /// A map from room id to a map of the sender key to a set of session ids.
+    keys: BTreeMap<OwnedRoomId, BTreeMap<String, BTreeSet<String>>>,
+}
+
+#[wasm_bindgen]
+impl RoomKeyImportResult {
+    /// The keys that were imported.
+    ///
+    /// A Map from room id to a Map of the sender key to a Set of session ids.
+    ///
+    /// Typescript type: `Map<string, Map<string, Set<string>>`.
+    pub fn keys(&self) -> Map {
+        let key_map = Map::new();
+
+        for (room_id, room_result) in self.keys.iter() {
+            let room_map = Map::new();
+            key_map.set(&JsString::from(room_id.to_string()), &room_map);
+
+            for (sender_key, sessions) in room_result.iter() {
+                let s: Array = sessions.iter().map(|s| JsString::from(s.as_ref())).collect();
+                room_map.set(&JsString::from(sender_key.as_ref()), &Set::new(&s));
+            }
+        }
+
+        key_map
+    }
+}
+
+impl From<matrix_sdk_crypto::RoomKeyImportResult> for RoomKeyImportResult {
+    fn from(value: matrix_sdk_crypto::RoomKeyImportResult) -> Self {
+        RoomKeyImportResult {
+            imported_count: value.imported_count,
+            total_count: value.total_count,
+            keys: value.keys,
+        }
     }
 }
