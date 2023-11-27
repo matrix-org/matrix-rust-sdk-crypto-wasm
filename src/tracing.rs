@@ -3,7 +3,7 @@ use std::{
     sync::{Arc, Mutex, OnceLock},
 };
 
-use matrix_sdk_common::js_tracing::{JsLoggingSubscriber, MakeJsLogWriter};
+use matrix_sdk_common::js_tracing::{make_tracing_subscriber, JsLoggingSubscriber};
 use tracing::Level;
 use tracing_subscriber::{filter::LevelFilter, prelude::*, reload};
 use wasm_bindgen::prelude::*;
@@ -78,13 +78,7 @@ impl Tracing {
         // and stash it in `INSTALL`
         INSTALL
             .get_or_init(|| {
-                let format = tracing_subscriber::fmt::format().without_time().pretty();
-                let subscriber = tracing_subscriber::fmt()
-                    .with_max_level(Level::TRACE)
-                    .with_writer(MakeJsLogWriter::new())
-                    .with_ansi(false)
-                    .event_format(format)
-                    .finish();
+                let subscriber = make_tracing_subscriber(None);
 
                 let (level_filter, level_filter_reload_handle) =
                     reload::Layer::new(LevelFilter::OFF);
