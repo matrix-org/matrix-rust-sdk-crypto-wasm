@@ -1,3 +1,22 @@
+# matrix-sdk-crypto-wasm v3.1.0
+
+-   Improve performance of `OlmMachine.shareRoomKey`.
+    ([matrix-rust-sdk#2862](https://github.com/matrix-org/matrix-rust-sdk/pull/2862))
+
+-   `OlmMachine.getMissingSessions`: Don't block waiting for `/keys/query`
+    requests on blacklisted servers, and improve performance.
+    ([matrix-rust-sdk#2845](https://github.com/matrix-org/matrix-rust-sdk/pull/2845))
+
+-   Various clarifications to the log messages written during encryption operations.
+    ([matrix-rust-sdk#2859](https://github.com/matrix-org/matrix-rust-sdk/pull/2859))
+
+-   `OlmMachine.importRoomKeys` is now deprecated in favour of separate
+    methods for importing room keys from backup and export,
+    `OlmMachine.importBackedUpRoomKeys` and
+    `OlmMachine.importExportedRoomKeys`.
+
+-	Minor improvements to the formatting of messages logged to the console.
+
 # matrix-sdk-crypto-wasm v3.0.1
 
 **BREAKING CHANGES**
@@ -11,11 +30,6 @@
     `UploadSigningKeysRequest` for consistency with the underlying SDK.
 
 ## Other changes
-
--   `OlmMachine.importRoomKeys` is now deprecated in favour of separate
-    methods for importing room keys from backup and export,
-    `OlmMachine.importBackedUpRoomKeys` and
-    `OlmMachine.importExportedRoomKeys`.
 
 -   Devices which have exhausted their one-time-keys will now be correctly
     handled in `/keys/claim` responses (we will register them as "failed" and
