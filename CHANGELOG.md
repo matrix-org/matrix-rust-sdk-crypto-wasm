@@ -15,7 +15,7 @@
     `OlmMachine.importBackedUpRoomKeys` and
     `OlmMachine.importExportedRoomKeys`.
 
--	Minor improvements to the formatting of messages logged to the console.
+-   Minor improvements to the formatting of messages logged to the console.
 
 # matrix-sdk-crypto-wasm v3.0.1
 
