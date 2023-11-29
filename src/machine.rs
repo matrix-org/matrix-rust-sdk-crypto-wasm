@@ -691,11 +691,28 @@ impl OlmMachine {
 
     /// Get a map holding all the devices of a user.
     ///
-    /// `user_id` represents the unique ID of the user that the
-    /// devices belong to.
+    /// ### Parameters
+    ///
+    /// * `user_id` - The unique ID of the user that the device belongs to.
+    ///
+    /// * `timeout_secs` - The amount of time we should wait for a `/keys/query`
+    ///   response before returning if the user's device list has been marked as
+    ///   stale. **Note**, this assumes that the requests from {@link
+    ///   OlmMachine.outgoingRequests} are being processed and sent out.
+    ///
+    ///   If unset, we will return immediately even if the device list is stale.
+    ///
+    /// ### Returns
+    ///
+    /// A {@link UserDevices} object.
     #[wasm_bindgen(js_name = "getUserDevices")]
-    pub fn get_user_devices(&self, user_id: &identifiers::UserId) -> Promise {
+    pub fn get_user_devices(
+        &self,
+        user_id: &identifiers::UserId,
+        timeout_secs: Option<f64>,
+    ) -> Promise {
         let user_id = user_id.inner.clone();
+        let timeout_duration = timeout_secs.map(Duration::from_secs_f64);
 
         let me = self.inner.clone();
 
@@ -703,29 +720,43 @@ impl OlmMachine {
             // wait for up to a second for any in-flight device list requests to complete.
             // The reason for this isn't so much to avoid races (some level of raciness is
             // inevitable for this method) but to make testing easier.
-            Ok(me.get_user_devices(&user_id, Some(Duration::from_secs(1))).await.map(Into::into)?)
+            Ok(me.get_user_devices(&user_id, timeout_duration).await.map(Into::into)?)
         })
     }
 
-    /// Get a specific device of a user if one is found and the crypto store
-    /// didn't throw an error.
+    /// Get a specific device of a user.
     ///
-    /// `user_id` represents the unique ID of the user that the
-    /// identity belongs to. `device_id` represents the unique ID of
-    /// the device.
+    /// ### Parameters
+    ///
+    /// * `user_id` - The unique ID of the user that the device belongs to.
+    ///
+    /// * `device_id` - The unique ID of the device.
+    ///
+    /// * `timeout_secs` - The amount of time we should wait for a `/keys/query`
+    ///   response before returning if the user's device list has been marked as
+    ///   stale. **Note**, this assumes that the requests from {@link
+    ///   OlmMachine.outgoingRequests} are being processed and sent out.
+    ///
+    ///   If unset, we will return immediately even if the device list is stale.
+    ///
+    /// ### Returns
+    ///
+    /// If the device is known, a {@link Device}. Otherwise, `undefined`.
     #[wasm_bindgen(js_name = "getDevice")]
     pub fn get_device(
         &self,
         user_id: &identifiers::UserId,
         device_id: &identifiers::DeviceId,
+        timeout_secs: Option<f64>,
     ) -> Promise {
         let user_id = user_id.inner.clone();
         let device_id = device_id.inner.clone();
+        let timeout_duration = timeout_secs.map(Duration::from_secs_f64);
 
         let me = self.inner.clone();
 
         future_to_promise::<_, Option<device::Device>>(async move {
-            Ok(me.get_device(&user_id, &device_id, None).await?.map(Into::into))
+            Ok(me.get_device(&user_id, &device_id, timeout_duration).await?.map(Into::into))
         })
     }
 
