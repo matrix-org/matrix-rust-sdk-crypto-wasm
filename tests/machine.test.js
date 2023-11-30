@@ -70,7 +70,7 @@ describe(OlmMachine.name, () => {
         expect(databases).toHaveLength(2);
         expect(databases).toStrictEqual([
             { name: `${store_name}::matrix-sdk-crypto-meta`, version: 1 },
-            { name: `${store_name}::matrix-sdk-crypto`, version: 5 },
+            { name: `${store_name}::matrix-sdk-crypto`, version: 7 },
         ]);
 
         // Creating a new Olm machine, with the stored state.
@@ -163,7 +163,7 @@ describe(OlmMachine.name, () => {
         expect(databases).toHaveLength(2);
         expect(databases).toStrictEqual([
             { name: `${store_name}::matrix-sdk-crypto-meta`, version: 1 },
-            { name: `${store_name}::matrix-sdk-crypto`, version: 5 },
+            { name: `${store_name}::matrix-sdk-crypto`, version: 7 },
         ]);
 
         // Let's force to close the `OlmMachine`.

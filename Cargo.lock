@@ -614,9 +614,9 @@ dependencies = [
 
 [[package]]
 name = "hashbrown"
-version = "0.14.2"
+version = "0.14.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "f93e7192158dbcda357bdec5fb5788eebf8bbac027f3f33e719d29135ae84156"
+checksum = "290f1a1d9242c78d09ce40a5e87e7554ee637af1351968159f4952f028f75604"
 
 [[package]]
 name = "hkdf"
@@ -760,9 +760,9 @@ dependencies = [
 
 [[package]]
 name = "konst"
-version = "0.3.6"
+version = "0.3.7"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "030400e39b2dff8beaa55986a17e0014ad657f569ca92426aafcb5e8e71faee7"
+checksum = "29a6ee015a18f4a121ba670f947f801b207139f0f810b3cd266e319065129782"
 dependencies = [
  "const_panic",
  "konst_kernel",
@@ -875,7 +875,7 @@ dependencies = [
 [[package]]
 name = "matrix-sdk-base"
 version = "0.6.1"
-source = "git+https://github.com/matrix-org/matrix-rust-sdk#ceeb5e78b6de782726c50c973a8dbbd46f9b2904"
+source = "git+https://github.com/matrix-org/matrix-rust-sdk#94c4e685fc47ccecb565c755fb9a72bb104ddcaa"
 dependencies = [
  "as_variant",
  "async-trait",
@@ -897,7 +897,7 @@ dependencies = [
 [[package]]
 name = "matrix-sdk-common"
 version = "0.6.0"
-source = "git+https://github.com/matrix-org/matrix-rust-sdk#ceeb5e78b6de782726c50c973a8dbbd46f9b2904"
+source = "git+https://github.com/matrix-org/matrix-rust-sdk#94c4e685fc47ccecb565c755fb9a72bb104ddcaa"
 dependencies = [
  "async-trait",
  "futures-core",
@@ -919,7 +919,7 @@ dependencies = [
 [[package]]
 name = "matrix-sdk-crypto"
 version = "0.6.0"
-source = "git+https://github.com/matrix-org/matrix-rust-sdk#ceeb5e78b6de782726c50c973a8dbbd46f9b2904"
+source = "git+https://github.com/matrix-org/matrix-rust-sdk#94c4e685fc47ccecb565c755fb9a72bb104ddcaa"
 dependencies = [
  "aes",
  "as_variant",
@@ -980,7 +980,7 @@ dependencies = [
 [[package]]
 name = "matrix-sdk-indexeddb"
 version = "0.2.0"
-source = "git+https://github.com/matrix-org/matrix-rust-sdk#ceeb5e78b6de782726c50c973a8dbbd46f9b2904"
+source = "git+https://github.com/matrix-org/matrix-rust-sdk#94c4e685fc47ccecb565c755fb9a72bb104ddcaa"
 dependencies = [
  "anyhow",
  "async-trait",
@@ -1006,7 +1006,7 @@ dependencies = [
 [[package]]
 name = "matrix-sdk-qrcode"
 version = "0.4.0"
-source = "git+https://github.com/matrix-org/matrix-rust-sdk#ceeb5e78b6de782726c50c973a8dbbd46f9b2904"
+source = "git+https://github.com/matrix-org/matrix-rust-sdk#94c4e685fc47ccecb565c755fb9a72bb104ddcaa"
 dependencies = [
  "byteorder",
  "qrcode",
@@ -1018,7 +1018,7 @@ dependencies = [
 [[package]]
 name = "matrix-sdk-store-encryption"
 version = "0.2.0"
-source = "git+https://github.com/matrix-org/matrix-rust-sdk#ceeb5e78b6de782726c50c973a8dbbd46f9b2904"
+source = "git+https://github.com/matrix-org/matrix-rust-sdk#94c4e685fc47ccecb565c755fb9a72bb104ddcaa"
 dependencies = [
  "blake3",
  "chacha20poly1305",
@@ -1223,9 +1223,9 @@ dependencies = [
 
 [[package]]
 name = "proc-macro2"
-version = "1.0.69"
+version = "1.0.70"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "134c189feb4956b20f6f547d2cf727d4c0fe06722b20a0eec87ed445a97f92da"
+checksum = "39278fbbf5fb4f646ce651690877f89d1c5811a3d4acb27700c1cb3cdb78fd3b"
 dependencies = [
  "unicode-ident",
 ]
@@ -1360,9 +1360,9 @@ dependencies = [
 
 [[package]]
 name = "ruma"
-version = "0.9.3"
+version = "0.9.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "278d22d2e51c95da0ac677b868c524a8e5dce634cd22b7b966733c1bd945bb14"
+checksum = "2779c38df072964c63476259d9300efb07d0d1a7178c6469893636ce0c547a36"
 dependencies = [
  "assign",
  "js_int",
@@ -1424,9 +1424,9 @@ dependencies = [
 
 [[package]]
 name = "ruma-events"
-version = "0.27.10"
+version = "0.27.11"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "01e183432a772dfb83b63bd3a29f33766adce45932070a1c4492db9df0b720d5"
+checksum = "d20a52770e5a9fb30b7a1c14ba8b3dcf76dadc01674e58e40094f78e6bd5e3f1"
 dependencies = [
  "as_variant",
  "indexmap",
@@ -1628,9 +1628,9 @@ dependencies = [
 
 [[package]]
 name = "spki"
-version = "0.7.2"
+version = "0.7.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "9d1e996ef02c474957d681f1b05213dfb0abab947b446a62d37770b23500184a"
+checksum = "d91ed6c858b01f942cd56b37a94b3e0a1798290327d1236e4d9cf4eaca44d29d"
 dependencies = [
  "base64ct",
  "der",
