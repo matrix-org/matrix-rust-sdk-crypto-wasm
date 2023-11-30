@@ -1,3 +1,11 @@
+# matrix-sdk-crypto-wasm v3.2.0
+
+-   Add `timeout_secs` parameters to `OlmMachine.get_user_devices` and
+    `OlmMachine.get_device`. ([#60](https://github.com/matrix-org/matrix-rust-sdk-crypto-wasm/pull/60))
+
+-   Improve efficiency of IndexedDB storage of `inbound_group_sessions`.
+    ([matrix-rust-sdk#2885](https://github.com/matrix-org/matrix-rust-sdk/pull/2885))
+
 # matrix-sdk-crypto-wasm v3.1.0
 
 -   Improve performance of `OlmMachine.shareRoomKey`.
