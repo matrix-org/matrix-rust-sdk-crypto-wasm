@@ -1307,9 +1307,10 @@ impl OlmMachine {
         })
     }
 
-    /// Request missing local secrets from our other trusted devices (cross signing private
-    /// keys, megolm backup decryption key). This will ask the sdk to create outgoing
-    /// secret requests (`m.secret.request`) to get the missing secrets.
+    /// Request missing local secrets from our other trusted devices (cross
+    /// signing private keys, megolm backup decryption key). This will ask
+    /// the sdk to create outgoing secret requests (`m.secret.request`) to
+    /// get the missing secrets.
     ///
     /// The requests will be processed as soon as `outgoing_requests()` is
     /// called to process them.
