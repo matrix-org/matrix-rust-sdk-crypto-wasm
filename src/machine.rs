@@ -1307,6 +1307,24 @@ impl OlmMachine {
         })
     }
 
+    /// Request missing local secrets from our other trusted devices (cross signing private
+    /// keys, megolm backup decryption key). This will ask the sdk to create outgoing
+    /// secret requests (`m.secret.request`) to get the missing secrets.
+    ///
+    /// The requests will be processed as soon as `outgoing_requests()` is
+    /// called to process them.
+    ///
+    /// # Returns a `Promise` for `bool` result saying if actual secrets were missing and have been
+    /// requested
+    #[wasm_bindgen(js_name = "requestMissingSecretsIfNeeded")]
+    pub async fn request_missing_secrets_if_needed(&self) -> Promise {
+        let me = self.inner.clone();
+        future_to_promise(async move {
+            let has_missing_secrets = me.query_missing_secrets_from_other_sessions().await?;
+            Ok(JsValue::from_bool(has_missing_secrets))
+        })
+    }
+
     /// Shut down the `OlmMachine`.
     ///
     /// The `OlmMachine` cannot be used after this method has been called.

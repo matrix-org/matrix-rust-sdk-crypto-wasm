@@ -1,3 +1,7 @@
+# matrix-sdk-crypto-wasm UNRELEASED
+
+-   New API `OlmMachine.requestMissingSecretsIfNeeded` that will creates outgoing secret request to other sessions.
+
 # matrix-sdk-crypto-wasm v3.2.0
 
 -   Add `timeout_secs` parameters to `OlmMachine.get_user_devices` and

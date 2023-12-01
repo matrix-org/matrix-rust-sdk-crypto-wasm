@@ -1134,4 +1134,177 @@ describe(OlmMachine.name, () => {
             expect(progressListener).toHaveBeenCalledWith(0, 1);
         });
     });
+
+    describe("Request missing secrets", () => {
+        async function getHypotheticalKeyQuery(new_user, new_device, bootstrapCrossSigning) {
+            let initialMachine = await OlmMachine.initialize(new_user, new_device);
+            const userId = initialMachine.userId.toString();
+            const deviceId = initialMachine.deviceId.toString();
+
+            let deviceKeys;
+            let outgoingRequests = await initialMachine.outgoingRequests();
+            for (const request of outgoingRequests) {
+                if (request instanceof KeysUploadRequest) {
+                    deviceKeys = JSON.parse(request.body);
+                }
+            }
+            delete deviceKeys.one_time_keys;
+            delete deviceKeys.fallback_keys;
+
+            let xsigning;
+
+            if (bootstrapCrossSigning) {
+                let bootstrapRequest = await initialMachine.bootstrapCrossSigning(true);
+
+                xsigning = JSON.parse(bootstrapRequest[0].body);
+                const newSignature = JSON.parse(bootstrapRequest[1].body);
+
+                console.log("Device keys", JSON.stringify(deviceKeys));
+                console.log("Xsigning", JSON.stringify(xsigning));
+                console.log("newSignature", JSON.stringify(newSignature));
+
+                const allSignatures = {
+                    [userId]: {
+                        ...deviceKeys.device_keys.signatures[userId],
+                        ...newSignature[userId][deviceId].signatures[userId],
+                    },
+                };
+
+                deviceKeys.device_keys.signatures = allSignatures;
+            }
+
+            return {
+                device_keys: {
+                    [userId]: {
+                        [deviceId]: deviceKeys,
+                    },
+                },
+                ...xsigning,
+            };
+        }
+
+        async function getSecondMachine(userId, deviceId, hypothetical_response) {
+            const secondMachine = await OlmMachine.initialize(userId, deviceId);
+
+            const toDeviceEvents = JSON.stringify([]);
+            const changedDevices = new DeviceLists();
+            const oneTimeKeyCounts = new Map();
+            const unusedFallbackKeys = new Set();
+
+            await secondMachine.receiveSyncChanges(
+                toDeviceEvents,
+                changedDevices,
+                oneTimeKeyCounts,
+                unusedFallbackKeys,
+            );
+            let outgoingRequests = await secondMachine.outgoingRequests();
+
+            const request = outgoingRequests[1];
+            expect(request).toBeInstanceOf(KeysQueryRequest);
+
+            await secondMachine.markRequestAsSent(
+                request.id,
+                RequestType.KeysQuery,
+                JSON.stringify(hypothetical_response),
+            );
+
+            return secondMachine;
+        }
+
+        test("Should request cross signing request if missing", async () => {
+            const userId = new UserId("@alice:example.org");
+            const firstDevice = new DeviceId("ABCDEF");
+            const hypothetical_response = await getHypotheticalKeyQuery(userId, firstDevice, true);
+
+            const secondDeviceId = new DeviceId("GHIJKL");
+
+            const secondMachine = await getSecondMachine(userId, secondDeviceId, hypothetical_response);
+            const hasMissingSecrets = await secondMachine.requestMissingSecretsIfNeeded();
+
+            expect(hasMissingSecrets).toStrictEqual(true);
+
+            let outgoingRequests = await secondMachine.outgoingRequests();
+
+            let mskRequested = false;
+            let sskRequested = false;
+            let uskRequested = false;
+            for (const request of outgoingRequests) {
+                if (request instanceof ToDeviceRequest) {
+                    const parsed = JSON.parse(request.body);
+                    const message = parsed.messages[userId]["*"];
+                    if (message && message.action === "request") {
+                        if (message.name === "m.cross_signing.master") {
+                            mskRequested = true;
+                        } else if (message.name === "m.cross_signing.self_signing") {
+                            sskRequested = true;
+                        } else if (message.name === "m.cross_signing.user_signing") {
+                            uskRequested = true;
+                        }
+                    }
+                    console.log("ToDeviceRequest", request.body);
+                }
+            }
+
+            expect(mskRequested).toStrictEqual(true);
+            expect(sskRequested).toStrictEqual(true);
+            expect(uskRequested).toStrictEqual(true);
+        });
+
+        test("Should not request if there are request already in flight", async () => {
+            const userId = new UserId("@alice:example.org");
+            const firstDevice = new DeviceId("ABCDEF");
+            const hypothetical_response = await getHypotheticalKeyQuery(userId, firstDevice, true);
+
+            const secondDeviceId = new DeviceId("GHIJKL");
+
+            const secondMachine = await getSecondMachine(userId, secondDeviceId, hypothetical_response);
+
+            const hasMissingSecrets = await secondMachine.requestMissingSecretsIfNeeded();
+            expect(hasMissingSecrets).toStrictEqual(true);
+
+            const hasMissingSecretsSecondTry = await secondMachine.requestMissingSecretsIfNeeded();
+            expect(hasMissingSecretsSecondTry).toStrictEqual(false);
+        });
+
+        test("Should not request cross signing secrets if known", async () => {
+            const userId = new UserId("@alice:example.org");
+            const firstDevice = new DeviceId("ABCDEF");
+
+            let initialMachine = await OlmMachine.initialize(userId, firstDevice);
+            await initialMachine.bootstrapCrossSigning(true);
+            let keyBackupKey = BackupDecryptionKey.createRandomKey();
+
+            await initialMachine.saveBackupDecryptionKey(keyBackupKey, "3");
+
+            const hasMissingSecrets = await initialMachine.requestMissingSecretsIfNeeded();
+
+            expect(hasMissingSecrets).toStrictEqual(false);
+
+            let outgoingRequests = await initialMachine.outgoingRequests();
+
+            let mskRequested = false;
+            let sskRequested = false;
+            let uskRequested = false;
+            for (const request of outgoingRequests) {
+                if (request instanceof ToDeviceRequest) {
+                    const parsed = JSON.parse(request.body);
+                    const message = parsed.messages[userId]["*"];
+                    if (message && message.action === "request") {
+                        if (message.name === "m.cross_signing.master") {
+                            mskRequested = true;
+                        } else if (message.name === "m.cross_signing.self_signing") {
+                            sskRequested = true;
+                        } else if (message.name === "m.cross_signing.user_signing") {
+                            uskRequested = true;
+                        }
+                    }
+                    console.log("ToDeviceRequest", request.body);
+                }
+            }
+
+            expect(mskRequested).toStrictEqual(false);
+            expect(sskRequested).toStrictEqual(false);
+            expect(uskRequested).toStrictEqual(false);
+        });
+    });
 });
