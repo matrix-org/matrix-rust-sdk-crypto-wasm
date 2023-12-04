@@ -203,16 +203,16 @@ describe(OlmMachine.name, () => {
 
     test("can toggle room key requests", async () => {
         const m = await machine();
-        expect(m.roomKeyRequestsEnabled).toBeTruthy();
+        expect(m.roomKeyRequestsEnabled).toBe(true);
         m.roomKeyRequestsEnabled = false;
-        expect(m.roomKeyRequestsEnabled).toBeFalsy();
+        expect(m.roomKeyRequestsEnabled).toBe(false);
     });
 
     test("can toggle room key forwarding", async () => {
         const m = await machine();
-        expect(m.roomKeyForwardingEnabled).toBeTruthy();
+        expect(m.roomKeyForwardingEnabled).toBe(true);
         m.roomKeyForwardingEnabled = false;
-        expect(m.roomKeyForwardingEnabled).toBeFalsy();
+        expect(m.roomKeyForwardingEnabled).toBe(false);
     });
 
     test("can read tracked users", async () => {
