@@ -172,6 +172,38 @@ impl OlmMachine {
         future_to_promise(async move { Ok(me.display_name().await?) })
     }
 
+    /// Whether automatic transmission of room key requests is enabled.
+    ///
+    /// Room key requests allow the device to request room keys that it might
+    /// have missed in the original share using `m.room_key_request`
+    /// events.
+    #[wasm_bindgen(getter, js_name = "roomKeyRequestsEnabled")]
+    pub fn are_room_key_requests_enabled(&self) -> bool {
+        self.inner.are_room_key_requests_enabled()
+    }
+
+    /// Enable or disable automatic transmission of room key requests.
+    #[wasm_bindgen(setter, js_name = "roomKeyRequestsEnabled")]
+    pub fn set_room_key_requests_enabled(&self, enabled: bool) {
+        self.inner.set_room_key_requests_enabled(enabled)
+    }
+
+    /// Whether room key forwarding is enabled.
+    ///
+    /// If room key forwarding is enabled, we will automatically reply to
+    /// incoming `m.room_key_request` messages from verified devices by
+    /// forwarding the requested key (if we have it).
+    #[wasm_bindgen(getter, js_name = "roomKeyForwardingEnabled")]
+    pub fn is_room_key_forwarding_enabled(&self) -> bool {
+        self.inner.is_room_key_forwarding_enabled()
+    }
+
+    /// Enable or disable room key forwarding.
+    #[wasm_bindgen(setter, js_name = "roomKeyForwardingEnabled")]
+    pub fn set_room_key_forwarding_enabled(&self, enabled: bool) {
+        self.inner.set_room_key_forwarding_enabled(enabled)
+    }
+
     /// Get the list of users whose devices we are currently tracking.
     ///
     /// A user can be marked for tracking using the

@@ -201,6 +201,20 @@ describe(OlmMachine.name, () => {
         expect(await machine().displayName).toBeUndefined();
     });
 
+    test("can toggle room key requests", async () => {
+        const m = await machine();
+        expect(m.roomKeyRequestsEnabled).toBe(true);
+        m.roomKeyRequestsEnabled = false;
+        expect(m.roomKeyRequestsEnabled).toBe(false);
+    });
+
+    test("can toggle room key forwarding", async () => {
+        const m = await machine();
+        expect(m.roomKeyForwardingEnabled).toBe(true);
+        m.roomKeyForwardingEnabled = false;
+        expect(m.roomKeyForwardingEnabled).toBe(false);
+    });
+
     test("can read tracked users", async () => {
         const m = await machine();
         const trackedUsers = await m.trackedUsers();
