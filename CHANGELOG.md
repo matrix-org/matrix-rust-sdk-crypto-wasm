@@ -1,4 +1,4 @@
-# UNRELEASED
+# matrix-sdk-crypto-wasm v3.3.0
 
 -   Add new properties `roomKeyRequestsEnabled` and `roomKeyForwardingEnabled`
     to OlmMachine.
