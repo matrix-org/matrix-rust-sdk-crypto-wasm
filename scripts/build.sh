@@ -16,7 +16,7 @@ set -e
 
 cd $(dirname "$0")/..
 
-RUSTFLAGS='-C opt-level=z' WASM_BINDGEN_WEAKREF=1 wasm-pack build --target nodejs --scope matrix-org --out-dir pkg "${WASM_PACK_ARGS[@]}"
+wasm-pack build --target nodejs --scope matrix-org --out-dir pkg --weak-refs "${WASM_PACK_ARGS[@]}"
 
 # Convert the Wasm into a JS file that exports the base64'ed Wasm.
 {
