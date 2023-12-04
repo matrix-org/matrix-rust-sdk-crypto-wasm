@@ -184,8 +184,8 @@ impl OlmMachine {
 
     /// Enable or disable automatic transmission of room key requests.
     #[wasm_bindgen(setter, js_name = "roomKeyRequestsEnabled")]
-    pub fn toggle_room_key_requests(&self, enabled: bool) {
-        self.inner.toggle_room_key_requests(enabled)
+    pub fn set_room_key_requests_enabled(&self, enabled: bool) {
+        self.inner.set_room_key_requests_enabled(enabled)
     }
 
     /// Whether room key forwarding is enabled.
@@ -200,8 +200,8 @@ impl OlmMachine {
 
     /// Enable or disable room key forwarding.
     #[wasm_bindgen(setter, js_name = "roomKeyForwardingEnabled")]
-    pub fn toggle_room_key_forwarding(&self, enabled: bool) {
-        self.inner.toggle_room_key_forwarding(enabled)
+    pub fn set_room_key_forwarding_enabled(&self, enabled: bool) {
+        self.inner.set_room_key_forwarding_enabled(enabled)
     }
 
     /// Get the list of users whose devices we are currently tracking.
