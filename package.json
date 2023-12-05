@@ -45,7 +45,9 @@
         "node": ">= 10"
     },
     "scripts": {
-        "lint": "prettier --check .",
+        "lint": "npm run lint:prettier && npm run lint:types",
+        "lint:prettier": "prettier --check .",
+        "lint:types": "tsc --noEmit",
         "build": "WASM_PACK_ARGS=--release ./scripts/build.sh",
         "build:dev": "WASM_PACK_ARGS=--dev ./scripts/build.sh",
         "test": "jest --verbose",
