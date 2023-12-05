@@ -1,4 +1,4 @@
-const {
+import {
     CrossSigningStatus,
     DecryptedRoomEvent,
     DeviceId,
@@ -21,17 +21,25 @@ const {
     UserId,
     UserIdentity,
     VerificationRequest,
-    VerificationState,
     Versions,
     getVersions,
     SignatureState,
     BackupDecryptionKey,
     MegolmDecryptionError,
     DecryptionErrorCode,
-} = require("../pkg/matrix_sdk_crypto_wasm");
-const { addMachineToMachine } = require("./helper");
-require("fake-indexeddb/auto");
-const RustSdkCryptoJs = require("../pkg");
+    KeysClaimRequest,
+    KeysBackupRequest,
+} from "../pkg/matrix_sdk_crypto_wasm";
+import "fake-indexeddb/auto";
+
+type AnyOutgoingRequest =
+    | KeysUploadRequest
+    | KeysQueryRequest
+    | KeysClaimRequest
+    | ToDeviceRequest
+    | SignatureUploadRequest
+    | RoomMessageRequest
+    | KeysBackupRequest;
 
 describe("Versions", () => {
     test("can find out the crate versions", async () => {
@@ -54,7 +62,7 @@ describe(OlmMachine.name, () => {
         let store_name = "hello";
         let store_passphrase = "world";
 
-        const by_store_name = (db) => db.name.startsWith(store_name);
+        const by_store_name = (db: IDBDatabaseInfo) => db.name?.startsWith(store_name);
 
         // No databases.
         expect((await indexedDB.databases()).filter(by_store_name)).toHaveLength(0);
@@ -84,7 +92,6 @@ describe(OlmMachine.name, () => {
 
     describe("cannot be instantiated with a store", () => {
         test("store name is missing", async () => {
-            let store_name = null;
             let store_passphrase = "world";
 
             let err = null;
@@ -93,7 +100,7 @@ describe(OlmMachine.name, () => {
                 await OlmMachine.initialize(
                     new UserId("@foo:bar.org"),
                     new DeviceId("baz"),
-                    store_name,
+                    undefined,
                     store_passphrase,
                 );
             } catch (error) {
@@ -105,17 +112,11 @@ describe(OlmMachine.name, () => {
 
         test("store passphrase is missing", async () => {
             let store_name = "hello";
-            let store_passphrase = null;
 
             let err = null;
 
             try {
-                await OlmMachine.initialize(
-                    new UserId("@foo:bar.org"),
-                    new DeviceId("baz"),
-                    store_name,
-                    store_passphrase,
-                );
+                await OlmMachine.initialize(new UserId("@foo:bar.org"), new DeviceId("baz"), store_name, undefined);
             } catch (error) {
                 err = error;
             }
@@ -128,7 +129,7 @@ describe(OlmMachine.name, () => {
     const device = new DeviceId("foobar");
     const room = new RoomId("!baz:matrix.org");
 
-    function machine(new_user, new_device) {
+    function machine(new_user?: UserId, new_device?: DeviceId): Promise<OlmMachine> {
         // Uncomment to enable debug logging for tests
         // new RustSdkCryptoJs.Tracing(RustSdkCryptoJs.LoggerLevel.Trace).turnOn();
         return OlmMachine.initialize(new_user || user, new_device || device);
@@ -143,7 +144,7 @@ describe(OlmMachine.name, () => {
         let store_name = "temporary";
         let store_passphrase = "temporary";
 
-        const by_store_name = (db) => db.name.startsWith(store_name);
+        const by_store_name = (db: IDBDatabaseInfo) => db.name?.startsWith(store_name);
 
         // No databases.
         expect((await indexedDB.databases()).filter(by_store_name)).toHaveLength(0);
@@ -306,8 +307,8 @@ describe(OlmMachine.name, () => {
     });
 
     describe("setup workflow to mark requests as sent", () => {
-        let m;
-        let outgoingRequests;
+        let m: OlmMachine;
+        let outgoingRequests: Array<AnyOutgoingRequest>;
 
         beforeAll(async () => {
             m = await machine(new UserId("@alice:example.org"), new DeviceId("DEVICEID"));
@@ -340,7 +341,7 @@ describe(OlmMachine.name, () => {
                         signed_curve25519: 20,
                     },
                 });
-                const marked = await m.markRequestAsSent(request.id, request.type, hypothetical_response);
+                const marked = await m.markRequestAsSent(request.id!, request.type, hypothetical_response);
                 expect(marked).toStrictEqual(true);
             }
 
@@ -374,14 +375,14 @@ describe(OlmMachine.name, () => {
                     },
                     failures: {},
                 });
-                const marked = await m.markRequestAsSent(request.id, request.type, hypothetical_response);
+                const marked = await m.markRequestAsSent(request.id!, request.type, hypothetical_response);
                 expect(marked).toStrictEqual(true);
             }
         });
     });
 
     describe("setup workflow to encrypt/decrypt events", () => {
-        let m;
+        let m: OlmMachine;
         const user = new UserId("@alice:example.org");
         const device = new DeviceId("JLAFKJWSCS");
         const room = new RoomId("!test:localhost");
@@ -513,7 +514,7 @@ describe(OlmMachine.name, () => {
             expect(requestsAfterMarkedAsSent).toHaveLength(0);
         });
 
-        let encrypted;
+        let encrypted: Record<string, any>;
 
         test("can encrypt an event", async () => {
             encrypted = JSON.parse(
@@ -588,7 +589,7 @@ describe(OlmMachine.name, () => {
             fail("it should not reach here");
         } catch (err) {
             expect(err).toBeInstanceOf(MegolmDecryptionError);
-            expect(err.code).toStrictEqual(DecryptionErrorCode.UnableToDecrypt);
+            expect((err as MegolmDecryptionError).code).toStrictEqual(DecryptionErrorCode.UnableToDecrypt);
         }
     });
 
@@ -705,7 +706,7 @@ describe(OlmMachine.name, () => {
         let m = await machine();
         await m.shareRoomKey(room, [new UserId("@bob:example.org")], new EncryptionSettings());
 
-        let exportedRoomKeys = await m.exportRoomKeys((session) => {
+        let exportedRoomKeys = await m.exportRoomKeys((session: InboundGroupSession) => {
             expect(session).toBeInstanceOf(InboundGroupSession);
             expect(session.senderKey.toBase64()).toEqual(m.identityKeys.curve25519.toBase64());
             expect(session.roomId.toString()).toStrictEqual(room.toString());
@@ -731,13 +732,13 @@ describe(OlmMachine.name, () => {
     });
 
     describe("can process exported room keys", () => {
-        let exportedRoomKeys;
+        let exportedRoomKeys: string;
 
         beforeEach(async () => {
             let m = await machine();
             await m.shareRoomKey(room, [new UserId("@bob:example.org")], new EncryptionSettings());
 
-            exportedRoomKeys = await m.exportRoomKeys((_session) => true);
+            exportedRoomKeys = await m.exportRoomKeys(() => true);
         });
 
         test("can encrypt and decrypt the exported room keys", () => {
@@ -759,7 +760,7 @@ describe(OlmMachine.name, () => {
         });
 
         test("can import room keys via importRoomKeys", async () => {
-            const progressListener = (progress, total) => {
+            const progressListener = (progress: bigint, total: bigint) => {
                 expect(progress).toBeLessThan(total);
 
                 // Since it's called only once, let's be crazy.
@@ -778,7 +779,7 @@ describe(OlmMachine.name, () => {
         });
 
         test("can import room keys via importExportedRoomKeys", async () => {
-            const progressListener = (progress, total) => {
+            const progressListener = (progress: bigint, total: bigint) => {
                 expect(progress).toStrictEqual(0);
                 expect(total).toStrictEqual(1);
             };
@@ -798,7 +799,7 @@ describe(OlmMachine.name, () => {
             callback.mockImplementation(() => Promise.resolve(undefined));
             let m = await machine();
             m.registerRoomKeyUpdatedCallback(callback);
-            await m.importRoomKeys(exportedRoomKeys, (_, _1) => undefined);
+            await m.importRoomKeys(exportedRoomKeys, () => undefined);
             expect(callback).toHaveBeenCalledTimes(1);
             let keyInfoList = callback.mock.calls[0][0];
             expect(keyInfoList.length).toEqual(1);
@@ -807,7 +808,7 @@ describe(OlmMachine.name, () => {
     });
 
     describe("can do in-room verification", () => {
-        let m;
+        let m: OlmMachine;
         const user = new UserId("@alice:example.org");
         const device = new DeviceId("JLAFKJWSCS");
         const room = new RoomId("!test:localhost");
@@ -1075,6 +1076,7 @@ describe(OlmMachine.name, () => {
             let exportedKey = JSON.parse(outgoing.body);
 
             let sessions = exportedKey.rooms["!baz:matrix.org"].sessions;
+            // @ts-ignore
             let session_data = Object.values(sessions)[0].session_data;
 
             // should decrypt with the created key
@@ -1114,7 +1116,9 @@ describe(OlmMachine.name, () => {
             await m.enableBackupV1(keyBackupKey.megolmV1PublicKey.publicKeyBase64, "1");
             const outgoing = await m.backupRoomKeys();
             expect(outgoing.type).toStrictEqual(RequestType.KeysBackup);
-            const exportedKeys = JSON.parse(outgoing.body);
+            const exportedKeys = JSON.parse(outgoing.body) as {
+                rooms: Record<string, { sessions: Record<string, any> }>;
+            };
 
             // decrypt the backup
             const decryptedKeyMap = new Map();
