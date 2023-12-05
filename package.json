@@ -27,6 +27,11 @@
         "pkg/matrix_sdk_crypto_wasm.d.ts"
     ],
     "devDependencies": {
+        "@babel/core": "^7.23.5",
+        "@babel/preset-env": "^7.23.5",
+        "@babel/preset-typescript": "^7.23.3",
+        "@types/jest": "^29.5.10",
+        "babel-jest": "^29.7.0",
         "cross-env": "^7.0.3",
         "fake-indexeddb": "^4.0",
         "jest": "^28.1.0",
