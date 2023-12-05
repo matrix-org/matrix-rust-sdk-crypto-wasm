@@ -1,4 +1,4 @@
-# UNRELEASED
+# matrix-sdk-crypto-wasm v3.4.0
 
 -   Include Rust symbol names in the generated wasm output.
     ([#65](https://github.com/matrix-org/matrix-rust-sdk-crypto-wasm/pull/65))
