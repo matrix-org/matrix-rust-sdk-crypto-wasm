@@ -1,3 +1,8 @@
+# UNRELEASED
+
+-   Include Rust symbol names in the generated wasm output.
+    ([#65](https://github.com/matrix-org/matrix-rust-sdk-crypto-wasm/pull/65))
+
 # matrix-sdk-crypto-wasm v3.3.0
 
 -   Add new properties `roomKeyRequestsEnabled` and `roomKeyForwardingEnabled`
