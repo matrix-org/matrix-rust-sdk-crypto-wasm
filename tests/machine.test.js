@@ -135,7 +135,7 @@ describe(OlmMachine.name, () => {
     }
 
     test("can drop/close", async () => {
-        m = await machine();
+        const m = await machine();
         m.close();
     });
 
