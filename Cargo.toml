@@ -42,9 +42,6 @@ wasm-opt = ['-Oz', '-g']
 ################################################################################
 
 [profile.release]
-# Tell cargo to run `rustc` with `-C debuginfo=2` - ie, to include debug symbols.
-# https://doc.rust-lang.org/cargo/reference/profiles.html#debug
-debug = true
 # Tell cargo to run `rustc` with `-Oz` - ie, to optimize for size.
 # https://doc.rust-lang.org/cargo/reference/profiles.html#opt-level
 opt-level = 'z'
