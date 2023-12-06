@@ -1155,7 +1155,7 @@ describe(OlmMachine.name, () => {
          * Creates an hypothetical response to a key query request for an account with a pre-existing device and identity.
          *
          * To be used in test when you want to create a setup where there is an existing device
-         * on the account. It is also possible to bootstrap cross signing on the account.
+         * on the account with cross-signing setup.
          *
          * This will create a valid response to a key query request with all needed signatures.
          *
