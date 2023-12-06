@@ -2,6 +2,18 @@
 
 -   New API `OlmMachine.requestMissingSecretsIfNeeded` that will creates outgoing secret request to other sessions.
 
+# matrix-sdk-crypto-wasm v3.4.0
+
+-   Include Rust symbol names in the generated wasm output.
+    ([#65](https://github.com/matrix-org/matrix-rust-sdk-crypto-wasm/pull/65))
+
+# matrix-sdk-crypto-wasm v3.3.0
+
+-   Add new properties `roomKeyRequestsEnabled` and `roomKeyForwardingEnabled`
+    to OlmMachine.
+    ([#60](https://github.com/matrix-org/matrix-rust-sdk-crypto-wasm/pull/60),
+    ([matrix-rust-sdk#2902](https://github.com/matrix-org/matrix-rust-sdk/pull/2902))
+
 # matrix-sdk-crypto-wasm v3.2.0
 
 -   Add `timeout_secs` parameters to `OlmMachine.get_user_devices` and
