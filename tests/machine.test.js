@@ -1281,7 +1281,7 @@ describe(OlmMachine.name, () => {
             expect(uskRequested).toStrictEqual(true);
         });
 
-        test("Should not request if there are request already in flight", async () => {
+        test("Should not request if there are requests already in flight", async () => {
             const userId = new UserId("@alice:example.org");
             const firstDevice = new DeviceId("ABCDEF");
             const hypothetical_response = await getKeyQueryResponseWithExistingDevice(userId, firstDevice);
