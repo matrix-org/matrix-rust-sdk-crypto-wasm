@@ -1181,7 +1181,7 @@ describe(OlmMachine.name, () => {
 
             let bootstrapRequest = await initialMachine.bootstrapCrossSigning(true);
 
-            const xsigning = JSON.parse(bootstrapRequest.uploadSigningKeysRequest.body);
+            const crossSigning = JSON.parse(bootstrapRequest.uploadSigningKeysRequest.body);
             const newSignature = JSON.parse(bootstrapRequest.uploadSignaturesRequest.body);
 
             const allSignatures = {
@@ -1199,7 +1199,7 @@ describe(OlmMachine.name, () => {
                         [deviceId]: deviceKeys,
                     },
                 },
-                ...xsigning,
+                ...crossSigning,
             };
         }
 
