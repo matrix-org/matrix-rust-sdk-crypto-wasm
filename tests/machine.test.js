@@ -1181,8 +1181,8 @@ describe(OlmMachine.name, () => {
 
             let bootstrapRequest = await initialMachine.bootstrapCrossSigning(true);
 
-            const xsigning = JSON.parse(bootstrapRequest[0].body);
-            const newSignature = JSON.parse(bootstrapRequest[1].body);
+            const xsigning = JSON.parse(bootstrapRequest.uploadSigningKeysRequest.body);
+            const newSignature = JSON.parse(bootstrapRequest.uploadSignaturesRequest.body);
 
             const allSignatures = {
                 [userId]: {
