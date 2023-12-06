@@ -1347,12 +1347,13 @@ impl OlmMachine {
     ///
     /// This method will cause the sdk to generated outgoing secret requests
     /// (`m.secret.request`) to get the missing secrets. These requests will
-    /// then be returned by a future call to {@link OlmMachine#outgoing_requests}.
+    /// then be returned by a future call to {@link
+    /// OlmMachine#outgoing_requests}.
     ///
-    /// # Returns 
+    /// # Returns
     ///
-    /// A `Promise` for a `bool` result, which will be true if  secrets were missing,
-    /// and a request was generated.
+    /// A `Promise` for a `bool` result, which will be true if  secrets were
+    /// missing, and a request was generated.
     #[wasm_bindgen(js_name = "requestMissingSecretsIfNeeded")]
     pub async fn request_missing_secrets_if_needed(&self) -> Promise {
         let me = self.inner.clone();
