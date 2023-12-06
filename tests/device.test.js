@@ -55,8 +55,8 @@ describe(OlmMachine.name, () => {
     const device = new DeviceId("foobar");
     const room = new RoomId("!baz:matrix.org");
 
-    function machine(new_user, new_device) {
-        return OlmMachine.initialize(new_user || user, new_device || device);
+    function machine(newUser, newDevice) {
+        return OlmMachine.initialize(newUser || user, newDevice || device);
     }
 
     test("can read user devices", async () => {
@@ -66,14 +66,14 @@ describe(OlmMachine.name, () => {
         expect(userDevices).toBeInstanceOf(UserDevices);
         expect(userDevices.get(device)).toBeInstanceOf(Device);
         expect(userDevices.isAnyVerified()).toStrictEqual(false);
-        expect(userDevices.keys().map((device_id) => device_id.toString())).toStrictEqual([device.toString()]);
+        expect(userDevices.keys().map((deviceId) => deviceId.toString())).toStrictEqual([device.toString()]);
         expect(userDevices.devices().map((device) => device.deviceId.toString())).toStrictEqual([device.toString()]);
     });
 
     test("can read a user device", async () => {
         const m = await machine();
 
-        const hypothetical_response = JSON.stringify({
+        const hypotheticalResponse = JSON.stringify({
             device_keys: {
                 "@alice:example.org": {
                     JLAFKJWSCS: {
@@ -99,7 +99,7 @@ describe(OlmMachine.name, () => {
             failures: {},
         });
         // Insert another device into the store
-        await m.markRequestAsSent("ID", RequestType.KeysQuery, hypothetical_response);
+        await m.markRequestAsSent("ID", RequestType.KeysQuery, hypotheticalResponse);
 
         const secondDeviceId = new DeviceId("JLAFKJWSCS");
         const dev = await m.getDevice(user, secondDeviceId);
@@ -153,8 +153,8 @@ describe("Key Verification", () => {
     const userId2 = new UserId("@bob:example.org");
     const deviceId2 = new DeviceId("bob_device");
 
-    function machine(new_user, new_device) {
-        return OlmMachine.initialize(new_user || userId1, new_device || deviceId1);
+    function machine(newUser, newDevice) {
+        return OlmMachine.initialize(newUser || userId1, newDevice || deviceId1);
     }
 
     it("SAS", async () => {

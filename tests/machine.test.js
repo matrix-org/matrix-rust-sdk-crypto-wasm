@@ -51,41 +51,41 @@ describe(OlmMachine.name, () => {
     });
 
     test("can be instantiated with a store", async () => {
-        let store_name = "hello";
-        let store_passphrase = "world";
+        let storeName = "hello";
+        let storePassphrase = "world";
 
-        const by_store_name = (db) => db.name.startsWith(store_name);
+        const byStoreName = (db) => db.name.startsWith(storeName);
 
         // No databases.
-        expect((await indexedDB.databases()).filter(by_store_name)).toHaveLength(0);
+        expect((await indexedDB.databases()).filter(byStoreName)).toHaveLength(0);
 
         // Creating a new Olm machine.
         expect(
-            await OlmMachine.initialize(new UserId("@foo:bar.org"), new DeviceId("baz"), store_name, store_passphrase),
+            await OlmMachine.initialize(new UserId("@foo:bar.org"), new DeviceId("baz"), storeName, storePassphrase),
         ).toBeInstanceOf(OlmMachine);
 
-        // Oh, there is 2 databases now, prefixed by `store_name`.
-        let databases = (await indexedDB.databases()).filter(by_store_name);
+        // Oh, there is 2 databases now, prefixed by `storeName`.
+        let databases = (await indexedDB.databases()).filter(byStoreName);
 
         expect(databases).toHaveLength(2);
         expect(databases).toStrictEqual([
-            { name: `${store_name}::matrix-sdk-crypto-meta`, version: 1 },
-            { name: `${store_name}::matrix-sdk-crypto`, version: 7 },
+            { name: `${storeName}::matrix-sdk-crypto-meta`, version: 1 },
+            { name: `${storeName}::matrix-sdk-crypto`, version: 7 },
         ]);
 
         // Creating a new Olm machine, with the stored state.
         expect(
-            await OlmMachine.initialize(new UserId("@foo:bar.org"), new DeviceId("baz"), store_name, store_passphrase),
+            await OlmMachine.initialize(new UserId("@foo:bar.org"), new DeviceId("baz"), storeName, storePassphrase),
         ).toBeInstanceOf(OlmMachine);
 
         // Same number of databases.
-        expect((await indexedDB.databases()).filter(by_store_name)).toHaveLength(2);
+        expect((await indexedDB.databases()).filter(byStoreName)).toHaveLength(2);
     });
 
     describe("cannot be instantiated with a store", () => {
         test("store name is missing", async () => {
-            let store_name = null;
-            let store_passphrase = "world";
+            let storeName = null;
+            let storePassphrase = "world";
 
             let err = null;
 
@@ -93,8 +93,8 @@ describe(OlmMachine.name, () => {
                 await OlmMachine.initialize(
                     new UserId("@foo:bar.org"),
                     new DeviceId("baz"),
-                    store_name,
-                    store_passphrase,
+                    storeName,
+                    storePassphrase,
                 );
             } catch (error) {
                 err = error;
@@ -104,8 +104,8 @@ describe(OlmMachine.name, () => {
         });
 
         test("store passphrase is missing", async () => {
-            let store_name = "hello";
-            let store_passphrase = null;
+            let storeName = "hello";
+            let storePassphrase = null;
 
             let err = null;
 
@@ -113,8 +113,8 @@ describe(OlmMachine.name, () => {
                 await OlmMachine.initialize(
                     new UserId("@foo:bar.org"),
                     new DeviceId("baz"),
-                    store_name,
-                    store_passphrase,
+                    storeName,
+                    storePassphrase,
                 );
             } catch (error) {
                 err = error;
@@ -128,10 +128,10 @@ describe(OlmMachine.name, () => {
     const device = new DeviceId("foobar");
     const room = new RoomId("!baz:matrix.org");
 
-    function machine(new_user, new_device) {
+    function machine(newUser, newDevice) {
         // Uncomment to enable debug logging for tests
         // new RustSdkCryptoJs.Tracing(RustSdkCryptoJs.LoggerLevel.Trace).turnOn();
-        return OlmMachine.initialize(new_user || user, new_device || device);
+        return OlmMachine.initialize(newUser || user, newDevice || device);
     }
 
     test("can drop/close", async () => {
@@ -140,38 +140,38 @@ describe(OlmMachine.name, () => {
     });
 
     test("can drop/close with a store", async () => {
-        let store_name = "temporary";
-        let store_passphrase = "temporary";
+        let storeName = "temporary";
+        let storePassphrase = "temporary";
 
-        const by_store_name = (db) => db.name.startsWith(store_name);
+        const byStoreName = (db) => db.name.startsWith(storeName);
 
         // No databases.
-        expect((await indexedDB.databases()).filter(by_store_name)).toHaveLength(0);
+        expect((await indexedDB.databases()).filter(byStoreName)).toHaveLength(0);
 
         // Creating a new Olm machine.
         const m = await OlmMachine.initialize(
             new UserId("@foo:bar.org"),
             new DeviceId("baz"),
-            store_name,
-            store_passphrase,
+            storeName,
+            storePassphrase,
         );
         expect(m).toBeInstanceOf(OlmMachine);
 
-        // Oh, there is 2 databases now, prefixed by `store_name`.
-        let databases = (await indexedDB.databases()).filter(by_store_name);
+        // Oh, there is 2 databases now, prefixed by `storeName`.
+        let databases = (await indexedDB.databases()).filter(byStoreName);
 
         expect(databases).toHaveLength(2);
         expect(databases).toStrictEqual([
-            { name: `${store_name}::matrix-sdk-crypto-meta`, version: 1 },
-            { name: `${store_name}::matrix-sdk-crypto`, version: 7 },
+            { name: `${storeName}::matrix-sdk-crypto-meta`, version: 1 },
+            { name: `${storeName}::matrix-sdk-crypto`, version: 7 },
         ]);
 
         // Let's force to close the `OlmMachine`.
         m.close();
 
         // Now we can delete the databases!
-        for (const database_name of [`${store_name}::matrix-sdk-crypto`, `${store_name}::matrix-sdk-crypto-meta`]) {
-            const deleting = indexedDB.deleteDatabase(database_name);
+        for (const databaseName of [`${storeName}::matrix-sdk-crypto`, `${storeName}::matrix-sdk-crypto-meta`]) {
+            const deleting = indexedDB.deleteDatabase(databaseName);
             deleting.onsuccess = () => {};
             deleting.onerror = () => {
                 throw new Error("failed to remove the database (error)");
@@ -333,13 +333,13 @@ describe(OlmMachine.name, () => {
                 expect(request).toBeInstanceOf(KeysUploadRequest);
 
                 // https://spec.matrix.org/v1.2/client-server-api/#post_matrixclientv3keysupload
-                const hypothetical_response = JSON.stringify({
+                const hypotheticalResponse = JSON.stringify({
                     one_time_key_counts: {
                         curve25519: 10,
                         signed_curve25519: 20,
                     },
                 });
-                const marked = await m.markRequestAsSent(request.id, request.type, hypothetical_response);
+                const marked = await m.markRequestAsSent(request.id, request.type, hypotheticalResponse);
                 expect(marked).toStrictEqual(true);
             }
 
@@ -348,7 +348,7 @@ describe(OlmMachine.name, () => {
                 expect(request).toBeInstanceOf(KeysQueryRequest);
 
                 // https://spec.matrix.org/v1.2/client-server-api/#post_matrixclientv3keysquery
-                const hypothetical_response = JSON.stringify({
+                const hypotheticalResponse = JSON.stringify({
                     device_keys: {
                         "@alice:example.org": {
                             JLAFKJWSCS: {
@@ -373,7 +373,7 @@ describe(OlmMachine.name, () => {
                     },
                     failures: {},
                 });
-                const marked = await m.markRequestAsSent(request.id, request.type, hypothetical_response);
+                const marked = await m.markRequestAsSent(request.id, request.type, hypotheticalResponse);
                 expect(marked).toStrictEqual(true);
             }
         });
@@ -392,7 +392,7 @@ describe(OlmMachine.name, () => {
         test("can pass keysquery and keysclaim requests directly", async () => {
             {
                 // derived from https://github.com/matrix-org/matrix-rust-sdk/blob/7f49618d350fab66b7e1dc4eaf64ec25ceafd658/benchmarks/benches/crypto_bench/keys_query.json
-                const hypothetical_response = JSON.stringify({
+                const hypotheticalResponse = JSON.stringify({
                     device_keys: {
                         "@example:localhost": {
                             AFGUOBTZWM: {
@@ -465,12 +465,12 @@ describe(OlmMachine.name, () => {
                         },
                     },
                 });
-                const marked = await m.markRequestAsSent("foo", RequestType.KeysQuery, hypothetical_response);
+                const marked = await m.markRequestAsSent("foo", RequestType.KeysQuery, hypotheticalResponse);
             }
 
             {
                 // derived from https://github.com/matrix-org/matrix-rust-sdk/blob/7f49618d350fab66b7e1dc4eaf64ec25ceafd658/benchmarks/benches/crypto_bench/keys_claim.json
-                const hypothetical_response = JSON.stringify({
+                const hypotheticalResponse = JSON.stringify({
                     one_time_keys: {
                         "@example:localhost": {
                             AFGUOBTZWM: {
@@ -488,14 +488,14 @@ describe(OlmMachine.name, () => {
                     },
                     failures: {},
                 });
-                const marked = await m.markRequestAsSent("bar", RequestType.KeysClaim, hypothetical_response);
+                const marked = await m.markRequestAsSent("bar", RequestType.KeysClaim, hypotheticalResponse);
             }
         });
 
         test("can share a room key", async () => {
-            const other_users = [new UserId("@example:localhost")];
+            const otherUsers = [new UserId("@example:localhost")];
 
-            const requests = await m.shareRoomKey(room, other_users, new EncryptionSettings());
+            const requests = await m.shareRoomKey(room, otherUsers, new EncryptionSettings());
 
             expect(requests).toHaveLength(1);
             expect(requests[0]).toBeInstanceOf(ToDeviceRequest);
@@ -508,7 +508,7 @@ describe(OlmMachine.name, () => {
             expect(messageContent["org.matrix.msgid"]).toBeDefined();
 
             await m.markRequestAsSent(requests[0].id, RequestType.ToDevice, "{}");
-            const requestsAfterMarkedAsSent = await m.shareRoomKey(room, other_users, new EncryptionSettings());
+            const requestsAfterMarkedAsSent = await m.shareRoomKey(room, otherUsers, new EncryptionSettings());
             expect(requestsAfterMarkedAsSent).toHaveLength(0);
         });
 
@@ -744,7 +744,7 @@ describe(OlmMachine.name, () => {
             let encryptedExportedRoomKeys = OlmMachine.encryptExportedRoomKeys(
                 exportedRoomKeys,
                 encryptionPassphrase,
-                100_000,
+                100000,
             );
 
             expect(encryptedExportedRoomKeys).toMatch(/^-----BEGIN MEGOLM SESSION DATA-----/);
@@ -817,7 +817,7 @@ describe(OlmMachine.name, () => {
 
         test("can inject devices from someone else", async () => {
             {
-                const hypothetical_response = JSON.stringify({
+                const hypotheticalResponse = JSON.stringify({
                     device_keys: {
                         "@example:morpheus.localhost": {
                             ATRLDCRXAC: {
@@ -928,7 +928,7 @@ describe(OlmMachine.name, () => {
                         },
                     },
                 });
-                const marked = await m.markRequestAsSent("foo", RequestType.KeysQuery, hypothetical_response);
+                const marked = await m.markRequestAsSent("foo", RequestType.KeysQuery, hypotheticalResponse);
             }
         });
 
@@ -1022,11 +1022,11 @@ describe(OlmMachine.name, () => {
 
             let keyBackupKey = BackupDecryptionKey.createRandomKey();
 
-            let auth_data = {
+            let authData = {
                 public_key: keyBackupKey.megolmV1PublicKey.publicKeyBase64,
             };
 
-            let canonical = JSON.stringify(auth_data);
+            let canonical = JSON.stringify(authData);
 
             let signaturesJSON = (await m.sign(canonical)).asJSON();
 
@@ -1034,7 +1034,7 @@ describe(OlmMachine.name, () => {
                 algorithm: keyBackupKey.megolmV1PublicKey.algorithm,
                 auth_data: {
                     signatures: JSON.parse(signaturesJSON),
-                    ...auth_data,
+                    ...authData,
                 },
             };
 
@@ -1074,11 +1074,11 @@ describe(OlmMachine.name, () => {
             let exportedKey = JSON.parse(outgoing.body);
 
             let sessions = exportedKey.rooms["!baz:matrix.org"].sessions;
-            let session_data = Object.values(sessions)[0].session_data;
+            let sessionData = Object.values(sessions)[0].session_data;
 
             // should decrypt with the created key
             let decrypted = JSON.parse(
-                keyBackupKey.decryptV1(session_data.ephemeral, session_data.mac, session_data.ciphertext),
+                keyBackupKey.decryptV1(sessionData.ephemeral, sessionData.mac, sessionData.ciphertext),
             );
             expect(decrypted.algorithm).toStrictEqual("m.megolm.v1.aes-sha2");
 
