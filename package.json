@@ -40,7 +40,7 @@
         "node": ">= 10"
     },
     "scripts": {
-        "lint": "prettier --check .",
+        "lint": "prettier --write .",
         "build": "WASM_PACK_ARGS=--release ./scripts/build.sh",
         "build:dev": "WASM_PACK_ARGS=--dev ./scripts/build.sh",
         "test": "jest --verbose",
