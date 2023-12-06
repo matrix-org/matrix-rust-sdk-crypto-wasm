@@ -1211,7 +1211,7 @@ describe(OlmMachine.name, () => {
             return secondMachine;
         }
 
-        test("Should request cross signing request if missing", async () => {
+        test("Should request cross signing-keys if missing", async () => {
             const userId = new UserId("@alice:example.org");
             const firstDevice = new DeviceId("ABCDEF");
             const hypothetical_response = await getHypotheticalKeyQuery(userId, firstDevice, true);
