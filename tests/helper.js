@@ -39,7 +39,7 @@ async function addMachineToMachine(machineToAdd, machine) {
         expect(body.one_time_keys).toBeDefined();
 
         // https://spec.matrix.org/v1.2/client-server-api/#post_matrixclientv3keysupload
-        const hypothetical_response = JSON.stringify({
+        const hypotheticalResponse = JSON.stringify({
             one_time_key_counts: {
                 curve25519: 10,
                 signed_curve25519: 20,
@@ -48,7 +48,7 @@ async function addMachineToMachine(machineToAdd, machine) {
         const marked = await machineToAdd.markRequestAsSent(
             outgoingRequests[0].id,
             outgoingRequests[0].type,
-            hypothetical_response,
+            hypotheticalResponse,
         );
         expect(marked).toStrictEqual(true);
 
