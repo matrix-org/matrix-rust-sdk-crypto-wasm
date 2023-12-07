@@ -1339,6 +1339,30 @@ impl OlmMachine {
         })
     }
 
+    /// Request missing local secrets from our other trusted devices.
+    ///
+    /// "Local secrets" refers to secrets which can be shared between trusted
+    /// devices, such as private cross-signing keys, and the megolm backup
+    /// decryption key.
+    ///
+    /// This method will cause the sdk to generated outgoing secret requests
+    /// (`m.secret.request`) to get the missing secrets. These requests will
+    /// then be returned by a future call to {@link
+    /// OlmMachine#outgoing_requests}.
+    ///
+    /// # Returns
+    ///
+    /// A `Promise` for a `bool` result, which will be true if  secrets were
+    /// missing, and a request was generated.
+    #[wasm_bindgen(js_name = "requestMissingSecretsIfNeeded")]
+    pub async fn request_missing_secrets_if_needed(&self) -> Promise {
+        let me = self.inner.clone();
+        future_to_promise(async move {
+            let has_missing_secrets = me.query_missing_secrets_from_other_sessions().await?;
+            Ok(JsValue::from_bool(has_missing_secrets))
+        })
+    }
+
     /// Shut down the `OlmMachine`.
     ///
     /// The `OlmMachine` cannot be used after this method has been called.

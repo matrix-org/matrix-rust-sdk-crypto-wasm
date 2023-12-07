@@ -1,6 +1,6 @@
 {
     "name": "@matrix-org/matrix-sdk-crypto-wasm",
-    "version": "3.3.0",
+    "version": "3.4.0",
     "homepage": "https://github.com/matrix-org/matrix-rust-sdk-wasm",
     "description": "WebAssembly bindings of the matrix-sdk-crypto encryption library",
     "license": "Apache-2.0",
@@ -33,6 +33,7 @@
         "@types/jest": "^29.5.10",
         "babel-jest": "^29.7.0",
         "cross-env": "^7.0.3",
+        "eslint": "^8.55.0",
         "fake-indexeddb": "^4.0",
         "jest": "^28.1.0",
         "prettier": "^2.8.3",
@@ -46,7 +47,7 @@
     },
     "scripts": {
         "lint": "npm run lint:prettier && npm run lint:types",
-        "lint:prettier": "prettier --check .",
+        "lint:prettier": "eslint --max-warnings 0 tests && prettier --check .",
         "lint:types": "tsc --noEmit",
         "build": "WASM_PACK_ARGS=--release ./scripts/build.sh",
         "build:dev": "WASM_PACK_ARGS=--dev ./scripts/build.sh",
