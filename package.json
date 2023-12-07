@@ -27,6 +27,11 @@
         "pkg/matrix_sdk_crypto_wasm.d.ts"
     ],
     "devDependencies": {
+        "@babel/core": "^7.23.5",
+        "@babel/preset-env": "^7.23.5",
+        "@babel/preset-typescript": "^7.23.3",
+        "@types/jest": "^29.5.10",
+        "babel-jest": "^29.7.0",
         "cross-env": "^7.0.3",
         "eslint": "^8.55.0",
         "fake-indexeddb": "^4.0",
@@ -41,7 +46,10 @@
         "node": ">= 10"
     },
     "scripts": {
-        "lint": "eslint --max-warnings 0 tests && prettier --check .",
+        "lint": "npm run lint:eslint && npm run lint:prettier && npm run lint:types",
+        "lint:eslint": "eslint --max-warnings 0 tests",
+        "lint:prettier": "prettier --check .",
+        "lint:types": "tsc --noEmit",
         "build": "WASM_PACK_ARGS=--release ./scripts/build.sh",
         "build:dev": "WASM_PACK_ARGS=--dev ./scripts/build.sh",
         "test": "jest --verbose",

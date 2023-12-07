@@ -305,6 +305,7 @@ describe("Key Verification", () => {
         // can start a SAS verification (`m.key.verification.start`)
         {
             // Let's start a SAS verification, from `m2` for example.
+            let outgoingVerificationRequest;
             [sas2, outgoingVerificationRequest] = await verificationRequest2.startSas();
             expect(sas2).toBeInstanceOf(Sas);
 
