@@ -1,3 +1,7 @@
+# matrix-sdk-crypto-wasm UNRELEASED
+
+-   New API `OlmMachine.requestMissingSecretsIfNeeded` that will creates outgoing secret request to other sessions.
+
 # matrix-sdk-crypto-wasm v3.4.0
 
 -   Include Rust symbol names in the generated wasm output.
