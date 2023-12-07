@@ -62,7 +62,7 @@ describe(OlmMachine.name, () => {
         let store_name = "hello";
         let store_passphrase = "world";
 
-        const by_store_name = (db: IDBDatabaseInfo) => db.name?.startsWith(store_name);
+        const by_store_name = (db: IDBDatabaseInfo) => db.name!.startsWith(store_name);
 
         // No databases.
         expect((await indexedDB.databases()).filter(by_store_name)).toHaveLength(0);
@@ -1076,7 +1076,7 @@ describe(OlmMachine.name, () => {
             let exportedKey = JSON.parse(outgoing.body);
 
             let sessions = exportedKey.rooms["!baz:matrix.org"].sessions;
-            // @ts-ignore
+            // @ts-ignore "object is of type 'unknown'"
             let session_data = Object.values(sessions)[0].session_data;
 
             // should decrypt with the created key
@@ -1116,6 +1116,8 @@ describe(OlmMachine.name, () => {
             await m.enableBackupV1(keyBackupKey.megolmV1PublicKey.publicKeyBase64, "1");
             const outgoing = await m.backupRoomKeys();
             expect(outgoing.type).toStrictEqual(RequestType.KeysBackup);
+
+            // Map from room ID, to map from session ID to the backup data.
             const exportedKeys = JSON.parse(outgoing.body) as {
                 rooms: Record<string, { sessions: Record<string, any> }>;
             };
