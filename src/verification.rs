@@ -7,9 +7,7 @@ use futures_util::StreamExt;
 #[cfg(feature = "qrcode")]
 use js_sys::Uint8ClampedArray;
 use js_sys::{Array, Function, JsString, Promise};
-use matrix_sdk_common::ruma::events::key::verification::{
-    cancel::CancelCode as RumaCancelCode, VerificationMethod as RumaVerificationMethod,
-};
+use matrix_sdk_common::ruma::events::key::verification::VerificationMethod as RumaVerificationMethod;
 use matrix_sdk_crypto::{QrVerificationState, VerificationRequestState};
 use tracing::warn;
 use wasm_bindgen::prelude::*;
@@ -295,9 +293,9 @@ impl Sas {
     /// Returns either an `OutgoingRequest` which should be sent out, or
     /// `undefined` if the verification is already cancelled.
     #[wasm_bindgen(js_name = "cancelWithCode")]
-    pub fn cancel_with_code(&self, code: CancelCode) -> Result<JsValue, JsError> {
+    pub fn cancel_with_code(&self, code: &str) -> Result<JsValue, JsError> {
         self.inner
-            .cancel_with_code(code.try_into()?)
+            .cancel_with_code(code.into())
             .map(OutgoingVerificationRequest::from)
             .map(JsValue::try_from)
             .transpose()
@@ -576,9 +574,9 @@ impl Qr {
     /// Returns either an `OutgoingRequest` which should be sent out, or
     /// `undefined` if the verification is already cancelled.
     #[wasm_bindgen(js_name = "cancelWithCode")]
-    pub fn cancel_with_code(&self, code: CancelCode) -> Result<JsValue, JsError> {
+    pub fn cancel_with_code(&self, code: &str) -> Result<JsValue, JsError> {
         self.inner
-            .cancel_with_code(code.try_into()?)
+            .cancel_with_code(code.into())
             .map(OutgoingVerificationRequest::from)
             .map(JsValue::try_from)
             .transpose()
@@ -621,114 +619,14 @@ impl CancelInfo {
 
     /// Get the `CancelCode` that cancelled this verification.
     #[wasm_bindgen(js_name = "cancelCode")]
-    pub fn cancel_code(&self) -> CancelCode {
-        self.inner.cancel_code().into()
+    pub fn cancel_code(&self) -> String {
+        self.inner.cancel_code().to_string()
     }
 
     /// Was the verification cancelled by us?
     #[wasm_bindgen(js_name = "cancelledbyUs")]
     pub fn cancelled_by_us(&self) -> bool {
         self.inner.cancelled_by_us()
-    }
-}
-
-/// An error code for why the process/request was cancelled by the
-/// user.
-#[wasm_bindgen]
-#[derive(Debug)]
-pub enum CancelCode {
-    /// Unknown cancel code.
-    Other,
-
-    /// The user cancelled the verification.
-    User,
-
-    /// The verification process timed out.
-    ///
-    /// Verification processes can define their own timeout
-    /// parameters.
-    Timeout,
-
-    /// The device does not know about the given transaction ID.
-    UnknownTransaction,
-
-    /// The device does not know how to handle the requested method.
-    ///
-    /// Should be sent for `m.key.verification.start` messages and
-    /// messages defined by individual verification processes.
-    UnknownMethod,
-
-    /// The device received an unexpected message.
-    ///
-    /// Typically raised when one of the parties is handling the
-    /// verification out of order.
-    UnexpectedMessage,
-
-    /// The key was not verified.
-    KeyMismatch,
-
-    /// The expected user did not match the user verified.
-    UserMismatch,
-
-    /// The message received was invalid.
-    InvalidMessage,
-
-    /// An `m.key.verification.request` was accepted by a different
-    /// device.
-    ///
-    /// The device receiving this error can ignore the verification
-    /// request.
-    Accepted,
-
-    /// The device receiving this error can ignore the verification
-    /// request.
-    MismatchedCommitment,
-
-    /// The SAS did not match.
-    MismatchedSas,
-}
-
-impl From<&RumaCancelCode> for CancelCode {
-    fn from(code: &RumaCancelCode) -> Self {
-        use RumaCancelCode::*;
-
-        match code {
-            User => Self::User,
-            Timeout => Self::Timeout,
-            UnknownTransaction => Self::UnknownTransaction,
-            UnknownMethod => Self::UnknownMethod,
-            UnexpectedMessage => Self::UnexpectedMessage,
-            KeyMismatch => Self::KeyMismatch,
-            UserMismatch => Self::UserMismatch,
-            InvalidMessage => Self::InvalidMessage,
-            Accepted => Self::Accepted,
-            MismatchedCommitment => Self::MismatchedCommitment,
-            MismatchedSas => Self::MismatchedSas,
-            _ => Self::Other,
-        }
-    }
-}
-
-impl TryFrom<CancelCode> for RumaCancelCode {
-    type Error = JsError;
-
-    fn try_from(code: CancelCode) -> Result<Self, Self::Error> {
-        use CancelCode::*;
-
-        Ok(match code {
-            User => Self::User,
-            Timeout => Self::Timeout,
-            UnknownTransaction => Self::UnknownTransaction,
-            UnknownMethod => Self::UnknownMethod,
-            UnexpectedMessage => Self::UnexpectedMessage,
-            KeyMismatch => Self::KeyMismatch,
-            UserMismatch => Self::UserMismatch,
-            InvalidMessage => Self::InvalidMessage,
-            Accepted => Self::Accepted,
-            MismatchedCommitment => Self::MismatchedCommitment,
-            MismatchedSas => Self::MismatchedSas,
-            Other => return Err(JsError::new("`Other` variant is invalid at this place")),
-        })
     }
 }
 
