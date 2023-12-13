@@ -288,7 +288,7 @@ impl Sas {
 
     /// Cancel the verification.
     ///
-    /// This cancels the verification with given code.
+    /// This cancels the verification with given code (e.g. `m.user`).
     ///
     /// Returns either an `OutgoingRequest` which should be sent out, or
     /// `undefined` if the verification is already cancelled.
@@ -569,7 +569,7 @@ impl Qr {
 
     /// Cancel the verification.
     ///
-    /// This cancels the verification with given code.
+    /// This cancels the verification with given code (e.g. `m.user`).
     ///
     /// Returns either an `OutgoingRequest` which should be sent out, or
     /// `undefined` if the verification is already cancelled.
@@ -617,7 +617,8 @@ impl CancelInfo {
         self.inner.reason().into()
     }
 
-    /// Get the `CancelCode` that cancelled this verification.
+    /// Get the `code` (e.g. `m.user`) that was used to cancel the
+    /// verification.
     #[wasm_bindgen(js_name = "cancelCode")]
     pub fn cancel_code(&self) -> String {
         self.inner.cancel_code().to_string()

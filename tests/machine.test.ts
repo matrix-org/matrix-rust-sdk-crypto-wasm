@@ -934,7 +934,7 @@ describe(OlmMachine.name, () => {
             }
         });
 
-        test("can start an in-room SAS verification", async () => {
+        test("can start and cancel an in-room SAS verification", async () => {
             let _ = m.bootstrapCrossSigning(true);
             const identity = await m.getIdentity(new UserId("@example:morpheus.localhost"));
 
@@ -965,7 +965,7 @@ describe(OlmMachine.name, () => {
 
             expect(verificationRequest.roomId.toString()).toStrictEqual(room.toString());
 
-            const [_sas, outgoingVerificationRequest] = await verificationRequest.startSas();
+            const [sas, outgoingVerificationRequest] = await verificationRequest.startSas();
 
             expect(outgoingVerificationRequest).toBeInstanceOf(RoomMessageRequest);
             expect(outgoingVerificationRequest.id).toBeDefined();
@@ -987,6 +987,47 @@ describe(OlmMachine.name, () => {
                     event_id: eventId.toString(),
                 },
             });
+
+            const outgoingCancellationRequest = sas.cancelWithCode("org.matrix.custom");
+
+            const cancellationBody = JSON.parse(outgoingCancellationRequest.body);
+            expect(cancellationBody.code).toEqual("org.matrix.custom");
+
+            let cancelInfo = verificationRequest.cancelInfo;
+            expect(cancelInfo).toBeTruthy();
+            expect(cancelInfo.cancelCode()).toEqual("org.matrix.custom");
+            expect(cancelInfo.cancelledbyUs()).toBe(true);
+        });
+
+        test("can handle a cancelled in-room verification", async () => {
+            let _ = m.bootstrapCrossSigning(true);
+            const identity = await m.getIdentity(new UserId("@example:morpheus.localhost"));
+
+            const eventId = new EventId("$qnc-F-dvnEYJTyHq_iKxU2bZ1CI92-kuZq3a5lr5ZRg");
+            const verificationRequest = await identity.requestVerification(room, eventId);
+
+            await m.receiveVerificationEvent(
+                JSON.stringify({
+                    sender: "@example:morpheus.localhost",
+                    type: "m.key.verification.cancel",
+                    event_id: "$gQWuamMe6taH7oaEX6DHnIrvn8kden7vt9a9e2xBzl0",
+                    origin_server_ts: 1674037264827,
+                    content: {
+                        "reason": "Cancelled by user",
+                        "code": "m.user",
+                        "m.relates_to": {
+                            rel_type: "m.reference",
+                            event_id: eventId.toString(),
+                        },
+                    },
+                }),
+                room,
+            );
+
+            let cancelInfo = verificationRequest.cancelInfo;
+            expect(cancelInfo).toBeTruthy();
+            expect(cancelInfo.cancelCode()).toEqual("m.user");
+            expect(cancelInfo.cancelledbyUs()).toBe(false);
         });
     });
 
