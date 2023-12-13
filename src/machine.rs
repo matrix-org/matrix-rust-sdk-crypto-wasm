@@ -396,8 +396,29 @@ impl OlmMachine {
 
     /// Encrypt a room message for the given room.
     ///
-    /// Beware that a room key needs to be shared before this
-    /// method can be called using the `share_room_key` method.
+    /// **Note**: A room key needs to be shared with the group of users that are
+    /// members in the given room. If this is not done this method will panic.
+    ///
+    /// The usual flow to encrypt an event using this state machine is as
+    /// follows:
+    ///
+    /// 1. Get the one-time key claim request to establish 1:1 Olm sessions for
+    ///    the room members of the room we wish to participate in. This is done
+    ///    using the [`get_missing_sessions()`](Self::get_missing_sessions)
+    ///    method. This method call should be locked per call.
+    ///
+    /// 2. Share a room key with all the room members using the
+    ///    [`share_room_key()`](Self::share_room_key). This method call should
+    ///    be locked per room.
+    ///
+    /// 3. Encrypt the event using this method.
+    ///
+    /// 4. Send the encrypted event to the server.
+    ///
+    /// After the room key is shared steps 1 and 2 will become noops, unless
+    /// there's some changes in the room membership or in the list of devices a
+    /// member has.
+    ///
     ///
     /// `room_id` is the ID of the room for which the message should
     /// be encrypted. `event_type` is the type of the event. `content`
@@ -623,6 +644,9 @@ impl OlmMachine {
     /// `room_id` is the room ID. `users` is an array of `UserId`
     /// objects. `encryption_settings` are an `EncryptionSettings`
     /// object.
+    ///
+    /// Note: Care should be taken that only one such request at a
+    /// time is in flight for the same room, e.g. using a lock.
     ///
     /// Returns an array of `ToDeviceRequest`s.
     #[wasm_bindgen(js_name = "shareRoomKey")]
