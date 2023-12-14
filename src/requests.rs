@@ -1,5 +1,6 @@
 //! Types to handle requests.
 
+use std::time::Duration;
 use js_sys::JsString;
 use matrix_sdk_common::ruma::{
     api::client::keys::{
@@ -8,6 +9,7 @@ use matrix_sdk_common::ruma::{
         upload_signatures::v3::Request as OriginalSignatureUploadRequest,
     },
     events::EventContent,
+    exports::serde::ser::Error,
 };
 use matrix_sdk_crypto::{
     requests::{
@@ -316,7 +318,7 @@ macro_rules! request {
     (
         $destination_request:ident from $source_request:ident
         $( extracts $( $field_name:ident : $field_type:tt ),+ $(,)? )?
-        $( $( and )? groups $( $grouped_field_name:ident ),+ $(,)? )?
+        $( $( and )? groups $( $grouped_field_name:ident $( { $transformation:expr } )? $( $optional:literal )? ),+ $(,)? )?
     ) => {
 
         impl TryFrom<(String, &$source_request)> for $destination_request {
@@ -329,7 +331,7 @@ macro_rules! request {
                     @__try_from $destination_request from $source_request
                     (request_id = request_id.into(), request = request)
                     $( extracts [ $( $field_name : $field_type, )+ ] )?
-                    $( groups [ $( $grouped_field_name, )+ ] )?
+                    $( groups [ $( $grouped_field_name $( { $transformation } )? $( $optional )? , )+ ] )?
                 )
             }
         }
@@ -339,7 +341,7 @@ macro_rules! request {
         @__try_from $destination_request:ident from $source_request:ident
         (request_id = $request_id:expr, request = $request:expr)
         $( extracts [ $( $field_name:ident : $field_type:tt ),* $(,)? ] )?
-        $( groups [ $( $grouped_field_name:ident ),* $(,)? ] )?
+        $( groups [ $( $grouped_field_name:ident $( { $transformation:expr } )? $( $optional:literal )? ),* $(,)? ] )?
     ) => {
         {
             Ok($destination_request {
@@ -353,7 +355,15 @@ macro_rules! request {
                     body: {
                         let mut map = serde_json::Map::new();
                         $(
-                            map.insert(stringify!($grouped_field_name).to_owned(), serde_json::to_value(&$request.$grouped_field_name).unwrap());
+                            let field = &$request.$grouped_field_name;
+                            $(
+                                let field = {
+                                    let $grouped_field_name = field;
+
+                                    $transformation
+                                };
+                            )?
+                            request!(@__set_field $( $optional )? map : $grouped_field_name = field);
                         )*
                         let object = serde_json::Value::Object(map);
 
@@ -379,15 +389,25 @@ macro_rules! request {
     ( @__field_type as event_type ; request = $request:expr, field_name = $field_name:ident ) => {
         $request.content.event_type().to_string().into()
     };
+
+    ( @__set_field $optional:literal $map:ident : $grouped_field_name:ident = $field:ident) => {
+        if let Some($field) = $field {
+            request!(@__set_field $map : $grouped_field_name = $field);
+        }
+    };
+
+    ( @__set_field $map:ident : $grouped_field_name:ident = $field:ident) => {
+        $map.insert(stringify!($grouped_field_name).to_owned(), serde_json::to_value($field).unwrap());
+    };
 }
 
 // Generate the methods needed to convert rust `OutgoingRequests` into the js
 // counterpart. Technically it's converting tuples `(String, &Original)`, where
 // the first member  is the request ID, into js requests. Used by
 // `TryFrom<OutgoingRequest> for JsValue`.
-request!(KeysUploadRequest from OriginalKeysUploadRequest groups device_keys, one_time_keys, fallback_keys);
-request!(KeysQueryRequest from OriginalKeysQueryRequest groups timeout, device_keys);
-request!(KeysClaimRequest from OriginalKeysClaimRequest groups timeout, one_time_keys);
+request!(KeysUploadRequest from OriginalKeysUploadRequest groups device_keys "optional", one_time_keys, fallback_keys);
+request!(KeysQueryRequest from OriginalKeysQueryRequest groups timeout { timeout.as_ref().map(Duration::as_millis).map(u64::try_from).transpose().map_err(serde_json::Error::custom)? }, device_keys);
+request!(KeysClaimRequest from OriginalKeysClaimRequest groups timeout { timeout.as_ref().map(Duration::as_millis).map(u64::try_from).transpose().map_err(serde_json::Error::custom)? }, one_time_keys);
 request!(ToDeviceRequest from OriginalToDeviceRequest extracts event_type: string, txn_id: string and groups messages);
 request!(RoomMessageRequest from OriginalRoomMessageRequest extracts room_id: string, txn_id: string, event_type: event_type, content: json);
 request!(KeysBackupRequest from OriginalKeysBackupRequest extracts version: string and groups rooms);
