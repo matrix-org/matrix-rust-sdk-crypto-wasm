@@ -1,6 +1,7 @@
 //! Types to handle requests.
 
 use std::time::Duration;
+
 use js_sys::JsString;
 use matrix_sdk_common::ruma::{
     api::client::keys::{
@@ -645,36 +646,33 @@ pub mod test {
     // create data for tests/requests.test.js
     use std::collections::BTreeMap;
 
-    use wasm_bindgen::prelude::wasm_bindgen;
     use matrix_sdk_common::ruma::{
         api::client::keys::{
             claim_keys::v3::Request as OriginalKeysClaimRequest,
             upload_keys::v3::Request as OriginalKeysUploadRequest,
         },
-        DeviceKeyAlgorithm, device_id, user_id,
+        device_id, user_id, DeviceKeyAlgorithm,
     };
     use matrix_sdk_crypto::requests::KeysQueryRequest as OriginalKeysQueryRequest;
+    use wasm_bindgen::prelude::wasm_bindgen;
+
     use super::{KeysClaimRequest, KeysQueryRequest, KeysUploadRequest};
 
     #[wasm_bindgen(js_name = "_test_make_keys_claim_request")]
     pub fn make_keys_claim_request() -> KeysClaimRequest {
-        let request = OriginalKeysClaimRequest::new(
-            BTreeMap::from(
-                [
-                    (user_id!("@alice:localhost").to_owned(),
-                     BTreeMap::from([(device_id!("ABCDEFG").to_owned(), DeviceKeyAlgorithm::SignedCurve25519)]))
-                ],
-            )
-        );
+        let request = OriginalKeysClaimRequest::new(BTreeMap::from([(
+            user_id!("@alice:localhost").to_owned(),
+            BTreeMap::from([(
+                device_id!("ABCDEFG").to_owned(),
+                DeviceKeyAlgorithm::SignedCurve25519,
+            )]),
+        )]));
         KeysClaimRequest::try_from(("ID".to_string(), &request)).unwrap()
     }
 
     #[wasm_bindgen(js_name = "_test_make_keys_query_request")]
     pub fn make_keys_query_request() -> KeysQueryRequest {
-        let request = OriginalKeysQueryRequest {
-            timeout: None,
-            device_keys: BTreeMap::new(),
-        };
+        let request = OriginalKeysQueryRequest { timeout: None, device_keys: BTreeMap::new() };
         KeysQueryRequest::try_from(("ID".to_string(), &request)).unwrap()
     }
 
