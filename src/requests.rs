@@ -406,8 +406,8 @@ macro_rules! request {
 // the first member  is the request ID, into js requests. Used by
 // `TryFrom<OutgoingRequest> for JsValue`.
 request!(KeysUploadRequest from OriginalKeysUploadRequest groups device_keys "optional", one_time_keys, fallback_keys);
-request!(KeysQueryRequest from OriginalKeysQueryRequest groups timeout { timeout.as_ref().map(Duration::as_millis).map(u64::try_from).transpose().map_err(serde_json::Error::custom)? }, device_keys);
-request!(KeysClaimRequest from OriginalKeysClaimRequest groups timeout { timeout.as_ref().map(Duration::as_millis).map(u64::try_from).transpose().map_err(serde_json::Error::custom)? }, one_time_keys);
+request!(KeysQueryRequest from OriginalKeysQueryRequest groups timeout { timeout.as_ref().map(Duration::as_millis).map(u64::try_from).transpose().map_err(serde_json::Error::custom)? } "optional", device_keys);
+request!(KeysClaimRequest from OriginalKeysClaimRequest groups timeout { timeout.as_ref().map(Duration::as_millis).map(u64::try_from).transpose().map_err(serde_json::Error::custom)? } "optional", one_time_keys);
 request!(ToDeviceRequest from OriginalToDeviceRequest extracts event_type: string, txn_id: string and groups messages);
 request!(RoomMessageRequest from OriginalRoomMessageRequest extracts room_id: string, txn_id: string, event_type: event_type, content: json);
 request!(KeysBackupRequest from OriginalKeysBackupRequest extracts version: string and groups rooms);
@@ -637,5 +637,50 @@ impl TryFrom<OriginalCrossSigningBootstrapRequests> for CrossSigningBootstrapReq
             upload_signing_keys_request: (&request.upload_signing_keys_req).try_into()?,
             upload_signatures_request: (&request.upload_signatures_req).try_into()?,
         })
+    }
+}
+
+pub mod test {
+    #![allow(missing_docs)]
+    // create data for tests/requests.test.js
+    use std::collections::BTreeMap;
+
+    use wasm_bindgen::prelude::wasm_bindgen;
+    use matrix_sdk_common::ruma::{
+        api::client::keys::{
+            claim_keys::v3::Request as OriginalKeysClaimRequest,
+            upload_keys::v3::Request as OriginalKeysUploadRequest,
+        },
+        DeviceKeyAlgorithm, device_id, user_id,
+    };
+    use matrix_sdk_crypto::requests::KeysQueryRequest as OriginalKeysQueryRequest;
+    use super::{KeysClaimRequest, KeysQueryRequest, KeysUploadRequest};
+
+    #[wasm_bindgen(js_name = "_test_make_keys_claim_request")]
+    pub fn make_keys_claim_request() -> KeysClaimRequest {
+        let request = OriginalKeysClaimRequest::new(
+            BTreeMap::from(
+                [
+                    (user_id!("@alice:localhost").to_owned(),
+                     BTreeMap::from([(device_id!("ABCDEFG").to_owned(), DeviceKeyAlgorithm::SignedCurve25519)]))
+                ],
+            )
+        );
+        KeysClaimRequest::try_from(("ID".to_string(), &request)).unwrap()
+    }
+
+    #[wasm_bindgen(js_name = "_test_make_keys_query_request")]
+    pub fn make_keys_query_request() -> KeysQueryRequest {
+        let request = OriginalKeysQueryRequest {
+            timeout: None,
+            device_keys: BTreeMap::new(),
+        };
+        KeysQueryRequest::try_from(("ID".to_string(), &request)).unwrap()
+    }
+
+    #[wasm_bindgen(js_name = "_test_make_keys_upload_request")]
+    pub fn make_keys_upload_request() -> KeysUploadRequest {
+        let request = OriginalKeysUploadRequest::new();
+        KeysUploadRequest::try_from(("ID".to_string(), &request)).unwrap()
     }
 }

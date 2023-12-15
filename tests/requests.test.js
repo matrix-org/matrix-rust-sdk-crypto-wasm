@@ -1,4 +1,7 @@
 const {
+    _test_make_keys_claim_request,
+    _test_make_keys_query_request,
+    _test_make_keys_upload_request,
     RequestType,
     KeysUploadRequest,
     KeysQueryRequest,
@@ -18,5 +21,34 @@ describe("RequestType", () => {
         expect(RequestType.SignatureUpload).toStrictEqual(4);
         expect(RequestType.RoomMessage).toStrictEqual(5);
         expect(RequestType.KeysBackup).toStrictEqual(6);
+    });
+
+    test("Converts request types", () => {
+        // test that timeout gets transformed properly into a number
+        const keysClaimRequest = _test_make_keys_claim_request();
+        const keysClaimBody = JSON.parse(keysClaimRequest.body);
+        expect(keysClaimBody).toEqual({
+            "one_time_keys": {
+                "@alice:localhost": {
+                    "ABCDEFG": "signed_curve25519",
+                },
+            },
+            "timeout": 10000,
+        });
+
+        // test that timeout is omitted when set to None
+        const keysQueryRequest = _test_make_keys_query_request();
+        const keysQueryBody = JSON.parse(keysQueryRequest.body);
+        expect(keysQueryBody).toEqual({
+            "device_keys": {},
+        })
+
+        // test that device_keys is omitted when set to None
+        const keysUploadRequest = _test_make_keys_upload_request();
+        const keysUploadBody = JSON.parse(keysUploadRequest.body);
+        expect(keysUploadBody).toEqual({
+            fallback_keys: {},
+            one_time_keys: {},
+        });
     });
 });
