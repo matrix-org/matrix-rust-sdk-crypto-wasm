@@ -1,7 +1,13 @@
-# matrix-sdk-crypto-wasm UNRELEASED
+# matrix-sdk-crypto-wasm v3.5.0
 
--   New API `OlmMachine.requestMissingSecretsIfNeeded` that will creates outgoing secret request to other sessions.
--   Verification cancel codes for `cancelWithCode` and `cancelInfo.cancelCode` are now passed as strings rather than an enum.
+-   Update matrix-rust-sdk version, providing several changes including a fix
+    for occasional freezes (https://github.com/element-hq/element-web/issues/26488).
+
+-   New API `OlmMachine.requestMissingSecretsIfNeeded` that creates an
+    outgoing secret request to other sessions.
+
+-   Verification cancel codes for `cancelWithCode` and `cancelInfo.cancelCode`
+    are now passed as strings rather than an enum.
 
 # matrix-sdk-crypto-wasm v3.4.0
 
