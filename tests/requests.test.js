@@ -28,20 +28,20 @@ describe("RequestType", () => {
         const keysClaimRequest = makeKeysClaimRequest();
         const keysClaimBody = JSON.parse(keysClaimRequest.body);
         expect(keysClaimBody).toEqual({
-            "one_time_keys": {
+            one_time_keys: {
                 "@alice:localhost": {
-                    "ABCDEFG": "signed_curve25519",
+                    ABCDEFG: "signed_curve25519",
                 },
             },
-            "timeout": 10000,
+            timeout: 10000,
         });
 
         // test that timeout is omitted when set to None
         const keysQueryRequest = makeKeysQueryRequest();
         const keysQueryBody = JSON.parse(keysQueryRequest.body);
         expect(keysQueryBody).toEqual({
-            "device_keys": {},
-        })
+            device_keys: {},
+        });
 
         // test that device_keys is omitted when set to None
         const keysUploadRequest = makeKeysUploadRequest();
