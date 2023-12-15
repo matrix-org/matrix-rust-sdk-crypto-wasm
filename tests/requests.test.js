@@ -1,7 +1,7 @@
 const {
-    _test_make_keys_claim_request,
-    _test_make_keys_query_request,
-    _test_make_keys_upload_request,
+    _test_make_keys_claim_request: makeKeysClaimRequest,
+    _test_make_keys_query_request: makeKeysQueryRequest,
+    _test_make_keys_upload_request: makeKeysUploadRequest,
     RequestType,
     KeysUploadRequest,
     KeysQueryRequest,
@@ -25,7 +25,7 @@ describe("RequestType", () => {
 
     test("Converts request types", () => {
         // test that timeout gets transformed properly into a number
-        const keysClaimRequest = _test_make_keys_claim_request();
+        const keysClaimRequest = makeKeysClaimRequest();
         const keysClaimBody = JSON.parse(keysClaimRequest.body);
         expect(keysClaimBody).toEqual({
             "one_time_keys": {
@@ -37,14 +37,14 @@ describe("RequestType", () => {
         });
 
         // test that timeout is omitted when set to None
-        const keysQueryRequest = _test_make_keys_query_request();
+        const keysQueryRequest = makeKeysQueryRequest();
         const keysQueryBody = JSON.parse(keysQueryRequest.body);
         expect(keysQueryBody).toEqual({
             "device_keys": {},
         })
 
         // test that device_keys is omitted when set to None
-        const keysUploadRequest = _test_make_keys_upload_request();
+        const keysUploadRequest = makeKeysUploadRequest();
         const keysUploadBody = JSON.parse(keysUploadRequest.body);
         expect(keysUploadBody).toEqual({
             fallback_keys: {},
