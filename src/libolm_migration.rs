@@ -16,7 +16,7 @@
 
 use std::{iter, time::Duration};
 
-use anyhow::anyhow;
+use anyhow::Context;
 use js_sys::{Array, Date, Uint8Array};
 use matrix_sdk_common::ruma::{
     DeviceKeyAlgorithm, MilliSecondsSinceUnixEpoch, SecondsSinceUnixEpoch, UInt,
@@ -62,7 +62,7 @@ pub struct BaseMigrationData {
     #[wasm_bindgen(js_name = "deviceId")]
     pub device_id: Option<DeviceId>,
 
-    /// The pickled version of the Olm Account.
+    /// The pickle string holding the Olm Account, as returned by `olm_pickle_account` in libolm.
     #[wasm_bindgen(js_name = "pickledAccount")]
     pub pickled_account: String,
 
@@ -131,15 +131,18 @@ async fn migrate_base_data_to_store(
     pickle_key: &[u8],
     store: &DynCryptoStore,
 ) -> anyhow::Result<()> {
-    let user_id = data.user_id.clone().ok_or(anyhow!("User ID not specified"))?.inner;
+    let user_id = data.user_id.clone().context("User ID not specified")?.inner;
     let account = vodozemac::olm::Account::from_libolm_pickle(&data.pickled_account, pickle_key)?;
     let account =
         matrix_sdk_crypto::olm::Account::from_pickle(matrix_sdk_crypto::olm::PickledAccount {
             user_id: user_id.clone(),
-            device_id: data.device_id.clone().ok_or(anyhow!("Device ID not specified"))?.inner,
+            device_id: data.device_id.clone().context("Device ID not specified")?.inner,
             pickle: account.pickle(),
-            shared: true,
-            // assume we have 50 keys on the server, until we get a sync that says fewer.
+            // Legacy crypto in the js-sdk does not keep a record of whether it has published the
+            // device keys to the server (it does it every time the stack is started). For safety,
+            // let's assume it hasn't happened yet.
+            shared: false,
+            // Assume we have 50 keys on the server, until we get a sync that says fewer.
             uploaded_signed_key_count: 50,
             creation_local_time: MilliSecondsSinceUnixEpoch::now(),
         })?;
@@ -178,7 +181,7 @@ async fn migrate_base_data_to_store(
 #[wasm_bindgen(getter_with_clone)]
 #[derive(Debug)]
 pub struct PickledSession {
-    /// The libolm pickle string holding the Olm Session.
+    /// The pickle string holding the Olm Session, as returned by `olm_pickle_session` in libolm.
     pub pickle: String,
     /// The base64-encoded public curve25519 key of the other user that we share
     /// this session with.
@@ -259,9 +262,9 @@ fn libolm_pickled_session_to_rust_pickled_session(
     let session = vodozemac::olm::Session::from_libolm_pickle(&libolm_session.pickle, &pickle_key)?;
 
     let creation_time = date_to_seconds_since_epoch(&libolm_session.creation_time)
-        .ok_or(JsError::new("session creation time out of range"))?;
+        .ok_or_else(|| JsError::new("session creation time out of range"))?;
     let last_use_time = date_to_seconds_since_epoch(&libolm_session.last_use_time)
-        .ok_or(JsError::new("session last-use time out of range"))?;
+        .ok_or_else(|| JsError::new("session last-use time out of range"))?;
 
     Ok(matrix_sdk_crypto::olm::PickledSession {
         pickle: session.pickle(),
@@ -279,7 +282,7 @@ async fn import_olm_sessions_to_store(
     let account = store
         .load_account()
         .await?
-        .ok_or(anyhow!("Base data must be imported before calling `migrateOlmSessions`"))?;
+        .context("Base data must be imported before calling `migrateOlmSessions`")?;
 
     let user_id = account.user_id();
     let device_id = account.device_id();
@@ -308,10 +311,11 @@ async fn import_olm_sessions_to_store(
 #[wasm_bindgen(getter_with_clone)]
 #[derive(Debug, Default)]
 pub struct PickledInboundGroupSession {
-    /// The liblolm pickle string holding the InboundGroupSession.
+    /// The pickle string holding the Megolm Session, as returned by
+    /// `olm_pickle_inbound_group_session` in libolm.
     pub pickle: String,
 
-    /// The public curve25519 key of the account that sent us the session
+    /// The public curve25519 key of the account that sent us the session.
     #[wasm_bindgen(js_name = "senderKey")]
     pub sender_key: String,
 
@@ -403,7 +407,7 @@ fn libolm_pickled_megolm_session_to_rust_pickled_session(
         room_id: libolm_session
             .room_id
             .clone()
-            .ok_or(JsError::new("Room ID not specified for megolm session"))?
+            .ok_or_else(|| JsError::new("Room ID not specified for megolm session"))?
             .inner,
         imported: libolm_session.imported,
         backed_up: libolm_session.backed_up,
