@@ -229,9 +229,11 @@ impl Migration {
         pickle_key: Uint8Array,
         store_handle: &StoreHandle,
     ) -> Result<JsValue, JsError> {
+        let pickle_key = pickle_key.to_vec();
+
         let rust_sessions = sessions
             .into_iter()
-            .map(|s| libolm_pickled_session_to_rust_pickled_session(s, &(pickle_key.to_vec())))
+            .map(|s| libolm_pickled_session_to_rust_pickled_session(s, &pickle_key))
             .collect::<Result<_>>()?;
 
         import_olm_sessions_to_store(rust_sessions, store_handle.store.as_ref())
@@ -369,9 +371,13 @@ impl Migration {
         pickle_key: Uint8Array,
         store_handle: &StoreHandle,
     ) -> Result<JsValue, JsError> {
+        let pickle_key = pickle_key.to_vec();
+
         let rust_sessions = sessions
             .into_iter()
-            .map(|s| libolm_pickled_megolm_session_to_rust_pickled_session(s, &(pickle_key.to_vec())))
+            .map(|s| {
+                libolm_pickled_megolm_session_to_rust_pickled_session(s, &pickle_key)
+            })
             .collect::<Result<_>>()?;
 
         import_megolm_sessions_to_store(rust_sessions, store_handle.store.as_ref())
