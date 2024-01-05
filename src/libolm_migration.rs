@@ -75,16 +75,16 @@ pub struct BaseMigrationData {
     pub backup_recovery_key: Option<String>,
 
     /// The private, base64-encoded, master cross-signing key.
-    #[wasm_bindgen(js_name = "crossSigningMasterKey")]
-    pub cross_signing_master_key: Option<String>,
+    #[wasm_bindgen(js_name = "privateCrossSigningMasterKey")]
+    pub private_cross_signing_master_key: Option<String>,
 
     /// The private, base64-encoded, self-signing key.
-    #[wasm_bindgen(js_name = "crossSigningSelfSigningKey")]
-    pub cross_signing_self_signing_key: Option<String>,
+    #[wasm_bindgen(js_name = "privateCrossSigningSelfSigningKey")]
+    pub private_cross_signing_self_signing_key: Option<String>,
 
     /// The private, base64-encoded, user-signing key.
-    #[wasm_bindgen(js_name = "crossSigningUserSigningKey")]
-    pub cross_signing_user_signing_key: Option<String>,
+    #[wasm_bindgen(js_name = "privateCrossSigningUserSigningKey")]
+    pub private_cross_signing_user_signing_key: Option<String>,
 }
 
 #[wasm_bindgen]
@@ -156,9 +156,9 @@ async fn migrate_base_data_to_store(
     let cross_signing = PrivateCrossSigningIdentity::empty(&user_id);
     cross_signing
         .import_secrets_unchecked(
-            data.cross_signing_master_key.as_deref(),
-            data.cross_signing_self_signing_key.as_deref(),
-            data.cross_signing_user_signing_key.as_deref(),
+            data.private_cross_signing_master_key.as_deref(),
+            data.private_cross_signing_self_signing_key.as_deref(),
+            data.private_cross_signing_user_signing_key.as_deref(),
         )
         .await?;
 
