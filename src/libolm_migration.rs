@@ -25,10 +25,10 @@ use matrix_sdk_crypto::{
     olm::PrivateCrossSigningIdentity,
     store::{BackupDecryptionKey, Changes, DynCryptoStore, PendingChanges},
     types::EventEncryptionAlgorithm,
+    vodozemac,
+    vodozemac::{Curve25519PublicKey, Ed25519PublicKey},
     Session,
 };
-use matrix_sdk_crypto::vodozemac;
-use matrix_sdk_crypto::vodozemac::{Curve25519PublicKey, Ed25519PublicKey};
 use wasm_bindgen::prelude::*;
 
 use crate::{
@@ -41,12 +41,11 @@ type Result<T, E = JsError> = std::result::Result<T, E>;
 
 /// Migration routines
 ///
-/// The public methods are exposed as static methods on this class, for namespacing and to enable
-/// easier mocking in unit tests.
+/// The public methods are exposed as static methods on this class, for
+/// namespacing and to enable easier mocking in unit tests.
 #[wasm_bindgen()]
 #[derive(Debug, Default)]
 pub struct Migration {}
-
 
 /// The base dataset that is important to migrate to the Rust SDK.
 ///
@@ -62,7 +61,8 @@ pub struct BaseMigrationData {
     #[wasm_bindgen(js_name = "deviceId")]
     pub device_id: Option<DeviceId>,
 
-    /// The pickle string holding the Olm Account, as returned by `olm_pickle_account` in libolm.
+    /// The pickle string holding the Olm Account, as returned by
+    /// `olm_pickle_account` in libolm.
     #[wasm_bindgen(js_name = "pickledAccount")]
     pub pickled_account: String,
 
@@ -101,10 +101,10 @@ impl Migration {
     /// Import the base dataset from a libolm-based setup to a vodozemac-based
     /// setup stored in IndexedDB.
     ///
-    /// Populates the user credentials, Olm account, backup data, etc. This is the
-    /// first step in the migration process. Once this base data is imported,
-    /// further data can be imported with {@link #migrateOlmSessions}, {@link
-    /// #migrateMegolmSessions}, and TODO room settings.
+    /// Populates the user credentials, Olm account, backup data, etc. This is
+    /// the first step in the migration process. Once this base data is
+    /// imported, further data can be imported with {@link
+    /// #migrateOlmSessions}, {@link #migrateMegolmSessions}, and TODO room settings.
     ///
     /// # Arguments
     ///
@@ -113,7 +113,7 @@ impl Migration {
     ///   account objects.
     /// * `store_handle` - A connection to the CryptoStore which will be used to
     ///   store the vodozemac data.
-    #[wasm_bindgen(js_name="migrateBaseData")]
+    #[wasm_bindgen(js_name = "migrateBaseData")]
     pub async fn migrate_base_data(
         data: &BaseMigrationData,
         pickle_key: Uint8Array,
@@ -148,7 +148,8 @@ async fn migrate_base_data_to_store(
         })?;
 
     let backup_decryption_key = data
-        .backup_recovery_key.as_ref()
+        .backup_recovery_key
+        .as_ref()
         .map(|k| BackupDecryptionKey::from_base64(k.as_str()))
         .transpose()?;
 
@@ -181,7 +182,8 @@ async fn migrate_base_data_to_store(
 #[wasm_bindgen(getter_with_clone)]
 #[derive(Debug)]
 pub struct PickledSession {
-    /// The pickle string holding the Olm Session, as returned by `olm_pickle_session` in libolm.
+    /// The pickle string holding the Olm Session, as returned by
+    /// `olm_pickle_session` in libolm.
     pub pickle: String,
     /// The base64-encoded public curve25519 key of the other user that we share
     /// this session with.
@@ -206,7 +208,6 @@ impl PickledSession {
         Self::default()
     }
 }
-
 
 #[wasm_bindgen]
 impl Migration {
@@ -254,7 +255,6 @@ impl Default for PickledSession {
         }
     }
 }
-
 
 fn libolm_pickled_session_to_rust_pickled_session(
     libolm_session: JsValue,
@@ -352,17 +352,18 @@ impl PickledInboundGroupSession {
 
 #[wasm_bindgen]
 impl Migration {
-    /// Migrate Megolm sessions of a libolm-based setup to a vodozemac-based setup
-    /// stored in an indexedDB crypto store.
+    /// Migrate Megolm sessions of a libolm-based setup to a vodozemac-based
+    /// setup stored in an indexedDB crypto store.
     ///
     /// Before this method can be used, {@link #migrateBaseData} must be used to
     /// import the base data into the crypto store.
     ///
     /// # Arguments
     ///
-    /// * `sessions` - An `Array` of {@link PickledInboundGroupSession}s to import.
-    /// * `pickle_key` - The libolm pickle key that was used to pickle the megolm
-    ///   session objects.
+    /// * `sessions` - An `Array` of {@link PickledInboundGroupSession}s to
+    ///   import.
+    /// * `pickle_key` - The libolm pickle key that was used to pickle the
+    ///   megolm session objects.
     /// * `store_handle` - A connection to the CryptoStore which will be used to
     ///   store the vodozemac data.
     #[wasm_bindgen(js_name = "migrateMegolmSessions")]
@@ -375,9 +376,7 @@ impl Migration {
 
         let rust_sessions = sessions
             .into_iter()
-            .map(|s| {
-                libolm_pickled_megolm_session_to_rust_pickled_session(s, &pickle_key)
-            })
+            .map(|s| libolm_pickled_megolm_session_to_rust_pickled_session(s, &pickle_key))
             .collect::<Result<_>>()?;
 
         import_megolm_sessions_to_store(rust_sessions, store_handle.store.as_ref())
