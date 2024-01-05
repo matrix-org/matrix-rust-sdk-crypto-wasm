@@ -217,6 +217,10 @@ impl Migration {
     /// Before this method can be used, {@link #migrateBaseData} must be used to
     /// import the base data into the crypto store.
     ///
+    /// This method should be called a number of times, with separate batches of
+    /// `sessions`. If a progress display is given, it can be updated after
+    /// each batch is successfully imported.
+    ///
     /// # Arguments
     ///
     /// * `sessions` - An `Array` of {@link PickledSession}s to import.
@@ -357,6 +361,10 @@ impl Migration {
     ///
     /// Before this method can be used, {@link #migrateBaseData} must be used to
     /// import the base data into the crypto store.
+    ///
+    /// This method should be called a number of times, with separate batches of
+    /// `sessions`. If a progress display is given, it can be updated after
+    /// each batch is successfully imported.
     ///
     /// # Arguments
     ///
