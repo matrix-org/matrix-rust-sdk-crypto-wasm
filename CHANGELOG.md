@@ -1,5 +1,10 @@
 # UNRELEASED
 
+-   Add a `StoreHandle` class which can be used to hold a connection to a
+    crypto store, and thus improve performance when doing multiple operations
+    on the store.
+    ([#76](https://github.com/matrix-org/matrix-rust-sdk-crypto-wasm/pull/76))
+
 -   Update `matrix-rust-sdk` version, with changes including:
     -   Fix for an issue which caused the same keys to be repeatedly backed up.
         ([matrix-rust-sdk#2937](https://github.com/matrix-org/matrix-rust-sdk/pull/2957)
