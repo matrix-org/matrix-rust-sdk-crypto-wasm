@@ -981,7 +981,8 @@ impl VerificationRequest {
     /// supports the given verification methods.
     ///
     /// `methods` represents the methods that we should advertise as
-    /// supported by us.
+    /// supported by us. Items inside `methods` are going to be deleted on the
+    /// JS part after the function returns.
     ///
     /// It returns either a `ToDeviceRequest`, a `RoomMessageRequest`
     /// or `undefined`.

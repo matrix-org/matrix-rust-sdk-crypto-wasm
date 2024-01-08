@@ -54,7 +54,10 @@ impl UserId {
         self.inner.as_str().to_owned()
     }
 
-    /// Clone this `UserId`.
+    /// Create a clone of this `UserId`.
+    ///
+    /// This can be useful when passing a `UserId` instance to methods such as
+    /// {@link OlmMachine.updateTrackedUsers} which destroy the instance.
     #[wasm_bindgen(js_name = "clone")]
     pub fn clone_me(&self) -> Self {
         self.clone()
