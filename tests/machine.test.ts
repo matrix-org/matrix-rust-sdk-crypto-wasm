@@ -525,7 +525,11 @@ describe(OlmMachine.name, () => {
 
             await m.markRequestAsSent(requests[0].id, RequestType.ToDevice, "{}");
 
-            const requestsAfterMarkedAsSent = await m.shareRoomKey(room, [other_user_id.clone()], new EncryptionSettings());
+            const requestsAfterMarkedAsSent = await m.shareRoomKey(
+                room,
+                [other_user_id.clone()],
+                new EncryptionSettings(),
+            );
             expect(requestsAfterMarkedAsSent).toHaveLength(0);
         });
 
