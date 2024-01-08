@@ -41,19 +41,6 @@ pub enum VerificationMethod {
     ReciprocateV1 = 3,
 }
 
-impl From<VerificationMethod> for JsValue {
-    fn from(value: VerificationMethod) -> Self {
-        use VerificationMethod::*;
-
-        match value {
-            SasV1 => JsValue::from(0),
-            QrCodeScanV1 => JsValue::from(1),
-            QrCodeShowV1 => JsValue::from(2),
-            ReciprocateV1 => JsValue::from(3),
-        }
-    }
-}
-
 impl TryFrom<JsValue> for VerificationMethod {
     type Error = JsError;
 
