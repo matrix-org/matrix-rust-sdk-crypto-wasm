@@ -1,5 +1,9 @@
 # UNRELEASED
 
+-   Add a `Migration` class, supporting importing account and session data from
+    libolm.
+    ([#77](https://github.com/matrix-org/matrix-rust-sdk-crypto-wasm/pull/77))
+
 -   Add a `StoreHandle` class which can be used to hold a connection to a
     crypto store, and thus improve performance when doing multiple operations
     on the store.
