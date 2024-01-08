@@ -9,6 +9,14 @@
     on the store.
     ([#76](https://github.com/matrix-org/matrix-rust-sdk-crypto-wasm/pull/76))
 
+-   Update `matrix-rust-sdk` version, with changes including:
+    -   Fix for an issue which caused the same keys to be repeatedly backed up.
+        ([matrix-rust-sdk#2937](https://github.com/matrix-org/matrix-rust-sdk/pull/2957)
+    -   Performance improvement in `markRequestAsSent`.
+        ([matrix-rust-sdk#2977](https://github.com/matrix-org/matrix-rust-sdk/pull/2977))
+    -   Logging for the open sequence for indexeddb store.
+        ([matrix-rust-sdk#2983](https://github.com/matrix-org/matrix-rust-sdk/pull/2983))
+
 # matrix-sdk-crypto-wasm v3.5.0
 
 -   Update matrix-rust-sdk version, providing several changes including a fix
