@@ -53,6 +53,12 @@ impl UserId {
     pub fn to_string(&self) -> String {
         self.inner.as_str().to_owned()
     }
+
+    /// Clone this `UserId`.
+    #[wasm_bindgen(js_name = "clone")]
+    pub fn clone_me(&self) -> Self {
+        self.clone()
+    }
 }
 
 /// A Matrix key ID.
