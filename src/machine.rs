@@ -5,8 +5,8 @@ use std::{collections::BTreeMap, ops::Deref, time::Duration};
 use futures_util::{pin_mut, StreamExt};
 use js_sys::{Array, Function, JsString, Map, Promise, Set};
 use matrix_sdk_common::ruma::{
-    self, events::secret::request::SecretName, serde::Raw, DeviceKeyAlgorithm, OwnedTransactionId,
-    UInt,
+    self, events::secret::request::SecretName, serde::Raw, DeviceKeyAlgorithm, OwnedDeviceId,
+    OwnedTransactionId, OwnedUserId, UInt,
 };
 use matrix_sdk_crypto::{
     backups::MegolmV1BackupKey,
@@ -32,7 +32,7 @@ use crate::{
     requests::{outgoing_request_to_js_value, CrossSigningBootstrapRequests, ToDeviceRequest},
     responses::{self, response_from_string},
     store,
-    store::RoomKeyInfo,
+    store::{RoomKeyInfo, StoreHandle},
     sync_events,
     types::{self, RoomKeyImportResult, SignatureVerification},
     verification, vodozemac,
@@ -78,72 +78,59 @@ impl OlmMachine {
     ///   `OlmMachine` gets dropped.
     ///
     /// * `store_passphrase` - The passphrase that should be used to encrypt the
-    ///   IndexedDB based
-    pub fn initialize(
+    ///   IndexedDB-based store.
+    pub async fn initialize(
         user_id: &identifiers::UserId,
         device_id: &identifiers::DeviceId,
         store_name: Option<String>,
         store_passphrase: Option<String>,
-    ) -> Promise {
+    ) -> Result<JsValue, JsValue> {
         let user_id = user_id.inner.clone();
         let device_id = device_id.inner.clone();
 
-        future_to_promise(async move {
-            let store = match (store_name, store_passphrase) {
-                (Some(store_name), Some(mut store_passphrase)) => {
-                    use zeroize::Zeroize;
+        let store_handle = StoreHandle::open(store_name, store_passphrase)
+            .await
+            .map_err(|e| JsError::from(&*e))?;
+        Self::init_helper(user_id, device_id, store_handle).await
+    }
 
-                    let store = Some(
-                        matrix_sdk_indexeddb::IndexeddbCryptoStore::open_with_passphrase(
-                            &store_name,
-                            &store_passphrase,
-                        )
-                        .await?,
-                    );
+    /// Create a new `OlmMachine` backed by an existing store.
+    ///
+    /// # Arguments
+    ///
+    /// * `user_id` - represents the unique ID of the user that owns this
+    /// machine.
+    ///
+    /// * `device_id` - represents the unique ID of the device
+    /// that owns this machine.
+    ///
+    /// * `store_handle` - the connection to the crypto store to be used for
+    ///   this machine.
+    pub async fn init_from_store(
+        user_id: &identifiers::UserId,
+        device_id: &identifiers::DeviceId,
+        store_handle: &StoreHandle,
+    ) -> Result<JsValue, JsValue> {
+        let user_id = user_id.inner.clone();
+        let device_id = device_id.inner.clone();
+        Self::init_helper(user_id, device_id, store_handle.clone()).await
+    }
 
-                    store_passphrase.zeroize();
-
-                    store
-                }
-
-                (Some(store_name), None) => Some(
-                    matrix_sdk_indexeddb::IndexeddbCryptoStore::open_with_name(&store_name).await?,
-                ),
-
-                (None, Some(_)) => {
-                    return Err(anyhow::Error::msg(
-                        "The `store_passphrase` has been set, but it has an effect only if \
-                        `store_name` is set, which is not; please provide one",
-                    ))
-                }
-
-                (None, None) => None,
-            };
-
-            Ok(OlmMachine {
-                inner: match store {
-                    // We need this `#[cfg]` because `IndexeddbCryptoStore`
-                    // implements `CryptoStore` only on `target_arch =
-                    // "wasm32"`. Without that, we could have a compilation
-                    // error when checking the entire workspace. In practice,
-                    // it doesn't impact this crate because it's always
-                    // compiled for `wasm32`.
-                    #[cfg(target_arch = "wasm32")]
-                    Some(store) => {
-                        matrix_sdk_crypto::OlmMachine::with_store(
-                            user_id.as_ref(),
-                            device_id.as_ref(),
-                            store,
-                        )
-                        .await?
-                    }
-                    _ => {
-                        matrix_sdk_crypto::OlmMachine::new(user_id.as_ref(), device_id.as_ref())
-                            .await
-                    }
-                },
-            })
-        })
+    async fn init_helper(
+        user_id: OwnedUserId,
+        device_id: OwnedDeviceId,
+        store_handle: StoreHandle,
+    ) -> Result<JsValue, JsValue> {
+        Ok(OlmMachine {
+            inner: matrix_sdk_crypto::OlmMachine::with_store(
+                user_id.as_ref(),
+                device_id.as_ref(),
+                store_handle,
+            )
+            .await
+            .map_err(JsError::from)?,
+        }
+        .into())
     }
 
     /// The unique user ID that owns this `OlmMachine` instance.
