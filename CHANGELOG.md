@@ -1,4 +1,4 @@
-# UNRELEASED
+# matrix-sdk-crypto-wasm v3.6.0
 
 -   Add a `Migration` class, supporting importing account and session data from
     libolm.
@@ -11,7 +11,7 @@
 
 -   Update `matrix-rust-sdk` version, with changes including:
     -   Fix for an issue which caused the same keys to be repeatedly backed up.
-        ([matrix-rust-sdk#2937](https://github.com/matrix-org/matrix-rust-sdk/pull/2957)
+        ([matrix-rust-sdk#2937](https://github.com/matrix-org/matrix-rust-sdk/pull/2957))
     -   Performance improvement in `markRequestAsSent`.
         ([matrix-rust-sdk#2977](https://github.com/matrix-org/matrix-rust-sdk/pull/2977))
     -   Logging for the open sequence for indexeddb store.
