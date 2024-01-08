@@ -4,7 +4,7 @@ use js_sys::Array;
 use matrix_sdk_common::ruma;
 use wasm_bindgen::prelude::*;
 
-use crate::{identifiers, js::downcast};
+use crate::identifiers;
 
 /// Information on E2E device updates.
 #[wasm_bindgen]
@@ -19,20 +19,14 @@ impl DeviceLists {
     ///
     /// `changed` and `left` must be an array of `UserId`.
     #[wasm_bindgen(constructor)]
-    pub fn new(changed: Option<Array>, left: Option<Array>) -> Result<DeviceLists, JsError> {
+    pub fn new(
+        changed: Option<Vec<identifiers::UserId>>,
+        left: Option<Vec<identifiers::UserId>>,
+    ) -> Result<DeviceLists, JsError> {
         let mut inner = ruma::api::client::sync::sync_events::DeviceLists::default();
 
-        inner.changed = changed
-            .unwrap_or_default()
-            .iter()
-            .map(|user| Ok(downcast::<identifiers::UserId>(&user, "UserId")?.inner.clone()))
-            .collect::<Result<Vec<ruma::OwnedUserId>, JsError>>()?;
-
-        inner.left = left
-            .unwrap_or_default()
-            .iter()
-            .map(|user| Ok(downcast::<identifiers::UserId>(&user, "UserId")?.inner.clone()))
-            .collect::<Result<Vec<ruma::OwnedUserId>, JsError>>()?;
+        inner.changed = changed.unwrap_or_default().iter().map(|user| user.inner.clone()).collect();
+        inner.left = left.unwrap_or_default().iter().map(|user| user.inner.clone()).collect();
 
         Ok(Self { inner })
     }
