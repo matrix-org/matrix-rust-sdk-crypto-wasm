@@ -17,7 +17,6 @@ use crate::{
     future::future_to_promise,
     identifiers::{DeviceId, RoomId, UserId},
     impl_from_to_inner,
-    js::try_array_to_vec,
     machine::promise_result_to_future,
     requests,
 };
@@ -60,6 +59,19 @@ impl TryFrom<JsValue> for VerificationMethod {
                 )))
             }
         })
+    }
+}
+
+impl From<&VerificationMethod> for RumaVerificationMethod {
+    fn from(value: &VerificationMethod) -> Self {
+        use VerificationMethod::*;
+
+        match value {
+            SasV1 => Self::SasV1,
+            QrCodeScanV1 => Self::QrCodeScanV1,
+            QrCodeShowV1 => Self::QrCodeShowV1,
+            ReciprocateV1 => Self::ReciprocateV1,
+        }
     }
 }
 
@@ -785,9 +797,9 @@ impl VerificationRequest {
         own_user_id: &UserId,
         own_device_id: &DeviceId,
         other_user_id: &UserId,
-        methods: Option<Array>,
+        methods: Option<Vec<VerificationMethod>>,
     ) -> Result<String, JsError> {
-        let methods = methods.map(try_array_to_vec::<VerificationMethod, _>).transpose()?;
+        let methods = methods.map(|methods| methods.iter().map(Into::into).collect());
 
         Ok(serde_json::to_string(&matrix_sdk_crypto::VerificationRequest::request(
             &own_user_id.inner,
@@ -974,8 +986,11 @@ impl VerificationRequest {
     /// It returns either a `ToDeviceRequest`, a `RoomMessageRequest`
     /// or `undefined`.
     #[wasm_bindgen(js_name = "acceptWithMethods")]
-    pub fn accept_with_methods(&self, methods: Array) -> Result<JsValue, JsError> {
-        let methods = try_array_to_vec::<VerificationMethod, _>(methods)?;
+    pub fn accept_with_methods(
+        &self,
+        methods: Vec<VerificationMethod>,
+    ) -> Result<JsValue, JsError> {
+        let methods = methods.iter().map(Into::into).collect();
 
         self.inner
             .accept_with_methods(methods)

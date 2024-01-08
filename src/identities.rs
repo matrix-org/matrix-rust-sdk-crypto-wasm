@@ -3,10 +3,7 @@
 use js_sys::{Array, Promise};
 use wasm_bindgen::prelude::*;
 
-use crate::{
-    future::future_to_promise, identifiers, impl_from_to_inner, js::try_array_to_vec, requests,
-    verification,
-};
+use crate::{future::future_to_promise, identifiers, impl_from_to_inner, requests, verification};
 
 pub(crate) struct UserIdentities {
     inner: matrix_sdk_crypto::UserIdentities,
@@ -60,9 +57,11 @@ impl OwnUserIdentity {
 
     /// Send a verification request to our other devices.
     #[wasm_bindgen(js_name = "requestVerification")]
-    pub fn request_verification(&self, methods: Option<Array>) -> Result<Promise, JsError> {
-        let methods =
-            methods.map(try_array_to_vec::<verification::VerificationMethod, _>).transpose()?;
+    pub fn request_verification(
+        &self,
+        methods: Option<Vec<verification::VerificationMethod>>,
+    ) -> Result<Promise, JsError> {
+        let methods = methods.map(|methods| methods.iter().map(Into::into).collect());
         let me = self.inner.clone();
 
         Ok(future_to_promise(async move {
@@ -164,13 +163,12 @@ impl UserIdentity {
         &self,
         room_id: &identifiers::RoomId,
         request_event_id: &identifiers::EventId,
-        methods: Option<Array>,
+        methods: Option<Vec<verification::VerificationMethod>>,
     ) -> Result<Promise, JsError> {
         let me = self.inner.clone();
         let room_id = room_id.inner.clone();
         let request_event_id = request_event_id.inner.clone();
-        let methods =
-            methods.map(try_array_to_vec::<verification::VerificationMethod, _>).transpose()?;
+        let methods = methods.map(|methods| methods.iter().map(Into::into).collect());
 
         Ok(future_to_promise::<_, verification::VerificationRequest>(async move {
             Ok(me
@@ -188,10 +186,12 @@ impl UserIdentity {
     /// After the content has been sent out a VerificationRequest can be started
     /// with the `request_verification` method.
     #[wasm_bindgen(js_name = "verificationRequestContent")]
-    pub fn verification_request_content(&self, methods: Option<Array>) -> Result<Promise, JsError> {
+    pub fn verification_request_content(
+        &self,
+        methods: Option<Vec<verification::VerificationMethod>>,
+    ) -> Result<Promise, JsError> {
         let me = self.inner.clone();
-        let methods =
-            methods.map(try_array_to_vec::<verification::VerificationMethod, _>).transpose()?;
+        let methods = methods.map(|methods| methods.iter().map(Into::into).collect());
 
         Ok(future_to_promise(async move {
             Ok(serde_json::to_string(&me.verification_request_content(methods).await)?)

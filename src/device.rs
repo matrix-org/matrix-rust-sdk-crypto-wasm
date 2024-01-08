@@ -7,9 +7,7 @@ use crate::{
     encryption::EncryptionAlgorithm,
     future::future_to_promise,
     identifiers::{self, DeviceId, UserId},
-    impl_from_to_inner,
-    js::try_array_to_vec,
-    requests, types, verification, vodozemac,
+    impl_from_to_inner, requests, types, verification, vodozemac,
 };
 
 /// A device represents a E2EE capable client of an user.
@@ -28,10 +26,12 @@ impl Device {
     /// Returns a Promise for a 2-element array `[VerificationRequest,
     /// ToDeviceRequest]`.
     #[wasm_bindgen(js_name = "requestVerification")]
-    pub fn request_verification(&self, methods: Option<Array>) -> Result<Promise, JsError> {
-        let methods =
-            methods.map(try_array_to_vec::<verification::VerificationMethod, _>).transpose()?;
+    pub fn request_verification(
+        &self,
+        methods: Option<Vec<verification::VerificationMethod>>,
+    ) -> Result<Promise, JsError> {
         let me = self.inner.clone();
+        let methods = methods.map(|methods| methods.iter().map(Into::into).collect());
 
         Ok(future_to_promise(async move {
             let tuple = Array::new();

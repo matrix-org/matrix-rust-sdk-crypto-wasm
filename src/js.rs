@@ -1,4 +1,4 @@
-use js_sys::{Array, Object, Reflect};
+use js_sys::{Object, Reflect};
 use wasm_bindgen::{convert::RefFromWasmAbi, prelude::*};
 
 /// A really hacky and dirty code to downcast a `JsValue` to `T:
@@ -26,15 +26,4 @@ where
             "Expect an `{classname}` instance, received `{constructor_name}` instead",
         )))
     }
-}
-
-/// Transform a value `JS` from JavaScript to a Rust wrapper, to a
-/// Rust wrapped type.
-pub(crate) fn try_array_to_vec<JS, Rust>(
-    array: Array,
-) -> Result<Vec<Rust>, <JS as TryFrom<JsValue>>::Error>
-where
-    JS: TryFrom<JsValue> + Into<Rust>,
-{
-    array.iter().map(|item| JS::try_from(item).map(Into::into)).collect()
 }
