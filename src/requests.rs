@@ -641,9 +641,9 @@ impl TryFrom<OriginalCrossSigningBootstrapRequests> for CrossSigningBootstrapReq
     }
 }
 
-pub mod test {
-    #![allow(missing_docs)]
-    // create data for tests/requests.test.js
+#[cfg(test)]
+pub(crate) mod tests {
+    use wasm_bindgen_test::wasm_bindgen_test;
     use std::collections::BTreeMap;
 
     use matrix_sdk_common::ruma::{
@@ -654,31 +654,70 @@ pub mod test {
         device_id, user_id, DeviceKeyAlgorithm,
     };
     use matrix_sdk_crypto::requests::KeysQueryRequest as OriginalKeysQueryRequest;
-    use wasm_bindgen::prelude::wasm_bindgen;
+    use serde_json::Value;
 
     use super::{KeysClaimRequest, KeysQueryRequest, KeysUploadRequest};
 
-    #[wasm_bindgen(js_name = "_test_make_keys_claim_request")]
-    pub fn make_keys_claim_request() -> KeysClaimRequest {
-        let request = OriginalKeysClaimRequest::new(BTreeMap::from([(
+    #[wasm_bindgen_test]
+    // make sure that the timeout in a /keys/claim request is encoded as a number
+    fn test_keys_claim_request_with_timeout() {
+        let rust_request = OriginalKeysClaimRequest::new(BTreeMap::from([(
             user_id!("@alice:localhost").to_owned(),
             BTreeMap::from([(
                 device_id!("ABCDEFG").to_owned(),
                 DeviceKeyAlgorithm::SignedCurve25519,
             )]),
         )]));
-        KeysClaimRequest::try_from(("ID".to_string(), &request)).unwrap()
+        let request = KeysClaimRequest::try_from(("ID".to_string(), &rust_request)).unwrap();
+        let body: Value = serde_json::from_str(&String::from(request.body)).unwrap();
+        assert!(body.as_object().unwrap().contains_key("timeout"));
+        assert!(body["timeout"].is_number());
     }
 
-    #[wasm_bindgen(js_name = "_test_make_keys_query_request")]
-    pub fn make_keys_query_request() -> KeysQueryRequest {
-        let request = OriginalKeysQueryRequest { timeout: None, device_keys: BTreeMap::new() };
-        KeysQueryRequest::try_from(("ID".to_string(), &request)).unwrap()
+    #[wasm_bindgen_test]
+    // if a /keys/claim request has no timeout, make sure it isn't in the request
+    fn test_keys_claim_request_without_timeout() {
+        let mut rust_request = OriginalKeysClaimRequest::new(BTreeMap::from([(
+            user_id!("@alice:localhost").to_owned(),
+            BTreeMap::from([(
+                device_id!("ABCDEFG").to_owned(),
+                DeviceKeyAlgorithm::SignedCurve25519,
+            )]),
+        )]));
+        rust_request.timeout = None;
+        let request = KeysClaimRequest::try_from(("ID".to_string(), &rust_request)).unwrap();
+        let body: Value = serde_json::from_str(&String::from(request.body)).unwrap();
+        assert!(!body.as_object().unwrap().contains_key("timeout"));
     }
 
-    #[wasm_bindgen(js_name = "_test_make_keys_upload_request")]
-    pub fn make_keys_upload_request() -> KeysUploadRequest {
+    #[wasm_bindgen_test]
+    // make sure that the timeout is encoded as a number in a /keys/query
+    fn test_keys_query_request_with_timeout() {
+        let rust_request = OriginalKeysQueryRequest {
+            timeout: Some(std::time::Duration::from_secs(10)),
+            device_keys: BTreeMap::new(),
+        };
+        let request = KeysQueryRequest::try_from(("ID".to_string(), &rust_request)).unwrap();
+        let body: Value = serde_json::from_str(&String::from(request.body)).unwrap();
+        assert!(body.as_object().unwrap().contains_key("timeout"));
+        assert!(body["timeout"].is_number());
+    }
+
+    #[wasm_bindgen_test]
+    // if a /keys/query request has no timeout, make sure it isn't in the request
+    fn test_keys_query_request_without_timeout() {
+        let rust_request = OriginalKeysQueryRequest { timeout: None, device_keys: BTreeMap::new() };
+        let request = KeysQueryRequest::try_from(("ID".to_string(), &rust_request)).unwrap();
+        let body: Value = serde_json::from_str(&String::from(request.body)).unwrap();
+        assert!(!body.as_object().unwrap().contains_key("timeout"));
+    }
+
+    #[wasm_bindgen_test]
+    // if a /keys/upload request no device_keys, make sure it isn't in the request
+    fn test_keys_upload_request_without_devices() {
         let request = OriginalKeysUploadRequest::new();
-        KeysUploadRequest::try_from(("ID".to_string(), &request)).unwrap()
+        let request = KeysUploadRequest::try_from(("ID".to_string(), &request)).unwrap();
+        let body: Value = serde_json::from_str(&String::from(request.body)).unwrap();
+        assert!(!body.as_object().unwrap().contains_key("device_keys"));
     }
 }
