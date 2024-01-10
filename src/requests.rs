@@ -643,7 +643,6 @@ impl TryFrom<OriginalCrossSigningBootstrapRequests> for CrossSigningBootstrapReq
 
 #[cfg(test)]
 pub(crate) mod tests {
-    use wasm_bindgen_test::wasm_bindgen_test;
     use std::collections::BTreeMap;
 
     use matrix_sdk_common::ruma::{
@@ -655,6 +654,7 @@ pub(crate) mod tests {
     };
     use matrix_sdk_crypto::requests::KeysQueryRequest as OriginalKeysQueryRequest;
     use serde_json::Value;
+    use wasm_bindgen_test::wasm_bindgen_test;
 
     use super::{KeysClaimRequest, KeysQueryRequest, KeysUploadRequest};
 
