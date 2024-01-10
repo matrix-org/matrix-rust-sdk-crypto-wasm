@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # UNRELEASED
 
 -   Report failures to callback when importing backed-up room keys. The
@@ -8,7 +9,22 @@
 
 **BREAKING CHANGES**
 
--   Rename `OlmMachine.init_from_store` introduced in v3.6.0 to `OlmMachine.initFromStore`.
+
+-   Rename `OlmMachine.init_from_store` introduced in v3.6.0 to
+    `OlmMachine.initFromStore`.
+    ([#84](https://github.com/matrix-org/matrix-rust-sdk-crypto-wasm/pull/84))
+
+-   Functions/methods that take a JavaScript `Array` as argument now delete the
+    array's items once their return, for example `Device::requestVerification`,
+    `OlmMachine::updateTrackedUsers`, `OlmMachine::shareRoomKey`,
+    `OlmMachine::queryKeysForUsers`, `OlmMachine:getMissingSessions` and so on.
+    ([#82](https://github.com/matrix-org/matrix-rust-sdk-crypto-wasm/pull/82/))
+
+-   Update `wasm-bindgen` to 0.2.89. It allows to remove the `downcast` method.
+    It fixes [#51](https://github.com/matrix-org/matrix-rust-sdk-crypto-wasm/pull/51),
+    thus the resulting JavaScript code of `matrix-rust-sdk-crypto-wasm` can
+    be minified with no issue now.
+    ([#82](https://github.com/matrix-org/matrix-rust-sdk-crypto-wasm/pull/82/))
 
 # matrix-sdk-crypto-wasm v3.6.0
 
