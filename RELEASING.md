@@ -3,7 +3,7 @@
 ## Before you release
 
 Assuming you are making a release to get the latest Rust code, you should bump
-the version of `matrix-rust-sdk` we are depending on in `Cargo.toml`.
+the version of `matrix-rust-sdk` we are depending on in `Cargo.lock`.
 
 At time of writing, Cargo.toml has `git = "https://github.com/matrix-org/matrix-rust-sdk"`,
 which picks up the latest version on the default branch in Git. This means that
