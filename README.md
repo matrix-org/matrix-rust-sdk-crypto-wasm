@@ -72,6 +72,20 @@ $ yarn test
 
 The compiled output should be generated in the `pkg/` directory.
 
+## Local development with matrix-rust-sdk
+
+To build based on a local `matrix-rust-sdk`, add something like this to your
+`.cargo/config` file:
+
+```
+[patch.'https://github.com/matrix-org/matrix-rust-sdk']
+matrix-sdk-base = { path = "../matrix-rust-sdk/crates/matrix-sdk-base" }
+matrix-sdk-common = { path = "../matrix-rust-sdk/crates/matrix-sdk-common" }
+matrix-sdk-crypto = { path = "../matrix-rust-sdk/crates/matrix-sdk-crypto" }
+matrix-sdk-indexeddb = { path = "../matrix-rust-sdk/crates/matrix-sdk-indexeddb" }
+matrix-sdk-qrcode = { path = "../matrix-rust-sdk/crates/matrix-sdk-qrcode" }
+```
+
 ## Documentation
 
 [The documentation can be found
