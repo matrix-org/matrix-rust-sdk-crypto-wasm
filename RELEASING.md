@@ -9,7 +9,7 @@ At time of writing, Cargo.toml has `git = "https://github.com/matrix-org/matrix-
 which picks up the latest version on the default branch in Git. This means that
 we can update the version by following these steps:
 
-1. Ensure `.cargo/config` does not contain the `patch` section for local
+1. Ensure `.cargo/config` does **not** contain the `patch` section for local
    development recommended in `README.md`.
 2. Run `cargo update`
 
