@@ -106,7 +106,7 @@ impl OlmMachine {
     ///
     /// * `store_handle` - the connection to the crypto store to be used for
     ///   this machine.
-    #[wasm_bindgen(getter, js_name = "initFromStore")]
+    #[wasm_bindgen(js_name = "initFromStore")]
     pub async fn init_from_store(
         user_id: &identifiers::UserId,
         device_id: &identifiers::DeviceId,
