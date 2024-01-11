@@ -67,7 +67,7 @@ describe(OlmMachine.name, () => {
 
         let storeHandle = await StoreHandle.open(storeName, storePassphrase);
         expect(
-            await OlmMachine.init_from_store(new UserId("@foo:bar.org"), new DeviceId("baz"), storeHandle),
+            await OlmMachine.initFromStore(new UserId("@foo:bar.org"), new DeviceId("baz"), storeHandle),
         ).toBeInstanceOf(OlmMachine);
         storeHandle.free();
     });
