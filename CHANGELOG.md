@@ -1,3 +1,9 @@
+# UNRELEASED
+
+**BREAKING CHANGES**
+
+-   Rename `OlmMachine.init_from_store` introduced in v3.6.0 to `OlmMachine.initFromStore`.
+
 # matrix-sdk-crypto-wasm v3.6.0
 
 -   Add a `Migration` class, supporting importing account and session data from
