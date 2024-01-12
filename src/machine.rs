@@ -998,6 +998,7 @@ impl OlmMachine {
 
         // convert the js-side data into rust data
         let mut keys: BTreeMap<_, BTreeMap<_, _>> = BTreeMap::new();
+        let mut failures: usize = 0;
         for backed_up_room_keys_entry in backed_up_room_keys.entries() {
             let backed_up_room_keys_entry: Array = backed_up_room_keys_entry?.dyn_into()?;
             let room_id =
@@ -1009,10 +1010,15 @@ impl OlmMachine {
             for room_room_keys_entry in room_room_keys.entries() {
                 let room_room_keys_entry: Array = room_room_keys_entry?.dyn_into()?;
                 let session_id: JsString = room_room_keys_entry.get(0).dyn_into()?;
-                let key: BackedUpRoomKey =
-                    serde_wasm_bindgen::from_value(room_room_keys_entry.get(1))?;
-
-                keys.entry(room_id.clone()).or_default().insert(session_id.into(), key);
+                serde_wasm_bindgen::from_value::<BackedUpRoomKey>(room_room_keys_entry.get(1))
+                    .map_or_else(
+                        |_| {
+                            failures = failures + 1;
+                        },
+                        |key| {
+                            keys.entry(room_id.clone()).or_default().insert(session_id.into(), key);
+                        },
+                    );
             }
         }
 
@@ -1022,7 +1028,12 @@ impl OlmMachine {
                 .import_backed_up_room_keys(keys, |progress, total| {
                     if let Some(callback) = &progress_listener {
                         callback
-                            .call2(&JsValue::NULL, &JsValue::from(progress), &JsValue::from(total))
+                            .call3(
+                                &JsValue::NULL,
+                                &JsValue::from(progress),
+                                &JsValue::from(total),
+                                &JsValue::from(failures),
+                            )
                             .expect("Progress listener passed to `importBackedUpRoomKeys` failed");
                     }
                 })

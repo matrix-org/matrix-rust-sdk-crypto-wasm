@@ -1193,6 +1193,8 @@ describe(OlmMachine.name, () => {
                     expect(decrypted.algorithm).toStrictEqual("m.megolm.v1.aes-sha2");
                     decryptedRoomKeyMap.set(sessionId, decrypted);
                 }
+                // and add a bad key
+                decryptedRoomKeyMap.set("invalid", {});
             }
 
             // now import the backup into a new OlmMachine
@@ -1207,7 +1209,7 @@ describe(OlmMachine.name, () => {
             );
 
             expect(progressListener).toHaveBeenCalledTimes(1);
-            expect(progressListener).toHaveBeenCalledWith(0, 1);
+            expect(progressListener).toHaveBeenCalledWith(0, 1, 1);
         });
     });
 
