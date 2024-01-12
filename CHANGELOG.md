@@ -1,5 +1,9 @@
 # UNRELEASED
 
+-   Report failures to callback when importing backed-up room keys.  The
+    callback is now called with a third argument, giving the number of invalid
+    room keys.
+
 **BREAKING CHANGES**
 
 -   Rename `OlmMachine.init_from_store` introduced in v3.6.0 to `OlmMachine.initFromStore`.
