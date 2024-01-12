@@ -1,34 +1,35 @@
 import {
+    BackupDecryptionKey,
     CrossSigningStatus,
     DecryptedRoomEvent,
+    DecryptionErrorCode,
     DeviceId,
     DeviceKeyId,
     DeviceLists,
     EncryptionSettings,
     EventId,
+    getVersions,
     InboundGroupSession,
+    KeysBackupRequest,
+    KeysClaimRequest,
     KeysQueryRequest,
     KeysUploadRequest,
     MaybeSignature,
+    MegolmDecryptionError,
     OlmMachine,
     OwnUserIdentity,
     RequestType,
     RoomId,
     RoomMessageRequest,
     ShieldColor,
+    SignatureState,
     SignatureUploadRequest,
+    StoreHandle,
     ToDeviceRequest,
     UserId,
     UserIdentity,
     VerificationRequest,
     Versions,
-    getVersions,
-    SignatureState,
-    BackupDecryptionKey,
-    MegolmDecryptionError,
-    DecryptionErrorCode,
-    KeysClaimRequest,
-    KeysBackupRequest,
 } from "../pkg/matrix_sdk_crypto_wasm";
 import "fake-indexeddb/auto";
 
@@ -53,13 +54,26 @@ describe("Versions", () => {
     });
 });
 
+jest.setTimeout(15000);
+
 describe(OlmMachine.name, () => {
     test("can be instantiated with the async initializer", async () => {
         expect(await OlmMachine.initialize(new UserId("@foo:bar.org"), new DeviceId("baz"))).toBeInstanceOf(OlmMachine);
     });
 
-    test("can be instantiated with a store", async () => {
+    test("can be instantiated with a StoreHandle", async () => {
         let storeName = "hello";
+        let storePassphrase = "world";
+
+        let storeHandle = await StoreHandle.open(storeName, storePassphrase);
+        expect(
+            await OlmMachine.initFromStore(new UserId("@foo:bar.org"), new DeviceId("baz"), storeHandle),
+        ).toBeInstanceOf(OlmMachine);
+        storeHandle.free();
+    });
+
+    test("can be instantiated with store credentials", async () => {
+        let storeName = "hello2";
         let storePassphrase = "world";
 
         const byStoreName = (db: IDBDatabaseInfo) => db.name!.startsWith(storeName);
@@ -78,7 +92,7 @@ describe(OlmMachine.name, () => {
         expect(databases).toHaveLength(2);
         expect(databases).toStrictEqual([
             { name: `${storeName}::matrix-sdk-crypto-meta`, version: 1 },
-            { name: `${storeName}::matrix-sdk-crypto`, version: 7 },
+            { name: `${storeName}::matrix-sdk-crypto`, version: 8 },
         ]);
 
         // Creating a new Olm machine, with the stored state.
@@ -164,7 +178,7 @@ describe(OlmMachine.name, () => {
         expect(databases).toHaveLength(2);
         expect(databases).toStrictEqual([
             { name: `${storeName}::matrix-sdk-crypto-meta`, version: 1 },
-            { name: `${storeName}::matrix-sdk-crypto`, version: 7 },
+            { name: `${storeName}::matrix-sdk-crypto`, version: 8 },
         ]);
 
         // Let's force to close the `OlmMachine`.

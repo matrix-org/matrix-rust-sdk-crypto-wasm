@@ -1,4 +1,19 @@
-# Steps for releasing `matrix-sdk-crypto-wasm`
+# Releasing `matrix-sdk-crypto-wasm`
+
+## Before you release
+
+Assuming you are making a release to get the latest Rust code, you should bump
+the version of `matrix-rust-sdk` we are depending on in `Cargo.lock`.
+
+At time of writing, Cargo.toml has `git = "https://github.com/matrix-org/matrix-rust-sdk"`,
+which picks up the latest version on the default branch in Git. This means that
+we can update the version by following these steps:
+
+1. Ensure `.cargo/config` does **not** contain the `patch` section for local
+   development recommended in `README.md`.
+2. Run `cargo update`
+
+## Doing the release
 
 1. Create a new branch, named `release-v<version>`.
 2. Update `CHANGELOG.md` and `git add` ready for commit on the next step.

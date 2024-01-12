@@ -1,7 +1,38 @@
-# matrix-sdk-crypto-wasm UNRELEASED
+# UNRELEASED
 
--   New API `OlmMachine.requestMissingSecretsIfNeeded` that will creates outgoing secret request to other sessions.
--   Verification cancel codes for `cancelWithCode` and `cancelInfo.cancelCode` are now passed as strings rather than an enum.
+**BREAKING CHANGES**
+
+-   Rename `OlmMachine.init_from_store` introduced in v3.6.0 to `OlmMachine.initFromStore`.
+
+# matrix-sdk-crypto-wasm v3.6.0
+
+-   Add a `Migration` class, supporting importing account and session data from
+    libolm.
+    ([#77](https://github.com/matrix-org/matrix-rust-sdk-crypto-wasm/pull/77))
+
+-   Add a `StoreHandle` class which can be used to hold a connection to a
+    crypto store, and thus improve performance when doing multiple operations
+    on the store.
+    ([#76](https://github.com/matrix-org/matrix-rust-sdk-crypto-wasm/pull/76))
+
+-   Update `matrix-rust-sdk` version, with changes including:
+    -   Fix for an issue which caused the same keys to be repeatedly backed up.
+        ([matrix-rust-sdk#2937](https://github.com/matrix-org/matrix-rust-sdk/pull/2957))
+    -   Performance improvement in `markRequestAsSent`.
+        ([matrix-rust-sdk#2977](https://github.com/matrix-org/matrix-rust-sdk/pull/2977))
+    -   Logging for the open sequence for indexeddb store.
+        ([matrix-rust-sdk#2983](https://github.com/matrix-org/matrix-rust-sdk/pull/2983))
+
+# matrix-sdk-crypto-wasm v3.5.0
+
+-   Update matrix-rust-sdk version, providing several changes including a fix
+    for occasional freezes (https://github.com/element-hq/element-web/issues/26488).
+
+-   New API `OlmMachine.requestMissingSecretsIfNeeded` that creates an
+    outgoing secret request to other sessions.
+
+-   Verification cancel codes for `cancelWithCode` and `cancelInfo.cancelCode`
+    are now passed as strings rather than an enum.
 
 # matrix-sdk-crypto-wasm v3.4.0
 
