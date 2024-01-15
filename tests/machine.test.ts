@@ -1209,7 +1209,7 @@ describe(OlmMachine.name, () => {
             );
 
             expect(progressListener).toHaveBeenCalledTimes(1);
-            expect(progressListener).toHaveBeenCalledWith(0, 1, 1);
+            expect(progressListener).toHaveBeenCalledWith(0, 2, 1);
         });
     });
 
