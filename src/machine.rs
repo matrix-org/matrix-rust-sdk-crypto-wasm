@@ -982,8 +982,10 @@ impl OlmMachine {
     ///   {@link RoomId}, to a Map from session ID to a (decrypted) session data
     ///   structure.
     ///
-    /// * `progress_listener`: an optional callback that takes 2 arguments:
-    ///   `progress` and `total`, and returns nothing.
+    /// * `progress_listener`: an optional callback that takes 3 arguments:
+    ///   `progress` (the number of keys that have successfully been imported),
+    ///   `total` (the total number of keys), and `failures` (the number of keys
+    ///   that failed to import), and returns nothing.
     ///
     /// # Returns
     ///
@@ -1029,7 +1031,7 @@ impl OlmMachine {
                             .call3(
                                 &JsValue::NULL,
                                 &JsValue::from(progress),
-                                &JsValue::from(total),
+                                &JsValue::from(total + failures),
                                 &JsValue::from(failures),
                             )
                             .expect("Progress listener passed to `importBackedUpRoomKeys` failed");
