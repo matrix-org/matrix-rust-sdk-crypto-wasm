@@ -1031,6 +1031,9 @@ impl OlmMachine {
                             .call3(
                                 &JsValue::NULL,
                                 &JsValue::from(progress),
+                                // the "total" that gets passed to this function only counts
+                                // the keys that we passed to `import_backed_up_room_keys`
+                                // so we need to add `failures` to get the actual total
                                 &JsValue::from(total + failures),
                                 &JsValue::from(failures),
                             )
