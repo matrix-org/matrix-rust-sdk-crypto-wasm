@@ -1025,16 +1025,16 @@ impl OlmMachine {
         Ok(future_to_promise(async move {
             let result: RoomKeyImportResult = me
                 .backup_machine()
-                .import_backed_up_room_keys(keys, |progress, total| {
+                .import_backed_up_room_keys(keys, |progress, total_valid| {
                     if let Some(callback) = &progress_listener {
                         callback
                             .call3(
                                 &JsValue::NULL,
                                 &JsValue::from(progress),
-                                // the "total" that gets passed to this function only counts
-                                // the keys that we passed to `import_backed_up_room_keys`
-                                // so we need to add `failures` to get the actual total
-                                &JsValue::from(total + failures),
+                                // "total_valid" counts the total number of keys that
+                                // we passed to `import_backed_up_room_keys` so we
+                                // need to add `failures` to get the full total
+                                &JsValue::from(total_valid + failures),
                                 &JsValue::from(failures),
                             )
                             .expect("Progress listener passed to `importBackedUpRoomKeys` failed");
