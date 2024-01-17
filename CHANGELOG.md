@@ -1,5 +1,11 @@
 # UNRELEASED
 
+-   Report failures to callback when importing backed-up room keys. The
+    `progress_listener` callback in the `OlmMachine.importBackedUpRoomKeys`
+    function is now called with a third argument, giving the number of invalid
+    room keys.
+    ([#85](https://github.com/matrix-org/matrix-rust-sdk-crypto-wasm/pull/85))
+
 **BREAKING CHANGES**
 
 -   Rename `OlmMachine.init_from_store` introduced in v3.6.0 to `OlmMachine.initFromStore`.
