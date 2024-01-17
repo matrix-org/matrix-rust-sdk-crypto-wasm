@@ -1,5 +1,8 @@
 # UNRELEASED
 
+-   Add new methods `OlmMachine.{get,set}RoomSettings`.
+    ([#95](https://github.com/matrix-org/matrix-rust-sdk-crypto-wasm/pull/95))
+
 # matrix-sdk-crypto-wasm v4.0.1
 
 -   `PickledInboundGroupSession.sender_signing_key` is now optional.

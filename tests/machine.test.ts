@@ -6,6 +6,7 @@ import {
     DeviceId,
     DeviceKeyId,
     DeviceLists,
+    EncryptionAlgorithm,
     EncryptionSettings,
     EventId,
     getVersions,
@@ -21,6 +22,7 @@ import {
     RequestType,
     RoomId,
     RoomMessageRequest,
+    RoomSettings,
     ShieldColor,
     SignatureState,
     SignatureUploadRequest,
@@ -41,6 +43,13 @@ type AnyOutgoingRequest =
     | SignatureUploadRequest
     | RoomMessageRequest
     | KeysBackupRequest;
+
+afterEach(() => {
+    // reset fake-indexeddb after each test, to make sure we don't leak data
+    // cf https://github.com/dumbmatter/fakeIndexedDB#wipingresetting-the-indexeddb-for-a-fresh-state
+    // eslint-disable-next-line no-global-assign
+    indexedDB = new IDBFactory();
+});
 
 describe("Versions", () => {
     test("can find out the crate versions", async () => {
@@ -1386,6 +1395,80 @@ describe(OlmMachine.name, () => {
                 return request instanceof ToDeviceRequest;
             });
             expect(toDeviceRequests).toHaveLength(0);
+        });
+    });
+
+    describe.each(["passphrase", undefined])("Room settings (store passphrase '%s')", (storePassphrase) => {
+        let m: OlmMachine;
+
+        beforeEach(async () => {
+            m = await OlmMachine.initialize(user, device, "store_prefix", storePassphrase);
+        });
+
+        test("Should return undefined for an unknown room", async () => {
+            await m.setRoomSettings(new RoomId("!test:room"), new RoomSettings());
+            const settings = await m.getRoomSettings(new RoomId("!test1:room"));
+            expect(settings).toBe(undefined);
+        });
+
+        test("Should store and return room settings", async () => {
+            const settings = new RoomSettings();
+            settings.algorithm = EncryptionAlgorithm.MegolmV1AesSha2;
+            settings.onlyAllowTrustedDevices = true;
+            settings.sessionRotationPeriodMs = 10000;
+            settings.sessionRotationPeriodMessages = 1234;
+
+            await m.setRoomSettings(new RoomId("!test:room"), settings);
+
+            const loadedSettings = await m.getRoomSettings(new RoomId("!test:room"));
+            expect(loadedSettings.algorithm).toEqual(EncryptionAlgorithm.MegolmV1AesSha2);
+            expect(loadedSettings.onlyAllowTrustedDevices).toBe(true);
+            expect(loadedSettings.sessionRotationPeriodMs).toEqual(10000);
+            expect(loadedSettings.sessionRotationPeriodMessages).toEqual(1234);
+        });
+
+        test("Should reject unsupported algorithms", async () => {
+            const settings = new RoomSettings();
+            settings.algorithm = EncryptionAlgorithm.OlmV1Curve25519AesSha2;
+            await expect(m.setRoomSettings(new RoomId("!test:room"), settings)).rejects.toThrow(
+                /the new settings are invalid/,
+            );
+        });
+
+        test("Should reject downgrade attacks", async () => {
+            const settings = new RoomSettings();
+            settings.algorithm = EncryptionAlgorithm.MegolmV1AesSha2;
+            settings.onlyAllowTrustedDevices = true;
+            settings.sessionRotationPeriodMs = 100;
+            settings.sessionRotationPeriodMessages = 10;
+            await m.setRoomSettings(new RoomId("!test:room"), settings);
+
+            // Try to increase the rotation period
+            settings.sessionRotationPeriodMs = 1000;
+            await expect(m.setRoomSettings(new RoomId("!test:room"), settings)).rejects.toThrow(/downgrade/);
+
+            // Check the old settings persist
+            const loadedSettings = await m.getRoomSettings(new RoomId("!test:room"));
+            expect(loadedSettings.algorithm).toEqual(EncryptionAlgorithm.MegolmV1AesSha2);
+            expect(loadedSettings.onlyAllowTrustedDevices).toBe(true);
+            expect(loadedSettings.sessionRotationPeriodMs).toEqual(100);
+            expect(loadedSettings.sessionRotationPeriodMessages).toEqual(10);
+        });
+
+        test("Should ignore no-op changes", async () => {
+            const settings = new RoomSettings();
+            settings.algorithm = EncryptionAlgorithm.MegolmV1AesSha2;
+            settings.onlyAllowTrustedDevices = true;
+            settings.sessionRotationPeriodMs = 100;
+            settings.sessionRotationPeriodMessages = 10;
+            await m.setRoomSettings(new RoomId("!test:room"), settings);
+
+            const settings2 = new RoomSettings();
+            settings2.algorithm = EncryptionAlgorithm.MegolmV1AesSha2;
+            settings2.onlyAllowTrustedDevices = true;
+            settings2.sessionRotationPeriodMs = 100;
+            settings2.sessionRotationPeriodMessages = 10;
+            await m.setRoomSettings(new RoomId("!test:room"), settings2);
         });
     });
 });

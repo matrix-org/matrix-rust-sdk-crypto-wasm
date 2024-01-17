@@ -32,7 +32,7 @@ use crate::{
     store,
     store::{RoomKeyInfo, StoreHandle},
     sync_events,
-    types::{self, RoomKeyImportResult, SignatureVerification},
+    types::{self, RoomKeyImportResult, RoomSettings, SignatureVerification},
     verification, vodozemac,
 };
 
@@ -1377,6 +1377,42 @@ impl OlmMachine {
             let has_missing_secrets = me.query_missing_secrets_from_other_sessions().await?;
             Ok(JsValue::from_bool(has_missing_secrets))
         })
+    }
+
+    /// Get the stored room settings, such as the encryption algorithm or
+    /// whether to encrypt only for trusted devices.
+    ///
+    /// These settings can be modified via {@link #setRoomSettings}.
+    ///
+    /// # Returns
+    ///
+    /// `Promise<RoomSettings|undefined>`
+    #[wasm_bindgen(js_name = "getRoomSettings")]
+    pub async fn get_room_settings(
+        &self,
+        room_id: &identifiers::RoomId,
+    ) -> Result<JsValue, JsError> {
+        let result = self.inner.room_settings(&room_id.inner).await?;
+        Ok(result.map(|settings| RoomSettings::from(settings)).into())
+    }
+
+    /// Store encryption settings for the given room.
+    ///
+    /// This method checks if the new settings are "safe" -- ie, that they do
+    /// not represent a downgrade in encryption security from any previous
+    /// settings. Attempts to downgrade security will result in an error.
+    ///
+    /// If the settings are valid, they will be persisted to the crypto store.
+    /// These settings are not used directly by this library, but the saved
+    /// settings can be retrieved via {@link #getRoomSettings}.
+    #[wasm_bindgen(js_name = "setRoomSettings")]
+    pub async fn set_room_settings(
+        &self,
+        room_id: &identifiers::RoomId,
+        room_settings: &RoomSettings,
+    ) -> Result<(), JsError> {
+        self.inner.set_room_settings(&room_id.inner, &room_settings.into()).await?;
+        Ok(())
     }
 
     /// Shut down the `OlmMachine`.
