@@ -963,29 +963,6 @@ impl OlmMachine {
         }))
     }
 
-    /// Shared helper for `import_exported_room_keys` and `import_room_keys`.
-    ///
-    /// Wraps the progress listener in a Rust closure and runs
-    /// `Store::import_exported_room_keys`
-    ///
-    /// Items inside `exported_room_keys` are going to be deleted on the JS part
-    /// after the function returns. Be careful to not used `exported_room_keys`
-    /// after that.
-    async fn import_exported_room_keys_helper(
-        inner: &matrix_sdk_crypto::OlmMachine,
-        exported_room_keys: Vec<matrix_sdk_crypto::olm::ExportedRoomKey>,
-        progress_listener: Function,
-    ) -> Result<matrix_sdk_crypto::RoomKeyImportResult, CryptoStoreError> {
-        inner
-            .store()
-            .import_exported_room_keys(exported_room_keys, |progress, total| {
-                progress_listener
-                    .call2(&JsValue::NULL, &JsValue::from(progress), &JsValue::from(total))
-                    .expect("Progress listener passed to `importExportedRoomKeys` failed");
-            })
-            .await
-    }
-
     /// Import the given room keys into our store.
     ///
     /// # Arguments
@@ -1408,6 +1385,31 @@ impl OlmMachine {
     /// All associated resources will be closed too, like IndexedDB
     /// connections.
     pub fn close(self) {}
+}
+
+impl OlmMachine {
+    /// Shared helper for `import_exported_room_keys` and `import_room_keys`.
+    ///
+    /// Wraps the progress listener in a Rust closure and runs
+    /// `Store::import_exported_room_keys`
+    ///
+    /// Items inside `exported_room_keys` will be invalidated by this method. Be
+    /// careful to not used `ExportedRoomKey`s after this method has been
+    /// called.
+    async fn import_exported_room_keys_helper(
+        inner: &matrix_sdk_crypto::OlmMachine,
+        exported_room_keys: Vec<matrix_sdk_crypto::olm::ExportedRoomKey>,
+        progress_listener: Function,
+    ) -> Result<matrix_sdk_crypto::RoomKeyImportResult, CryptoStoreError> {
+        inner
+            .store()
+            .import_exported_room_keys(exported_room_keys, |progress, total| {
+                progress_listener
+                    .call2(&JsValue::NULL, &JsValue::from(progress), &JsValue::from(total))
+                    .expect("Progress listener passed to `importExportedRoomKeys` failed");
+            })
+            .await
+    }
 }
 
 // helper for register_room_key_received_callback: wraps the key info
