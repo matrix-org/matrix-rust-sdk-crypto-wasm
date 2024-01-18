@@ -75,19 +75,6 @@ impl From<&VerificationMethod> for RumaVerificationMethod {
     }
 }
 
-impl From<VerificationMethod> for RumaVerificationMethod {
-    fn from(value: VerificationMethod) -> Self {
-        use VerificationMethod::*;
-
-        match value {
-            SasV1 => Self::SasV1,
-            QrCodeScanV1 => Self::QrCodeScanV1,
-            QrCodeShowV1 => Self::QrCodeShowV1,
-            ReciprocateV1 => Self::ReciprocateV1,
-        }
-    }
-}
-
 impl TryFrom<RumaVerificationMethod> for VerificationMethod {
     type Error = JsError;
 
