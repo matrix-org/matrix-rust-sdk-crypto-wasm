@@ -984,6 +984,8 @@ impl VerificationRequest {
     /// supported by us. Items inside `methods` are going to be deleted on the
     /// JS part after the function returns.
     ///
+    /// Items inside `methods` will be invalidated by this method.
+    ///
     /// It returns either a `ToDeviceRequest`, a `RoomMessageRequest`
     /// or `undefined`.
     #[wasm_bindgen(js_name = "acceptWithMethods")]

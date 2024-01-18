@@ -222,10 +222,10 @@ impl Migration {
     ///
     /// # Arguments
     ///
-    /// * `sessions` - An `Array` of {@link PickledSession}s to import.
+    /// * `sessions` - An `Array` of {@link PickledSession}s to import. Items
+    ///   inside `sessions` are going to be invalidated by this method.
     /// * `pickle_key` - The libolm pickle key that was used to pickle the olm
-    ///   session objects. Items inside `sessions` are going to be deleted on
-    ///   the JS part after the function returns.
+    ///   session objects.
     /// * `store_handle` - A connection to the CryptoStore which will be used to
     ///   store the vodozemac data.
     #[wasm_bindgen(js_name = "migrateOlmSessions")]
@@ -368,8 +368,8 @@ impl Migration {
     /// # Arguments
     ///
     /// * `sessions` - An `Array` of {@link PickledInboundGroupSession}s to
-    ///   import. Items inside `sessions` are going to be deleted on the JS part
-    ///   after the function returns.
+    ///   import. Items inside `sessions` are going to be invalidated by this
+    ///   method.
     /// * `pickle_key` - The libolm pickle key that was used to pickle the
     ///   megolm session objects.
     /// * `store_handle` - A connection to the CryptoStore which will be used to

@@ -14,10 +14,11 @@
     `OlmMachine.initFromStore`.
     ([#84](https://github.com/matrix-org/matrix-rust-sdk-crypto-wasm/pull/84))
 
--   Functions/methods that take a JavaScript `Array` as argument now delete the
-    array's items once their return, for example `Device::requestVerification`,
-    `OlmMachine::updateTrackedUsers`, `OlmMachine::shareRoomKey`,
-    `OlmMachine::queryKeysForUsers`, `OlmMachine:getMissingSessions` and so on.
+**BREAKING CHANGES**
+
+-   Functions/methods that take a JavaScript `Array` as argument now invalidate the
+    items within that array so that they cannot be re-used as soon as
+    they are received by the functions/methods. See the patch for affected methods.
     ([#82](https://github.com/matrix-org/matrix-rust-sdk-crypto-wasm/pull/82/))
 
 -   Update `wasm-bindgen` to 0.2.89. It allows to remove the `downcast` method.

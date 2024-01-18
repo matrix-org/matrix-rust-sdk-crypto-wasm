@@ -56,6 +56,8 @@ impl OwnUserIdentity {
     }
 
     /// Send a verification request to our other devices.
+    ///
+    /// Items inside `methods` will be invalidated by this method.
     #[wasm_bindgen(js_name = "requestVerification")]
     pub fn request_verification(
         &self,
@@ -158,6 +160,8 @@ impl UserIdentity {
 
     /// Create a `VerificationRequest` object after the verification
     /// request content has been sent out.
+    ///
+    /// Items inside `methods` will be invalidated by this method.
     #[wasm_bindgen(js_name = "requestVerification")]
     pub fn request_verification(
         &self,
@@ -185,6 +189,8 @@ impl UserIdentity {
     ///
     /// After the content has been sent out a VerificationRequest can be started
     /// with the `request_verification` method.
+    ///
+    /// Items inside `methods` will be invalidated by this method.
     #[wasm_bindgen(js_name = "verificationRequestContent")]
     pub fn verification_request_content(
         &self,

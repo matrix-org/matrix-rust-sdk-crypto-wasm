@@ -227,8 +227,8 @@ impl OlmMachine {
     ///
     /// Users that were already in the list are unaffected.
     ///
-    /// Items inside `users` are going to be deleted on the JS part after the
-    /// function returns. Be careful to not used `users` after that.
+    /// Items inside `users` will be invalidated by this method. Be careful to
+    /// not used `UserId`s after this method has been called.
     #[wasm_bindgen(js_name = "updateTrackedUsers")]
     pub fn update_tracked_users(&self, users: Vec<identifiers::UserId>) -> Promise {
         let users = users.iter().map(|user| user.inner.clone()).collect::<Vec<_>>();
@@ -639,8 +639,8 @@ impl OlmMachine {
     ///
     /// Returns an array of `ToDeviceRequest`s.
     ///
-    /// Items inside `users` are going to be deleted on the JS part after the
-    /// function returns. Be careful to not used `users` after that.
+    /// Items inside `users` will be invalidated by this method. Be careful to
+    /// not used `UserId`s after this method has been called.
     #[wasm_bindgen(js_name = "shareRoomKey")]
     pub fn share_room_key(
         &self,
@@ -680,8 +680,8 @@ impl OlmMachine {
     /// Returns a `KeysQueryRequest` object. The response of the request should
     /// be passed to the `OlmMachine` with the `mark_request_as_sent`.
     ///
-    /// Items inside `users` are going to be deleted on the JS part after the
-    /// function returns. Be careful to not used `users` after that.
+    /// Items inside `users` will be invalidated by this method. Be careful to
+    /// not used `UserId`s after this method has been called.
     #[wasm_bindgen(js_name = "queryKeysForUsers")]
     pub fn query_keys_for_users(
         &self,
@@ -721,8 +721,8 @@ impl OlmMachine {
     /// we lack a session with one of their devices. This can be an
     /// empty iterator when calling this method between sync requests.
     ///
-    /// Items inside `users` are going to be deleted on the JS part after the
-    /// function returns. Be careful to not used `users` after that.
+    /// Items inside `users` will be invalidated by this method. Be careful to
+    /// not used `UserId`s after this method has been called.
     #[wasm_bindgen(js_name = "getMissingSessions")]
     pub fn get_missing_sessions(&self, users: Vec<identifiers::UserId>) -> Promise {
         let users = users.iter().map(|user| user.inner.clone()).collect::<Vec<_>>();

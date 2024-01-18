@@ -18,6 +18,9 @@ impl DeviceLists {
     /// Create an empty `DeviceLists`.
     ///
     /// `changed` and `left` must be an array of `UserId`.
+    ///
+    /// Items inside `changed` and `left` will be invalidated by this method. Be
+    /// careful to not used `UserId`s after this method has been called.
     #[wasm_bindgen(constructor)]
     pub fn new(
         changed: Option<Vec<identifiers::UserId>>,
