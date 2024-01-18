@@ -137,18 +137,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "8c3c1a368f70d6cf7302d78f8f7093da241fb8e8807c05cc9e51a125895a6d5b"
 
 [[package]]
-name = "bitflags"
-version = "2.4.2"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "ed570934406eb16438a4e976b1b4500774099c13b8cb96eec99f620f05090ddf"
-
-[[package]]
-name = "bitmaps"
-version = "3.2.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "703642b98a00b3b90513279a8ede3fcfa479c126c5fb46e78f3051522f021403"
-
-[[package]]
 name = "blake3"
 version = "1.5.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -467,19 +455,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "eyeball-im"
-version = "0.4.2"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "021fab29d9670be5867b16d56a95c29a12c3c1bb654e7d589010a028716d625d"
-dependencies = [
- "futures-core",
- "imbl",
- "tokio",
- "tokio-util",
- "tracing",
-]
-
-[[package]]
 name = "fancy_constructor"
 version = "1.2.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -668,28 +643,6 @@ checksum = "634d9b1461af396cad843f47fdba5597a4f9e6ddd4bfb6ff5d85028c25cb12f6"
 dependencies = [
  "unicode-bidi",
  "unicode-normalization",
-]
-
-[[package]]
-name = "imbl"
-version = "2.0.3"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "978d142c8028edf52095703af2fad11d6f611af1246685725d6b850634647085"
-dependencies = [
- "bitmaps",
- "imbl-sized-chunks",
- "rand_core",
- "rand_xoshiro",
- "version_check",
-]
-
-[[package]]
-name = "imbl-sized-chunks"
-version = "0.1.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "e6957ea0b2541c5ca561d3ef4538044af79f8a05a1eb3a3b148936aaceaa1076"
-dependencies = [
- "bitmaps",
 ]
 
 [[package]]
@@ -908,32 +861,9 @@ dependencies = [
 ]
 
 [[package]]
-name = "matrix-sdk-base"
-version = "0.7.0"
-source = "git+https://github.com/matrix-org/matrix-rust-sdk#18065cb42ec560571c6637c47fa0e18934043106"
-dependencies = [
- "as_variant",
- "async-trait",
- "bitflags",
- "eyeball",
- "eyeball-im",
- "futures-util",
- "matrix-sdk-common",
- "matrix-sdk-crypto",
- "matrix-sdk-store-encryption",
- "once_cell",
- "ruma",
- "serde",
- "serde_json",
- "thiserror",
- "tokio",
- "tracing",
-]
-
-[[package]]
 name = "matrix-sdk-common"
 version = "0.7.0"
-source = "git+https://github.com/matrix-org/matrix-rust-sdk#18065cb42ec560571c6637c47fa0e18934043106"
+source = "git+https://github.com/matrix-org/matrix-rust-sdk#a3fe9c357b1dc2e3d4d49800e0ffe525763612df"
 dependencies = [
  "async-trait",
  "futures-core",
@@ -955,7 +885,7 @@ dependencies = [
 [[package]]
 name = "matrix-sdk-crypto"
 version = "0.7.0"
-source = "git+https://github.com/matrix-org/matrix-rust-sdk#18065cb42ec560571c6637c47fa0e18934043106"
+source = "git+https://github.com/matrix-org/matrix-rust-sdk#a3fe9c357b1dc2e3d4d49800e0ffe525763612df"
 dependencies = [
  "aes",
  "as_variant",
@@ -1016,7 +946,7 @@ dependencies = [
 [[package]]
 name = "matrix-sdk-indexeddb"
 version = "0.7.0"
-source = "git+https://github.com/matrix-org/matrix-rust-sdk#18065cb42ec560571c6637c47fa0e18934043106"
+source = "git+https://github.com/matrix-org/matrix-rust-sdk#a3fe9c357b1dc2e3d4d49800e0ffe525763612df"
 dependencies = [
  "anyhow",
  "async-trait",
@@ -1025,7 +955,6 @@ dependencies = [
  "gloo-utils",
  "indexed_db_futures",
  "js-sys",
- "matrix-sdk-base",
  "matrix-sdk-crypto",
  "matrix-sdk-store-encryption",
  "ruma",
@@ -1042,7 +971,7 @@ dependencies = [
 [[package]]
 name = "matrix-sdk-qrcode"
 version = "0.7.0"
-source = "git+https://github.com/matrix-org/matrix-rust-sdk#18065cb42ec560571c6637c47fa0e18934043106"
+source = "git+https://github.com/matrix-org/matrix-rust-sdk#a3fe9c357b1dc2e3d4d49800e0ffe525763612df"
 dependencies = [
  "byteorder",
  "qrcode",
@@ -1054,12 +983,11 @@ dependencies = [
 [[package]]
 name = "matrix-sdk-store-encryption"
 version = "0.7.0"
-source = "git+https://github.com/matrix-org/matrix-rust-sdk#18065cb42ec560571c6637c47fa0e18934043106"
+source = "git+https://github.com/matrix-org/matrix-rust-sdk#a3fe9c357b1dc2e3d4d49800e0ffe525763612df"
 dependencies = [
  "blake3",
  "chacha20poly1305",
  "displaydoc",
- "getrandom",
  "hmac",
  "pbkdf2",
  "rand",
@@ -1333,15 +1261,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "ec0be4795e2f6a28069bec0b5ff3e2ac9bafc99e6a9a7dc3547996c5c816922c"
 dependencies = [
  "getrandom",
-]
-
-[[package]]
-name = "rand_xoshiro"
-version = "0.6.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "6f97cdb2a36ed4183de61b2f824cc45c9f1037f28afe0a322e9fff4c108b5aaa"
-dependencies = [
- "rand_core",
 ]
 
 [[package]]
