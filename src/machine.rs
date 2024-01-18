@@ -994,7 +994,8 @@ impl OlmMachine {
         let mut failures = 0;
         for backed_up_room_keys_entry in backed_up_room_keys.entries() {
             let backed_up_room_keys_entry: Array = backed_up_room_keys_entry?.dyn_into()?;
-            let room_id = identifiers::RoomId::try_from_js_value(backed_up_room_keys_entry.get(0))?;
+            let room_id =
+                identifiers::RoomId::try_from_js_value(backed_up_room_keys_entry.get(0))?.inner;
 
             let room_room_keys: Map = backed_up_room_keys_entry.get(1).dyn_into()?;
 
