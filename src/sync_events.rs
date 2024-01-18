@@ -1,6 +1,5 @@
 //! `GET /_matrix/client/*/sync`
 
-use js_sys::Array;
 use matrix_sdk_common::ruma;
 use wasm_bindgen::prelude::*;
 
@@ -44,24 +43,14 @@ impl DeviceLists {
     /// who now share an encrypted room with the client since the
     /// previous sync
     #[wasm_bindgen(getter)]
-    pub fn changed(&self) -> Array {
-        self.inner
-            .changed
-            .iter()
-            .map(|user| identifiers::UserId::from(user.clone()))
-            .map(JsValue::from)
-            .collect()
+    pub fn changed(&self) -> Vec<identifiers::UserId> {
+        self.inner.changed.iter().map(|user| identifiers::UserId::from(user.clone())).collect()
     }
 
     /// List of users who no longer share encrypted rooms since the
     /// previous sync response.
     #[wasm_bindgen(getter)]
-    pub fn left(&self) -> Array {
-        self.inner
-            .left
-            .iter()
-            .map(|user| identifiers::UserId::from(user.clone()))
-            .map(JsValue::from)
-            .collect()
+    pub fn left(&self) -> Vec<identifiers::UserId> {
+        self.inner.left.iter().map(|user| identifiers::UserId::from(user.clone())).collect()
     }
 }

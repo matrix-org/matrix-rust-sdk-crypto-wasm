@@ -330,15 +330,8 @@ impl Sas {
     ///
     /// Returns `undefined` if we can't yet present the short auth string,
     /// otherwise an array of seven `Emoji` objects.
-    pub fn emoji(&self) -> Option<Array> {
-        Some(
-            self.inner
-                .emoji()?
-                .iter()
-                .map(|emoji| Emoji::from(emoji.to_owned()))
-                .map(JsValue::from)
-                .collect(),
-        )
+    pub fn emoji(&self) -> Option<Vec<Emoji>> {
+        Some(self.inner.emoji()?.iter().map(|emoji| Emoji::from(emoji.to_owned())).collect())
     }
 
     /// Get the index of the emoji representing the short auth string
@@ -349,8 +342,8 @@ impl Sas {
     /// relevant specification
     /// entry](https://spec.matrix.org/unstable/client-server-api/#sas-method-emoji).
     #[wasm_bindgen(js_name = "emojiIndex")]
-    pub fn emoji_index(&self) -> Option<Array> {
-        Some(self.inner.emoji_index()?.into_iter().map(JsValue::from).collect())
+    pub fn emoji_index(&self) -> Option<Vec<u8>> {
+        Some(self.inner.emoji_index()?.into())
     }
 
     /// Get the decimal version of the short auth string.
@@ -358,15 +351,10 @@ impl Sas {
     /// Returns None if we can’t yet present the short auth string,
     /// otherwise a tuple containing three 4-digit integers that
     /// represent the short auth string.
-    pub fn decimals(&self) -> Option<Array> {
+    pub fn decimals(&self) -> Option<Vec<u16>> {
         let decimals = self.inner.decimals()?;
 
-        let out = Array::new_with_length(3);
-        out.set(0, JsValue::from(decimals.0));
-        out.set(1, JsValue::from(decimals.1));
-        out.set(2, JsValue::from(decimals.2));
-
-        Some(out)
+        Some(vec![decimals.0, decimals.1, decimals.2])
     }
 
     /// Register a callback which will be called whenever there is an update to
@@ -874,17 +862,12 @@ impl VerificationRequest {
     ///
     /// Will be present only if the other side requested the
     /// verification or if we’re in the ready state.
-    ///
-    /// It return a `Option<Vec<VerificationMethod>>`.
     #[wasm_bindgen(getter, js_name = "theirSupportedMethods")]
-    pub fn their_supported_methods(&self) -> Result<Option<Array>, JsError> {
+    pub fn their_supported_methods(&self) -> Result<Option<Vec<VerificationMethod>>, JsError> {
         self.inner
             .their_supported_methods()
             .map(|methods| {
-                methods
-                    .into_iter()
-                    .map(|method| VerificationMethod::try_from(method).map(JsValue::from))
-                    .collect::<Result<Array, _>>()
+                methods.into_iter().map(|method| VerificationMethod::try_from(method)).collect()
             })
             .transpose()
     }
@@ -894,14 +877,11 @@ impl VerificationRequest {
     /// Will be present only we requested the verification or if we’re
     /// in the ready state.
     #[wasm_bindgen(getter, js_name = "ourSupportedMethods")]
-    pub fn our_supported_methods(&self) -> Result<Option<Array>, JsError> {
+    pub fn our_supported_methods(&self) -> Result<Option<Vec<VerificationMethod>>, JsError> {
         self.inner
             .our_supported_methods()
             .map(|methods| {
-                methods
-                    .into_iter()
-                    .map(|method| VerificationMethod::try_from(method).map(JsValue::from))
-                    .collect::<Result<Array, _>>()
+                methods.into_iter().map(|method| VerificationMethod::try_from(method)).collect()
             })
             .transpose()
     }
