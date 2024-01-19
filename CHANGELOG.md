@@ -1,10 +1,4 @@
-# UNRELEASED
-
--   Report failures to callback when importing backed-up room keys. The
-    `progress_listener` callback in the `OlmMachine.importBackedUpRoomKeys`
-    function is now called with a third argument, giving the number of invalid
-    room keys.
-    ([#85](https://github.com/matrix-org/matrix-rust-sdk-crypto-wasm/pull/85))
+# matrix-sdk-crypto-wasm v4.0.0
 
 **BREAKING CHANGES**
 
@@ -24,6 +18,12 @@
     thus the resulting JavaScript code of `matrix-rust-sdk-crypto-wasm` can
     be minified with no issue now.
     ([#82](https://github.com/matrix-org/matrix-rust-sdk-crypto-wasm/pull/82/))
+
+-   Report failures to callback when importing backed-up room keys. The
+    `progress_listener` callback in the `OlmMachine.importBackedUpRoomKeys`
+    function is now called with a third argument, giving the number of invalid
+    room keys.
+    ([#85](https://github.com/matrix-org/matrix-rust-sdk-crypto-wasm/pull/85))
 
 # matrix-sdk-crypto-wasm v3.6.0
 
