@@ -948,8 +948,7 @@ impl VerificationRequest {
     /// supports the given verification methods.
     ///
     /// `methods` represents the methods that we should advertise as
-    /// supported by us. Items inside `methods` are going to be deleted on the
-    /// JS part after the function returns.
+    /// supported by us.
     ///
     /// Items inside `methods` will be invalidated by this method.
     ///
