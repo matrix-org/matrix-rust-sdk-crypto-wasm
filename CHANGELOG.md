@@ -1,8 +1,29 @@
-# UNRELEASED
+# matrix-sdk-crypto-wasm v4.0.0
 
 **BREAKING CHANGES**
 
--   Rename `OlmMachine.init_from_store` introduced in v3.6.0 to `OlmMachine.initFromStore`.
+-   Rename `OlmMachine.init_from_store` introduced in v3.6.0 to
+    `OlmMachine.initFromStore`.
+    ([#84](https://github.com/matrix-org/matrix-rust-sdk-crypto-wasm/pull/84))
+
+-   Functions/methods that take a JavaScript `Array` as argument now invalidate the
+    items within that array so that they cannot be re-used as soon as
+    they are received by the functions/methods. See the patch for affected methods.
+    ([#82](https://github.com/matrix-org/matrix-rust-sdk-crypto-wasm/pull/82/))
+
+**Other changes**
+
+-   Update `wasm-bindgen` to 0.2.89. It allows to remove the `downcast` method.
+    It fixes [#51](https://github.com/matrix-org/matrix-rust-sdk-crypto-wasm/pull/51),
+    thus the resulting JavaScript code of `matrix-rust-sdk-crypto-wasm` can
+    be minified with no issue now.
+    ([#82](https://github.com/matrix-org/matrix-rust-sdk-crypto-wasm/pull/82/))
+
+-   Report failures to callback when importing backed-up room keys. The
+    `progress_listener` callback in the `OlmMachine.importBackedUpRoomKeys`
+    function is now called with a third argument, giving the number of invalid
+    room keys.
+    ([#85](https://github.com/matrix-org/matrix-rust-sdk-crypto-wasm/pull/85))
 
 # matrix-sdk-crypto-wasm v3.6.0
 
