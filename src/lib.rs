@@ -27,7 +27,6 @@ pub mod events;
 mod future;
 pub mod identifiers;
 pub mod identities;
-mod js;
 pub mod libolm_migration;
 pub mod machine;
 mod macros;

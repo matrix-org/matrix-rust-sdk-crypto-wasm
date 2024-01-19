@@ -18,7 +18,7 @@ use matrix_sdk_crypto::{
 use serde_json::json;
 use serde_wasm_bindgen;
 use tracing::warn;
-use wasm_bindgen::prelude::*;
+use wasm_bindgen::{convert::TryFromJsValue, prelude::*};
 use wasm_bindgen_futures::{spawn_local, JsFuture};
 
 use crate::{
@@ -26,9 +26,7 @@ use crate::{
     device, encryption,
     error::MegolmDecryptionError,
     future::{future_to_promise, future_to_promise_with_custom_error},
-    identifiers, identities,
-    js::downcast,
-    olm, requests,
+    identifiers, identities, olm, requests,
     requests::{outgoing_request_to_js_value, CrossSigningBootstrapRequests, ToDeviceRequest},
     responses::{self, response_from_string},
     store,
@@ -228,16 +226,19 @@ impl OlmMachine {
     /// "changed" notification for that user in the future.
     ///
     /// Users that were already in the list are unaffected.
+    ///
+    /// Items inside `users` will be invalidated by this method. Be careful not
+    /// to use the `UserId`s after this method has been called.
     #[wasm_bindgen(js_name = "updateTrackedUsers")]
-    pub fn update_tracked_users(&self, users: &Array) -> Result<Promise, JsError> {
-        let users = user_ids_to_owned_user_ids(users)?;
+    pub fn update_tracked_users(&self, users: Vec<identifiers::UserId>) -> Promise {
+        let users = users.iter().map(|user| user.inner.clone()).collect::<Vec<_>>();
 
         let me = self.inner.clone();
 
-        Ok(future_to_promise(async move {
+        future_to_promise(async move {
             me.update_tracked_users(users.iter().map(AsRef::as_ref)).await?;
             Ok(JsValue::UNDEFINED)
-        }))
+        })
     }
 
     /// Handle to-device events and one-time key counts from a sync
@@ -637,21 +638,24 @@ impl OlmMachine {
     /// time is in flight for the same room, e.g. using a lock.
     ///
     /// Returns an array of `ToDeviceRequest`s.
+    ///
+    /// Items inside `users` will be invalidated by this method. Be careful not
+    /// to use the `UserId`s after this method has been called.
     #[wasm_bindgen(js_name = "shareRoomKey")]
     pub fn share_room_key(
         &self,
         room_id: &identifiers::RoomId,
-        users: &Array,
+        users: Vec<identifiers::UserId>,
         encryption_settings: &encryption::EncryptionSettings,
-    ) -> Result<Promise, JsError> {
+    ) -> Promise {
         let room_id = room_id.inner.clone();
-        let users = user_ids_to_owned_user_ids(users)?;
+        let users = users.iter().map(|user| user.inner.clone()).collect::<Vec<_>>();
         let encryption_settings =
             matrix_sdk_crypto::olm::EncryptionSettings::from(encryption_settings);
 
         let me = self.inner.clone();
 
-        Ok(future_to_promise(async move {
+        future_to_promise(async move {
             let to_device_requests = me
                 .share_room_key(&room_id, users.iter().map(AsRef::as_ref), encryption_settings)
                 .await?;
@@ -665,7 +669,7 @@ impl OlmMachine {
                 .into_iter()
                 .map(|td| ToDeviceRequest::try_from(td.deref()).map(JsValue::from))
                 .collect::<Result<Array, _>>()?)
-        }))
+        })
     }
 
     /// Generate an "out-of-band" key query request for the given set of users.
@@ -675,12 +679,15 @@ impl OlmMachine {
     ///
     /// Returns a `KeysQueryRequest` object. The response of the request should
     /// be passed to the `OlmMachine` with the `mark_request_as_sent`.
+    ///
+    /// Items inside `users` will be invalidated by this method. Be careful not
+    /// to use the `UserId`s after this method has been called.
     #[wasm_bindgen(js_name = "queryKeysForUsers")]
     pub fn query_keys_for_users(
         &self,
-        users: &Array,
+        users: Vec<identifiers::UserId>,
     ) -> Result<requests::KeysQueryRequest, JsError> {
-        let users = user_ids_to_owned_user_ids(users)?;
+        let users = users.iter().map(|user| user.inner.clone()).collect::<Vec<_>>();
 
         let (request_id, request) =
             self.inner.query_keys_for_users(users.iter().map(AsRef::as_ref));
@@ -713,13 +720,16 @@ impl OlmMachine {
     /// `users` represents the list of users that we should check if
     /// we lack a session with one of their devices. This can be an
     /// empty iterator when calling this method between sync requests.
+    ///
+    /// Items inside `users` will be invalidated by this method. Be careful not
+    /// to use the `UserId`s after this method has been called.
     #[wasm_bindgen(js_name = "getMissingSessions")]
-    pub fn get_missing_sessions(&self, users: &Array) -> Result<Promise, JsError> {
-        let users = user_ids_to_owned_user_ids(users)?;
+    pub fn get_missing_sessions(&self, users: Vec<identifiers::UserId>) -> Promise {
+        let users = users.iter().map(|user| user.inner.clone()).collect::<Vec<_>>();
 
         let me = self.inner.clone();
 
-        Ok(future_to_promise(async move {
+        future_to_promise(async move {
             match me.get_missing_sessions(users.iter().map(AsRef::as_ref)).await? {
                 Some((transaction_id, keys_claim_request)) => {
                     Ok(JsValue::from(requests::KeysClaimRequest::try_from((
@@ -730,7 +740,7 @@ impl OlmMachine {
 
                 None => Ok(JsValue::NULL),
             }
-        }))
+        })
     }
 
     /// Get a map holding all the devices of a user.
@@ -953,25 +963,6 @@ impl OlmMachine {
         }))
     }
 
-    /// Shared helper for `import_exported_room_keys` and `import_room_keys`.
-    ///
-    /// Wraps the progress listener in a Rust closure and runs
-    /// `Store::import_exported_room_keys`
-    async fn import_exported_room_keys_helper(
-        inner: &matrix_sdk_crypto::OlmMachine,
-        exported_room_keys: Vec<matrix_sdk_crypto::olm::ExportedRoomKey>,
-        progress_listener: Function,
-    ) -> Result<matrix_sdk_crypto::RoomKeyImportResult, CryptoStoreError> {
-        inner
-            .store()
-            .import_exported_room_keys(exported_room_keys, |progress, total| {
-                progress_listener
-                    .call2(&JsValue::NULL, &JsValue::from(progress), &JsValue::from(total))
-                    .expect("Progress listener passed to `importExportedRoomKeys` failed");
-            })
-            .await
-    }
-
     /// Import the given room keys into our store.
     ///
     /// # Arguments
@@ -1004,8 +995,7 @@ impl OlmMachine {
         for backed_up_room_keys_entry in backed_up_room_keys.entries() {
             let backed_up_room_keys_entry: Array = backed_up_room_keys_entry?.dyn_into()?;
             let room_id =
-                &downcast::<identifiers::RoomId>(&backed_up_room_keys_entry.get(0), "RoomId")?
-                    .inner;
+                identifiers::RoomId::try_from_js_value(backed_up_room_keys_entry.get(0))?.inner;
 
             let room_room_keys: Map = backed_up_room_keys_entry.get(1).dyn_into()?;
 
@@ -1398,6 +1388,31 @@ impl OlmMachine {
     pub fn close(self) {}
 }
 
+impl OlmMachine {
+    /// Shared helper for `import_exported_room_keys` and `import_room_keys`.
+    ///
+    /// Wraps the progress listener in a Rust closure and runs
+    /// `Store::import_exported_room_keys`
+    ///
+    /// Items inside `exported_room_keys` will be invalidated by this method. Be
+    /// careful not to use the `ExportedRoomKey`s after this method has been
+    /// called.
+    async fn import_exported_room_keys_helper(
+        inner: &matrix_sdk_crypto::OlmMachine,
+        exported_room_keys: Vec<matrix_sdk_crypto::olm::ExportedRoomKey>,
+        progress_listener: Function,
+    ) -> Result<matrix_sdk_crypto::RoomKeyImportResult, CryptoStoreError> {
+        inner
+            .store()
+            .import_exported_room_keys(exported_room_keys, |progress, total| {
+                progress_listener
+                    .call2(&JsValue::NULL, &JsValue::from(progress), &JsValue::from(total))
+                    .expect("Progress listener passed to `importExportedRoomKeys` failed");
+            })
+            .await
+    }
+}
+
 // helper for register_room_key_received_callback: wraps the key info
 // into our own RoomKeyInfo struct, and passes it into the javascript
 // function
@@ -1471,13 +1486,4 @@ pub(crate) async fn promise_result_to_future(
             Err(e)
         }
     }
-}
-
-/// Helper function to take a Javascript array of `UserId`s and turn it into
-/// a Rust `Vec` of `OwnedUserId`s
-fn user_ids_to_owned_user_ids(users: &Array) -> Result<Vec<ruma::OwnedUserId>, JsError> {
-    users
-        .iter()
-        .map(|user| Ok(downcast::<identifiers::UserId>(&user, "UserId")?.inner.clone()))
-        .collect()
 }

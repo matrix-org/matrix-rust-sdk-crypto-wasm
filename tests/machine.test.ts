@@ -242,7 +242,7 @@ describe(OlmMachine.name, () => {
     test("can update tracked users", async () => {
         const m = await machine();
 
-        expect(await m.updateTrackedUsers([user])).toStrictEqual(undefined);
+        expect(await m.updateTrackedUsers([user.clone()])).toStrictEqual(undefined);
     });
 
     test("can receive sync changes", async () => {
@@ -509,9 +509,9 @@ describe(OlmMachine.name, () => {
         });
 
         test("can share a room key", async () => {
-            const otherUsers = [new UserId("@example:localhost")];
+            const other_user_id = new UserId("@example:localhost");
 
-            const requests = await m.shareRoomKey(room, otherUsers, new EncryptionSettings());
+            const requests = await m.shareRoomKey(room, [other_user_id.clone()], new EncryptionSettings());
 
             expect(requests).toHaveLength(1);
             expect(requests[0]).toBeInstanceOf(ToDeviceRequest);
@@ -524,7 +524,12 @@ describe(OlmMachine.name, () => {
             expect(messageContent["org.matrix.msgid"]).toBeDefined();
 
             await m.markRequestAsSent(requests[0].id, RequestType.ToDevice, "{}");
-            const requestsAfterMarkedAsSent = await m.shareRoomKey(room, otherUsers, new EncryptionSettings());
+
+            const requestsAfterMarkedAsSent = await m.shareRoomKey(
+                room,
+                [other_user_id.clone()],
+                new EncryptionSettings(),
+            );
             expect(requestsAfterMarkedAsSent).toHaveLength(0);
         });
 
