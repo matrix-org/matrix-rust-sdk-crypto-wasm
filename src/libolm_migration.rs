@@ -17,7 +17,7 @@
 use std::{iter, time::Duration};
 
 use anyhow::Context;
-use js_sys::{Array, Date, Uint8Array};
+use js_sys::{Date, Uint8Array};
 use matrix_sdk_common::ruma::{
     DeviceKeyAlgorithm, MilliSecondsSinceUnixEpoch, SecondsSinceUnixEpoch, UInt,
 };
@@ -33,7 +33,6 @@ use wasm_bindgen::prelude::*;
 
 use crate::{
     identifiers::{DeviceId, RoomId, UserId},
-    js::downcast,
     store::StoreHandle,
 };
 
@@ -223,14 +222,15 @@ impl Migration {
     ///
     /// # Arguments
     ///
-    /// * `sessions` - An `Array` of {@link PickledSession}s to import.
+    /// * `sessions` - An `Array` of {@link PickledSession}s to import. Items
+    ///   inside `sessions` are going to be invalidated by this method.
     /// * `pickle_key` - The libolm pickle key that was used to pickle the olm
     ///   session objects.
     /// * `store_handle` - A connection to the CryptoStore which will be used to
     ///   store the vodozemac data.
     #[wasm_bindgen(js_name = "migrateOlmSessions")]
     pub async fn migrate_olm_sessions(
-        sessions: Array,
+        sessions: Vec<PickledSession>,
         pickle_key: Uint8Array,
         store_handle: &StoreHandle,
     ) -> Result<JsValue, JsError> {
@@ -238,7 +238,7 @@ impl Migration {
 
         let rust_sessions = sessions
             .into_iter()
-            .map(|s| libolm_pickled_session_to_rust_pickled_session(s, &pickle_key))
+            .map(|session| libolm_pickled_session_to_rust_pickled_session(session, &pickle_key))
             .collect::<Result<_>>()?;
 
         import_olm_sessions_to_store(rust_sessions, store_handle.store.as_ref())
@@ -261,10 +261,9 @@ impl Default for PickledSession {
 }
 
 fn libolm_pickled_session_to_rust_pickled_session(
-    libolm_session: JsValue,
+    libolm_session: PickledSession,
     pickle_key: &[u8],
 ) -> Result<matrix_sdk_crypto::olm::PickledSession> {
-    let libolm_session = downcast::<PickledSession>(&libolm_session, "PickledSession")?;
     let session = vodozemac::olm::Session::from_libolm_pickle(&libolm_session.pickle, &pickle_key)?;
 
     let creation_time = date_to_seconds_since_epoch(&libolm_session.creation_time)
@@ -369,14 +368,15 @@ impl Migration {
     /// # Arguments
     ///
     /// * `sessions` - An `Array` of {@link PickledInboundGroupSession}s to
-    ///   import.
+    ///   import. Items inside `sessions` are going to be invalidated by this
+    ///   method.
     /// * `pickle_key` - The libolm pickle key that was used to pickle the
     ///   megolm session objects.
     /// * `store_handle` - A connection to the CryptoStore which will be used to
     ///   store the vodozemac data.
     #[wasm_bindgen(js_name = "migrateMegolmSessions")]
     pub async fn migrate_megolm_sessions(
-        sessions: Array,
+        sessions: Vec<PickledInboundGroupSession>,
         pickle_key: Uint8Array,
         store_handle: &StoreHandle,
     ) -> Result<JsValue, JsError> {
@@ -384,7 +384,9 @@ impl Migration {
 
         let rust_sessions = sessions
             .into_iter()
-            .map(|s| libolm_pickled_megolm_session_to_rust_pickled_session(s, &pickle_key))
+            .map(|session| {
+                libolm_pickled_megolm_session_to_rust_pickled_session(session, &pickle_key)
+            })
             .collect::<Result<_>>()?;
 
         import_megolm_sessions_to_store(rust_sessions, store_handle.store.as_ref())
@@ -395,12 +397,9 @@ impl Migration {
 }
 
 fn libolm_pickled_megolm_session_to_rust_pickled_session(
-    libolm_session: JsValue,
+    libolm_session: PickledInboundGroupSession,
     pickle_key: &[u8],
 ) -> Result<matrix_sdk_crypto::olm::PickledInboundGroupSession> {
-    let libolm_session =
-        downcast::<PickledInboundGroupSession>(&libolm_session, "PickledInboundGroupSession")?;
-
     let pickle = vodozemac::megolm::InboundGroupSession::from_libolm_pickle(
         &libolm_session.pickle,
         pickle_key,

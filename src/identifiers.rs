@@ -53,6 +53,15 @@ impl UserId {
     pub fn to_string(&self) -> String {
         self.inner.as_str().to_owned()
     }
+
+    /// Create a clone of this `UserId`.
+    ///
+    /// This can be useful when passing a `UserId` instance to methods such as
+    /// {@link OlmMachine.updateTrackedUsers} which destroy the instance.
+    #[wasm_bindgen(js_name = "clone")]
+    pub fn clone_me(&self) -> Self {
+        self.clone()
+    }
 }
 
 /// A Matrix key ID.
