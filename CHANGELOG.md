@@ -3,6 +3,10 @@
 -   `PickledInboundGroupSession.sender_signing_key` is now optional.
     ([#89](https://github.com/matrix-org/matrix-rust-sdk-crypto-wasm/pull/89))
 
+-   Add `OlmMachine.registerDevicesUpdatedCallback` to notify when devices have
+    been update.
+    ([#88](https://github.com/matrix-org/matrix-rust-sdk-crypto-wasm/pull/88))
+
 # matrix-sdk-crypto-wasm v4.0.0
 
 -   Properly encode missing and `Duration` parameters in requests.
@@ -32,10 +36,6 @@
     function is now called with a third argument, giving the number of invalid
     room keys.
     ([#85](https://github.com/matrix-org/matrix-rust-sdk-crypto-wasm/pull/85))
-
--   Add `OlmMachine.registerDevicesUpdatedCallback` to notify when devices have
-    been update.
-    ([#88](https://github.com/matrix-org/matrix-rust-sdk-crypto-wasm/pull/88))
 
 # matrix-sdk-crypto-wasm v3.6.0
 

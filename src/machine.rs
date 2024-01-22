@@ -1275,7 +1275,7 @@ impl OlmMachine {
     /// a device.
     ///
     /// `callback` should be a function that takes a single argument (an array
-    /// of user IDs) and returns a Promise.
+    /// of user IDs as strings) and returns a Promise.
     #[wasm_bindgen(js_name = "registerDevicesUpdatedCallback")]
     pub async fn register_devices_updated_callback(&self, callback: Function) {
         let stream = self.inner.store().identities_stream_raw();
