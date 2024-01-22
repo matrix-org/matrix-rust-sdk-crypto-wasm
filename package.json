@@ -52,7 +52,7 @@
         "lint:types": "tsc --noEmit",
         "build": "WASM_PACK_ARGS=--release ./scripts/build.sh",
         "build:dev": "WASM_PACK_ARGS=--dev ./scripts/build.sh",
-        "test": "jest --verbose",
+        "test": "jest --verbose && yarn run wasm-pack test --node",
         "doc": "typedoc --tsconfig .",
         "prepack": "npm run build && npm run test"
     }

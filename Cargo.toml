@@ -69,6 +69,7 @@ tracing-subscriber = { version = "0.3.14", default-features = false, features = 
 wasm-bindgen = "0.2.89"
 wasm-bindgen-futures = "0.4.33"
 zeroize = "1.6.0"
+wasm-bindgen-test = "0.3.37"
 
 [build-dependencies]
 vergen = { version = "8.0.0", features = ["build", "git", "gitcl"] }
