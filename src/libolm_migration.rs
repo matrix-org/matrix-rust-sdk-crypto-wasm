@@ -328,7 +328,7 @@ pub struct PickledInboundGroupSession {
     /// the session, if known.
     ///
     /// If the session was received directly from the creator via an
-    /// Olm-encrypte `m.room_key` event, this value is taken from the `keys`
+    /// Olm-encrypted `m.room_key` event, this value is taken from the `keys`
     /// property of the plaintext payload of that event (see
     /// [`m.olm.v1.curve25519-aes-sha2`]).
     ///
