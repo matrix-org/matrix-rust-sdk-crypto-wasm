@@ -849,6 +849,11 @@ impl VerificationRequest {
     ///
     /// Will be present only if the other side requested the
     /// verification or if we’re in the ready state.
+    ///
+    /// # Returns
+    ///
+    /// `undefined` if we do not yet know the supported methods; otherwise, an
+    /// array of `VerificationMethod`s.
     #[wasm_bindgen(getter, js_name = "theirSupportedMethods")]
     pub fn their_supported_methods(&self) -> Result<Option<Vec<VerificationMethod>>, JsError> {
         self.inner
@@ -949,8 +954,6 @@ impl VerificationRequest {
     ///
     /// `methods` represents the methods that we should advertise as
     /// supported by us.
-    ///
-    /// Items inside `methods` will be invalidated by this method.
     ///
     /// It returns either a `ToDeviceRequest`, a `RoomMessageRequest`
     /// or `undefined`.
