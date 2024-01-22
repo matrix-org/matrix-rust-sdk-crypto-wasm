@@ -223,7 +223,7 @@ impl Migration {
     /// # Arguments
     ///
     /// * `sessions` - An `Array` of {@link PickledSession}s to import. Items
-    ///   inside `sessions` are going to be invalidated by this method.
+    ///   inside `sessions` will be invalidated by this method.
     /// * `pickle_key` - The libolm pickle key that was used to pickle the olm
     ///   session objects.
     /// * `store_handle` - A connection to the CryptoStore which will be used to
@@ -381,8 +381,7 @@ impl Migration {
     /// # Arguments
     ///
     /// * `sessions` - An `Array` of {@link PickledInboundGroupSession}s to
-    ///   import. Items inside `sessions` are going to be invalidated by this
-    ///   method.
+    ///   import. Items inside `sessions` will be invalidated by this method.
     /// * `pickle_key` - The libolm pickle key that was used to pickle the
     ///   megolm session objects.
     /// * `store_handle` - A connection to the CryptoStore which will be used to
