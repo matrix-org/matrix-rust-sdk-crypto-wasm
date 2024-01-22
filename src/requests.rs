@@ -1,5 +1,7 @@
 //! Types to handle requests.
 
+use std::time::Duration;
+
 use js_sys::JsString;
 use matrix_sdk_common::ruma::{
     api::client::keys::{
@@ -8,6 +10,7 @@ use matrix_sdk_common::ruma::{
         upload_signatures::v3::Request as OriginalSignatureUploadRequest,
     },
     events::EventContent,
+    exports::serde::ser::Error,
 };
 use matrix_sdk_crypto::{
     requests::{
@@ -316,7 +319,7 @@ macro_rules! request {
     (
         $destination_request:ident from $source_request:ident
         $( extracts $( $field_name:ident : $field_type:tt ),+ $(,)? )?
-        $( $( and )? groups $( $grouped_field_name:ident ),+ $(,)? )?
+        $( $( and )? groups $( $grouped_field_name:ident $( { $transformation:expr } )? $( $optional:literal )? ),+ $(,)? )?
     ) => {
 
         impl TryFrom<(String, &$source_request)> for $destination_request {
@@ -329,7 +332,7 @@ macro_rules! request {
                     @__try_from $destination_request from $source_request
                     (request_id = request_id.into(), request = request)
                     $( extracts [ $( $field_name : $field_type, )+ ] )?
-                    $( groups [ $( $grouped_field_name, )+ ] )?
+                    $( groups [ $( $grouped_field_name $( { $transformation } )? $( $optional )? , )+ ] )?
                 )
             }
         }
@@ -339,7 +342,7 @@ macro_rules! request {
         @__try_from $destination_request:ident from $source_request:ident
         (request_id = $request_id:expr, request = $request:expr)
         $( extracts [ $( $field_name:ident : $field_type:tt ),* $(,)? ] )?
-        $( groups [ $( $grouped_field_name:ident ),* $(,)? ] )?
+        $( groups [ $( $grouped_field_name:ident $( { $transformation:expr } )? $( $optional:literal )? ),* $(,)? ] )?
     ) => {
         {
             Ok($destination_request {
@@ -353,7 +356,15 @@ macro_rules! request {
                     body: {
                         let mut map = serde_json::Map::new();
                         $(
-                            map.insert(stringify!($grouped_field_name).to_owned(), serde_json::to_value(&$request.$grouped_field_name).unwrap());
+                            let field = &$request.$grouped_field_name;
+                            $(
+                                let field = {
+                                    let $grouped_field_name = field;
+
+                                    $transformation
+                                };
+                            )?
+                            request!(@__set_field $( $optional )? map : $grouped_field_name = field);
                         )*
                         let object = serde_json::Value::Object(map);
 
@@ -379,15 +390,25 @@ macro_rules! request {
     ( @__field_type as event_type ; request = $request:expr, field_name = $field_name:ident ) => {
         $request.content.event_type().to_string().into()
     };
+
+    ( @__set_field $optional:literal $map:ident : $grouped_field_name:ident = $field:ident) => {
+        if let Some($field) = $field {
+            request!(@__set_field $map : $grouped_field_name = $field);
+        }
+    };
+
+    ( @__set_field $map:ident : $grouped_field_name:ident = $field:ident) => {
+        $map.insert(stringify!($grouped_field_name).to_owned(), serde_json::to_value($field).unwrap());
+    };
 }
 
 // Generate the methods needed to convert rust `OutgoingRequests` into the js
 // counterpart. Technically it's converting tuples `(String, &Original)`, where
 // the first member  is the request ID, into js requests. Used by
 // `TryFrom<OutgoingRequest> for JsValue`.
-request!(KeysUploadRequest from OriginalKeysUploadRequest groups device_keys, one_time_keys, fallback_keys);
-request!(KeysQueryRequest from OriginalKeysQueryRequest groups timeout, device_keys);
-request!(KeysClaimRequest from OriginalKeysClaimRequest groups timeout, one_time_keys);
+request!(KeysUploadRequest from OriginalKeysUploadRequest groups device_keys "optional", one_time_keys, fallback_keys);
+request!(KeysQueryRequest from OriginalKeysQueryRequest groups timeout { timeout.as_ref().map(Duration::as_millis).map(u64::try_from).transpose().map_err(serde_json::Error::custom)? } "optional", device_keys);
+request!(KeysClaimRequest from OriginalKeysClaimRequest groups timeout { timeout.as_ref().map(Duration::as_millis).map(u64::try_from).transpose().map_err(serde_json::Error::custom)? } "optional", one_time_keys);
 request!(ToDeviceRequest from OriginalToDeviceRequest extracts event_type: string, txn_id: string and groups messages);
 request!(RoomMessageRequest from OriginalRoomMessageRequest extracts room_id: string, txn_id: string, event_type: event_type, content: json);
 request!(KeysBackupRequest from OriginalKeysBackupRequest extracts version: string and groups rooms);
@@ -617,5 +638,86 @@ impl TryFrom<OriginalCrossSigningBootstrapRequests> for CrossSigningBootstrapReq
             upload_signing_keys_request: (&request.upload_signing_keys_req).try_into()?,
             upload_signatures_request: (&request.upload_signatures_req).try_into()?,
         })
+    }
+}
+
+#[cfg(test)]
+pub(crate) mod tests {
+    use std::collections::BTreeMap;
+
+    use matrix_sdk_common::ruma::{
+        api::client::keys::{
+            claim_keys::v3::Request as OriginalKeysClaimRequest,
+            upload_keys::v3::Request as OriginalKeysUploadRequest,
+        },
+        device_id, user_id, DeviceKeyAlgorithm,
+    };
+    use matrix_sdk_crypto::requests::KeysQueryRequest as OriginalKeysQueryRequest;
+    use serde_json::Value;
+    use wasm_bindgen_test::wasm_bindgen_test;
+
+    use super::{KeysClaimRequest, KeysQueryRequest, KeysUploadRequest};
+
+    #[wasm_bindgen_test]
+    // make sure that the timeout in a /keys/claim request is encoded as a number
+    fn test_keys_claim_request_with_timeout() {
+        let rust_request = OriginalKeysClaimRequest::new(BTreeMap::from([(
+            user_id!("@alice:localhost").to_owned(),
+            BTreeMap::from([(
+                device_id!("ABCDEFG").to_owned(),
+                DeviceKeyAlgorithm::SignedCurve25519,
+            )]),
+        )]));
+        let request = KeysClaimRequest::try_from(("ID".to_string(), &rust_request)).unwrap();
+        let body: Value = serde_json::from_str(&String::from(request.body)).unwrap();
+        assert!(body.as_object().unwrap().contains_key("timeout"));
+        assert!(body["timeout"].is_number());
+    }
+
+    #[wasm_bindgen_test]
+    // if a /keys/claim request has no timeout, make sure it isn't in the request
+    fn test_keys_claim_request_without_timeout() {
+        let mut rust_request = OriginalKeysClaimRequest::new(BTreeMap::from([(
+            user_id!("@alice:localhost").to_owned(),
+            BTreeMap::from([(
+                device_id!("ABCDEFG").to_owned(),
+                DeviceKeyAlgorithm::SignedCurve25519,
+            )]),
+        )]));
+        rust_request.timeout = None;
+        let request = KeysClaimRequest::try_from(("ID".to_string(), &rust_request)).unwrap();
+        let body: Value = serde_json::from_str(&String::from(request.body)).unwrap();
+        assert!(!body.as_object().unwrap().contains_key("timeout"));
+    }
+
+    #[wasm_bindgen_test]
+    // make sure that the timeout is encoded as a number in a /keys/query
+    fn test_keys_query_request_with_timeout() {
+        let rust_request = OriginalKeysQueryRequest {
+            timeout: Some(std::time::Duration::from_secs(10)),
+            device_keys: BTreeMap::new(),
+        };
+        let request = KeysQueryRequest::try_from(("ID".to_string(), &rust_request)).unwrap();
+        let body: Value = serde_json::from_str(&String::from(request.body)).unwrap();
+        assert!(body.as_object().unwrap().contains_key("timeout"));
+        assert!(body["timeout"].is_number());
+    }
+
+    #[wasm_bindgen_test]
+    // if a /keys/query request has no timeout, make sure it isn't in the request
+    fn test_keys_query_request_without_timeout() {
+        let rust_request = OriginalKeysQueryRequest { timeout: None, device_keys: BTreeMap::new() };
+        let request = KeysQueryRequest::try_from(("ID".to_string(), &rust_request)).unwrap();
+        let body: Value = serde_json::from_str(&String::from(request.body)).unwrap();
+        assert!(!body.as_object().unwrap().contains_key("timeout"));
+    }
+
+    #[wasm_bindgen_test]
+    // if a /keys/upload request no device_keys, make sure it isn't in the request
+    fn test_keys_upload_request_without_devices() {
+        let request = OriginalKeysUploadRequest::new();
+        let request = KeysUploadRequest::try_from(("ID".to_string(), &request)).unwrap();
+        let body: Value = serde_json::from_str(&String::from(request.body)).unwrap();
+        assert!(!body.as_object().unwrap().contains_key("device_keys"));
     }
 }

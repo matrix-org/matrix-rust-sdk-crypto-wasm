@@ -1416,11 +1416,7 @@ impl OlmMachine {
     /// Shared helper for `import_exported_room_keys` and `import_room_keys`.
     ///
     /// Wraps the progress listener in a Rust closure and runs
-    /// `Store::import_exported_room_keys`
-    ///
-    /// Items inside `exported_room_keys` will be invalidated by this method. Be
-    /// careful not to use the `ExportedRoomKey`s after this method has been
-    /// called.
+    /// `Store::import_exported_room_keys`.
     async fn import_exported_room_keys_helper(
         inner: &matrix_sdk_crypto::OlmMachine,
         exported_room_keys: Vec<matrix_sdk_crypto::olm::ExportedRoomKey>,

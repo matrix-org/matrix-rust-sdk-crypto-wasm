@@ -940,6 +940,7 @@ dependencies = [
  "vergen",
  "wasm-bindgen",
  "wasm-bindgen-futures",
+ "wasm-bindgen-test",
  "zeroize",
 ]
 
@@ -1459,6 +1460,12 @@ name = "ryu"
 version = "1.0.16"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "f98d2aa92eebf49b69786be48e4477826b256916e84a57ff2a4f21923b48eb4c"
+
+[[package]]
+name = "scoped-tls"
+version = "1.0.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "e1cf6437eb19a8f4a6cc0f7dca544973b0b78843adbfeb3683d1a94a0024a294"
 
 [[package]]
 name = "semver"
@@ -2003,6 +2010,30 @@ name = "wasm-bindgen-shared"
 version = "0.2.89"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "7ab9b36309365056cd639da3134bf87fa8f3d86008abf99e612384a6eecd459f"
+
+[[package]]
+name = "wasm-bindgen-test"
+version = "0.3.37"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "6e6e302a7ea94f83a6d09e78e7dc7d9ca7b186bc2829c24a22d0753efd680671"
+dependencies = [
+ "console_error_panic_hook",
+ "js-sys",
+ "scoped-tls",
+ "wasm-bindgen",
+ "wasm-bindgen-futures",
+ "wasm-bindgen-test-macro",
+]
+
+[[package]]
+name = "wasm-bindgen-test-macro"
+version = "0.3.37"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "ecb993dd8c836930ed130e020e77d9b2e65dd0fbab1b67c790b0f5d80b11a575"
+dependencies = [
+ "proc-macro2",
+ "quote",
+]
 
 [[package]]
 name = "web-sys"

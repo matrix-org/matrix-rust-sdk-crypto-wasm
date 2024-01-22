@@ -307,7 +307,8 @@ describe(OlmMachine.name, () => {
             expect(outgoingRequests[1].body).toBeDefined();
 
             const body = JSON.parse(outgoingRequests[1].body);
-            expect(body.timeout).toBeDefined();
+            // default timeout in Rust is None, so timeout will be omitted
+            expect(body.timeout).not.toBeDefined();
             expect(body.device_keys).toBeDefined();
         }
     });
