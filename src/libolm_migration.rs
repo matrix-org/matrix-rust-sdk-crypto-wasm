@@ -14,7 +14,7 @@
 
 //! Migration from libolm to Vodozemac.
 
-use std::{iter, time::Duration};
+use std::time::Duration;
 
 use anyhow::Context;
 use js_sys::{Date, Uint8Array};
@@ -24,7 +24,7 @@ use matrix_sdk_common::ruma::{
 use matrix_sdk_crypto::{
     olm::PrivateCrossSigningIdentity,
     store::{BackupDecryptionKey, Changes, DynCryptoStore, PendingChanges},
-    types::EventEncryptionAlgorithm,
+    types::{EventEncryptionAlgorithm, SigningKeys},
     vodozemac,
     vodozemac::{Curve25519PublicKey, Ed25519PublicKey},
     Session,
@@ -324,9 +324,22 @@ pub struct PickledInboundGroupSession {
     #[wasm_bindgen(js_name = "senderKey")]
     pub sender_key: String,
 
-    /// The public ed25519 key of the account that sent us the session.
+    /// The public ed25519 key of the account that is believed to have initiated
+    /// the session, if known.
+    ///
+    /// If the session was received directly from the creator via an
+    /// Olm-encrypted `m.room_key` event, this value is taken from the `keys`
+    /// property of the plaintext payload of that event (see
+    /// [`m.olm.v1.curve25519-aes-sha2`]).
+    ///
+    /// If the session was forwarded to us using an [`m.forwarded_room_key`],
+    /// this value is a copy of the `sender_claimed_ed25519_key` from the
+    /// content of the event.
+    ///
+    /// [`m.olm.v1.curve25519-aes-sha2`]: https://spec.matrix.org/v1.9/client-server-api/#molmv1curve25519-aes-sha2
+    /// [`m.forwarded_room_key`]: https://spec.matrix.org/v1.9/client-server-api/#mforwarded_room_key
     #[wasm_bindgen(js_name = "senderSigningKey")]
-    pub sender_signing_key: String,
+    pub sender_signing_key: Option<String>,
 
     /// The id of the room that the session is used in.
     ///
@@ -408,14 +421,16 @@ fn libolm_pickled_megolm_session_to_rust_pickled_session(
 
     let sender_key = Curve25519PublicKey::from_base64(&libolm_session.sender_key)?;
 
+    let mut sender_signing_keys = SigningKeys::new();
+    if let Some(key) = libolm_session.sender_signing_key {
+        sender_signing_keys
+            .insert(DeviceKeyAlgorithm::Ed25519, Ed25519PublicKey::from_base64(&key)?.into());
+    }
+
     Ok(matrix_sdk_crypto::olm::PickledInboundGroupSession {
         pickle,
         sender_key,
-        signing_key: iter::once((
-            DeviceKeyAlgorithm::Ed25519,
-            Ed25519PublicKey::from_base64(&libolm_session.sender_signing_key)?.into(),
-        ))
-        .collect(),
+        signing_key: sender_signing_keys,
         room_id: libolm_session
             .room_id
             .clone()

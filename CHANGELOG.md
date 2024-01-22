@@ -1,3 +1,8 @@
+# UNRELEASED
+
+-   `PickledInboundGroupSession.sender_signing_key` is now optional.
+    ([#89](https://github.com/matrix-org/matrix-rust-sdk-crypto-wasm/pull/89))
+
 # matrix-sdk-crypto-wasm v4.0.0
 
 -   Properly encode missing and `Duration` parameters in requests.
