@@ -87,7 +87,8 @@ pub enum EncryptionAlgorithm {
 
     /// Unsupported algorithm.
     ///
-    /// Applications should ignore this value if it is received, and should never set it.
+    /// Applications should ignore this value if it is received, and should
+    /// never set it.
     Unknown,
 }
 
