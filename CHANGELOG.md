@@ -1,3 +1,5 @@
+# UNRELEASED
+
 # matrix-sdk-crypto-wasm v4.0.1
 
 -   `PickledInboundGroupSession.sender_signing_key` is now optional.
