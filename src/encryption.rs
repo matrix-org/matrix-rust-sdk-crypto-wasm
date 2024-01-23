@@ -85,8 +85,9 @@ pub enum EncryptionAlgorithm {
     /// Megolm version 1 using AES-256 and SHA-256.
     MegolmV1AesSha2,
 
-    /// Unknown algorithm (JavaScript should ignore this value if it is
-    /// received, and should never send this value to Rust)
+    /// Unsupported algorithm.
+    ///
+    /// Applications should ignore this value if it is received, and should never set it.
     Unknown,
 }
 
