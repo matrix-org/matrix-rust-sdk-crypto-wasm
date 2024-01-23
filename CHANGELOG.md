@@ -1,16 +1,20 @@
 # UNRELEASED
 
+-   Add `OlmMachine.registerDevicesUpdatedCallback` to notify when devices have
+    been updated.
+    ([#88](https://github.com/matrix-org/matrix-rust-sdk-crypto-wasm/pull/88))
+
+# matrix-sdk-crypto-wasm v4.0.1
+
 -   `PickledInboundGroupSession.sender_signing_key` is now optional.
     ([#89](https://github.com/matrix-org/matrix-rust-sdk-crypto-wasm/pull/89))
-
--   Add `OlmMachine.registerDevicesUpdatedCallback` to notify when devices have
-    been update.
-    ([#88](https://github.com/matrix-org/matrix-rust-sdk-crypto-wasm/pull/88))
 
 # matrix-sdk-crypto-wasm v4.0.0
 
 -   Properly encode missing and `Duration` parameters in requests.
     ([#72](https://github.com/matrix-org/matrix-rust-sdk-crypto-wasm/pull/72))
+
+# matrix-sdk-crypto-wasm v4.0.0
 
 **BREAKING CHANGES**
 
