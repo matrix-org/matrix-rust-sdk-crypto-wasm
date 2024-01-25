@@ -1,6 +1,9 @@
 //! Extra types, like `Signatures`.
 
-use std::collections::{BTreeMap, BTreeSet};
+use std::{
+    collections::{BTreeMap, BTreeSet},
+    time::Duration,
+};
 
 use js_sys::{Array, JsString, Map, Set};
 use matrix_sdk_common::ruma::OwnedRoomId;
@@ -10,6 +13,7 @@ use matrix_sdk_crypto::backups::{
 use wasm_bindgen::prelude::*;
 
 use crate::{
+    encryption::EncryptionAlgorithm,
     identifiers::{DeviceKeyId, UserId},
     impl_from_to_inner,
     vodozemac::Ed25519Signature,
@@ -280,6 +284,81 @@ impl From<matrix_sdk_crypto::RoomKeyImportResult> for RoomKeyImportResult {
             imported_count: value.imported_count,
             total_count: value.total_count,
             keys: value.keys,
+        }
+    }
+}
+
+/// Room encryption settings which are modified by state events or user options
+#[derive(Clone, Debug)]
+#[wasm_bindgen(getter_with_clone)]
+pub struct RoomSettings {
+    /// The encryption algorithm that should be used in the room.
+    ///
+    /// Should be one of the members of {@link EncryptionAlgorithm}.
+    pub algorithm: EncryptionAlgorithm,
+
+    /// Whether untrusted devices should receive room keys. If this is `false`,
+    /// they will be excluded from the conversation.
+    #[wasm_bindgen(js_name = "onlyAllowTrustedDevices")]
+    pub only_allow_trusted_devices: bool,
+
+    /// The maximum time, in milliseconds, that an encryption session should be
+    /// used for, before it is rotated.
+    #[wasm_bindgen(js_name = "sessionRotationPeriodMs")]
+    pub session_rotation_period_ms: Option<f64>,
+
+    /// The maximum number of messages an encryption session should be used for,
+    /// before it is rotated.
+    #[wasm_bindgen(js_name = "sessionRotationPeriodMessages")]
+    pub session_rotation_period_messages: Option<f64>,
+}
+
+#[wasm_bindgen]
+impl RoomSettings {
+    /// Create a new `RoomSettings` with default values.
+    #[wasm_bindgen(constructor)]
+    pub fn new() -> Self {
+        Self::default()
+    }
+}
+
+impl Default for RoomSettings {
+    fn default() -> Self {
+        Self {
+            algorithm: EncryptionAlgorithm::MegolmV1AesSha2,
+            only_allow_trusted_devices: false,
+            session_rotation_period_ms: None,
+            session_rotation_period_messages: None,
+        }
+    }
+}
+
+impl From<matrix_sdk_crypto::store::RoomSettings> for RoomSettings {
+    fn from(value: matrix_sdk_crypto::store::RoomSettings) -> Self {
+        Self {
+            algorithm: value.algorithm.into(),
+            only_allow_trusted_devices: value.only_allow_trusted_devices,
+            session_rotation_period_ms: value
+                .session_rotation_period
+                .map(|duration| duration.as_millis() as f64),
+            session_rotation_period_messages: value
+                .session_rotation_period_messages
+                .map(|count| count as f64),
+        }
+    }
+}
+
+impl From<&RoomSettings> for matrix_sdk_crypto::store::RoomSettings {
+    fn from(value: &RoomSettings) -> Self {
+        Self {
+            algorithm: value.algorithm.clone().into(),
+            only_allow_trusted_devices: value.only_allow_trusted_devices,
+            session_rotation_period: value
+                .session_rotation_period_ms
+                .map(|millis| Duration::from_millis(millis as u64)),
+            session_rotation_period_messages: value
+                .session_rotation_period_messages
+                .map(|count| count as usize),
         }
     }
 }
