@@ -44,8 +44,8 @@ Encryption](https://en.wikipedia.org/wiki/End-to-end_encryption)) for
         // indexedDB where that is available.
         // See https://matrix-org.github.io/matrix-rust-sdk-crypto-wasm/classes/OlmMachine.html#initialize
         const olmMachine = await matrixSdkCrypto.OlmMachine.initialize(
-            new RustSdkCryptoJs.UserId(userId),
-            new RustSdkCryptoJs.DeviceId(deviceId),
+            new matrixSdkCrypto.UserId(userId),
+            new matrixSdkCrypto.DeviceId(deviceId),
         );
 
         return olmMachine;
