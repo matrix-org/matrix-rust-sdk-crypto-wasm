@@ -1,6 +1,10 @@
 //! The crypto specific Olm objects.
 
-use std::{collections::BTreeMap, ops::Deref, time::Duration};
+use std::{
+    collections::{BTreeMap, HashSet},
+    ops::Deref,
+    time::Duration,
+};
 
 use futures_util::{pin_mut, StreamExt};
 use js_sys::{Array, Function, JsString, Map, Promise, Set};
@@ -1267,6 +1271,26 @@ impl OlmMachine {
         });
     }
 
+    /// Register a callback which will be called whenever there is an update to
+    /// a device.
+    ///
+    /// `callback` should be a function that takes a single argument (an array
+    /// of user IDs as strings) and returns a Promise.
+    #[wasm_bindgen(js_name = "registerDevicesUpdatedCallback")]
+    pub async fn register_devices_updated_callback(&self, callback: Function) {
+        let stream = self.inner.store().identities_stream_raw();
+
+        // fire up a promise chain which will call `callback` on each result from the
+        // stream
+        spawn_local(async move {
+            // take a reference to `callback` (which we then pass into the closure), to stop
+            // the callback being moved into the closure (which would mean we could only
+            // call the closure once)
+            let callback_ref = &callback;
+            stream.for_each(move |item| send_device_updates_to_callback(callback_ref, item)).await;
+        });
+    }
+
     /// Register a callback which will be called whenever a secret
     /// (`m.secret.send`) is received.
     ///
@@ -1439,6 +1463,34 @@ async fn send_user_identities_to_callback(
             Err(e) => {
                 warn!("Error calling user-identity-updated callback: {:?}", e);
             }
+        }
+    }
+}
+
+// helper for register_device_updated_callback: passes the user IDs into
+// the javascript function
+async fn send_device_updates_to_callback(
+    callback: &Function,
+    (_, device_updates): (IdentityChanges, DeviceChanges),
+) {
+    // get the user IDs of all the devices that have changed
+    let updated_chain = device_updates
+        .new
+        .into_iter()
+        .chain(device_updates.changed.into_iter())
+        .chain(device_updates.deleted.into_iter());
+    // put them in a set to make them unique
+    let updated_users: HashSet<String> =
+        HashSet::from_iter(updated_chain.map(|device| device.user_id().to_string()));
+    let updated_users_vec = Vec::from_iter(updated_users.iter());
+    match promise_result_to_future(
+        callback.call1(&JsValue::NULL, &serde_wasm_bindgen::to_value(&updated_users_vec).unwrap()),
+    )
+    .await
+    {
+        Ok(_) => (),
+        Err(e) => {
+            warn!("Error calling device-updated callback: {:?}", e);
         }
     }
 }
