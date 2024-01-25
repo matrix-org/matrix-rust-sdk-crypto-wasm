@@ -4,6 +4,13 @@
     coming from matrix-sdk-crypto's `EventEncryptionAlgorithm`.
     ([#92](https://github.com/matrix-org/matrix-rust-sdk-crypto-wasm/pull/92))
 
+-   Add new methods `OlmMachine.{get,set}RoomSettings`.
+    ([#95](https://github.com/matrix-org/matrix-rust-sdk-crypto-wasm/pull/95))
+
+-   Add `OlmMachine.registerDevicesUpdatedCallback` to notify when devices have
+    been updated.
+    ([#88](https://github.com/matrix-org/matrix-rust-sdk-crypto-wasm/pull/88))
+
 # matrix-sdk-crypto-wasm v4.0.1
 
 -   `PickledInboundGroupSession.sender_signing_key` is now optional.
