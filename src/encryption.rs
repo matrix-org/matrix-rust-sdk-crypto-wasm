@@ -77,13 +77,19 @@ impl From<&EncryptionSettings> for matrix_sdk_crypto::olm::EncryptionSettings {
 /// An encryption algorithm to be used to encrypt messages sent to a
 /// room.
 #[wasm_bindgen]
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub enum EncryptionAlgorithm {
     /// Olm version 1 using Curve25519, AES-256, and SHA-256.
     OlmV1Curve25519AesSha2,
 
     /// Megolm version 1 using AES-256 and SHA-256.
     MegolmV1AesSha2,
+
+    /// Unsupported algorithm.
+    ///
+    /// Applications should ignore this value if it is received, and should
+    /// never set it.
+    Unknown,
 }
 
 impl From<EncryptionAlgorithm> for matrix_sdk_crypto::types::EventEncryptionAlgorithm {
@@ -93,6 +99,7 @@ impl From<EncryptionAlgorithm> for matrix_sdk_crypto::types::EventEncryptionAlgo
         match value {
             OlmV1Curve25519AesSha2 => Self::OlmV1Curve25519AesSha2,
             MegolmV1AesSha2 => Self::MegolmV1AesSha2,
+            _ => unreachable!("Unknown variant"),
         }
     }
 }
@@ -104,7 +111,7 @@ impl From<matrix_sdk_crypto::types::EventEncryptionAlgorithm> for EncryptionAlgo
         match value {
             OlmV1Curve25519AesSha2 => Self::OlmV1Curve25519AesSha2,
             MegolmV1AesSha2 => Self::MegolmV1AesSha2,
-            _ => unreachable!("Unknown variant"),
+            _ => Self::Unknown,
         }
     }
 }
@@ -152,5 +159,31 @@ impl From<RustShieldState> for ShieldState {
             }
             RustShieldState::None => Self { color: ShieldColor::None, message: None },
         }
+    }
+}
+
+#[cfg(test)]
+pub(crate) mod tests {
+    use wasm_bindgen_test::wasm_bindgen_test;
+
+    use super::EncryptionAlgorithm;
+
+    #[wasm_bindgen_test]
+    fn test_convert_encryption_algorithm_to_js() {
+        assert!(
+            EncryptionAlgorithm::from(
+                matrix_sdk_crypto::types::EventEncryptionAlgorithm::OlmV1Curve25519AesSha2
+            ) == EncryptionAlgorithm::OlmV1Curve25519AesSha2
+        );
+        assert!(
+            EncryptionAlgorithm::from(
+                matrix_sdk_crypto::types::EventEncryptionAlgorithm::MegolmV1AesSha2
+            ) == EncryptionAlgorithm::MegolmV1AesSha2
+        );
+        assert!(
+            EncryptionAlgorithm::from(matrix_sdk_crypto::types::EventEncryptionAlgorithm::from(
+                "unknown"
+            )) == EncryptionAlgorithm::Unknown
+        );
     }
 }
