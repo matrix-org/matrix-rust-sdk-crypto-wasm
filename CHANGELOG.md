@@ -1,5 +1,7 @@
 # UNRELEASED
 
+# matrix-sdk-crypto-wasm v4.1.0
+
 -   Add `Unknown` to `EncryptionAlgorithm`, representing unsupported algorithms
     coming from matrix-sdk-crypto's `EventEncryptionAlgorithm`.
     ([#92](https://github.com/matrix-org/matrix-rust-sdk-crypto-wasm/pull/92))
