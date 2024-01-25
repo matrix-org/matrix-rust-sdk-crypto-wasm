@@ -1398,6 +1398,39 @@ describe(OlmMachine.name, () => {
         });
     });
 
+    test("Updating devices should call devicesUpdatedCallback", async () => {
+        const userId = new UserId("@alice:example.org");
+        const deviceId = new DeviceId("ABCDEF");
+        const machine = await OlmMachine.initialize(userId, deviceId);
+
+        const callback = jest.fn().mockImplementation(() => Promise.resolve(undefined));
+        machine.registerDevicesUpdatedCallback(callback);
+
+        const outgoingRequests = await machine.outgoingRequests();
+        let deviceKeys;
+        // outgoingRequests will have a KeysUploadRequest before the
+        // KeysQueryRequest, so we grab the device upload and put it in the
+        // response to the /keys/query
+        for (const request of outgoingRequests) {
+            if (request instanceof KeysUploadRequest) {
+                deviceKeys = JSON.parse(request.body).device_keys;
+            } else if (request instanceof KeysQueryRequest) {
+                await machine.markRequestAsSent(
+                    request.id,
+                    request.type,
+                    JSON.stringify({
+                        device_keys: {
+                            "@alice:example.org": {
+                                ABCDEF: deviceKeys,
+                            },
+                        },
+                    }),
+                );
+            }
+        }
+        expect(callback).toHaveBeenCalledWith(["@alice:example.org"]);
+    });
+
     describe.each(["passphrase", undefined])("Room settings (store passphrase '%s')", (storePassphrase) => {
         let m: OlmMachine;
 
