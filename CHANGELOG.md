@@ -1,5 +1,9 @@
 # UNRELEASED
 
+# matrix-sdk-crypto-wasm v4.2.0
+
+-   Update `matrix-rust-sdk` version (f5f8f47667f686d7937d4d31040032281fcf2cfc)
+
 # matrix-sdk-crypto-wasm v4.1.0
 
 -   Add `Unknown` to `EncryptionAlgorithm`, representing unsupported algorithms
