@@ -1,5 +1,11 @@
 # UNRELEASED
 
+# matrix-sdk-crypto-wasm v4.3.0
+
+-   Update `matrix-rust-sdk` version (f64af126f1a618969737f6eacc87427db106224e)
+    to get https://github.com/matrix-org/matrix-rust-sdk/pull/3073 which
+    improves Indexed DB performance by moving to schema v10.
+
 # matrix-sdk-crypto-wasm v4.2.0
 
 -   Update `matrix-rust-sdk` version (f5f8f47667f686d7937d4d31040032281fcf2cfc)

@@ -863,7 +863,7 @@ dependencies = [
 [[package]]
 name = "matrix-sdk-common"
 version = "0.7.0"
-source = "git+https://github.com/matrix-org/matrix-rust-sdk#f5f8f47667f686d7937d4d31040032281fcf2cfc"
+source = "git+https://github.com/matrix-org/matrix-rust-sdk#f64af126f1a618969737f6eacc87427db106224e"
 dependencies = [
  "async-trait",
  "futures-core",
@@ -885,7 +885,7 @@ dependencies = [
 [[package]]
 name = "matrix-sdk-crypto"
 version = "0.7.0"
-source = "git+https://github.com/matrix-org/matrix-rust-sdk#f5f8f47667f686d7937d4d31040032281fcf2cfc"
+source = "git+https://github.com/matrix-org/matrix-rust-sdk#f64af126f1a618969737f6eacc87427db106224e"
 dependencies = [
  "aes",
  "as_variant",
@@ -947,7 +947,7 @@ dependencies = [
 [[package]]
 name = "matrix-sdk-indexeddb"
 version = "0.7.0"
-source = "git+https://github.com/matrix-org/matrix-rust-sdk#f5f8f47667f686d7937d4d31040032281fcf2cfc"
+source = "git+https://github.com/matrix-org/matrix-rust-sdk#f64af126f1a618969737f6eacc87427db106224e"
 dependencies = [
  "anyhow",
  "async-trait",
@@ -972,7 +972,7 @@ dependencies = [
 [[package]]
 name = "matrix-sdk-qrcode"
 version = "0.7.0"
-source = "git+https://github.com/matrix-org/matrix-rust-sdk#f5f8f47667f686d7937d4d31040032281fcf2cfc"
+source = "git+https://github.com/matrix-org/matrix-rust-sdk#f64af126f1a618969737f6eacc87427db106224e"
 dependencies = [
  "byteorder",
  "qrcode",
@@ -984,8 +984,9 @@ dependencies = [
 [[package]]
 name = "matrix-sdk-store-encryption"
 version = "0.7.0"
-source = "git+https://github.com/matrix-org/matrix-rust-sdk#f5f8f47667f686d7937d4d31040032281fcf2cfc"
+source = "git+https://github.com/matrix-org/matrix-rust-sdk#f64af126f1a618969737f6eacc87427db106224e"
 dependencies = [
+ "base64",
  "blake3",
  "chacha20poly1305",
  "displaydoc",
