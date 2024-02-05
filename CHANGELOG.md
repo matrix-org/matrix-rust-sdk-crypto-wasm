@@ -1,5 +1,13 @@
 # UNRELEASED
 
+# matrix-sdk-crypto-wasm v4.4.0
+
+-   Update dependencies, including matrix-rust-sdk to
+    87a07d9ee32e576963c2e55889bbb504d4bb4ede to get
+    https://github.com/matrix-org/matrix-rust-sdk/pull/3090 which speeds up the
+    schema upgrade v8->v10. See
+    https://github.com/element-hq/element-web/issues/26948
+
 # matrix-sdk-crypto-wasm v4.3.0
 
 -   Update `matrix-rust-sdk` version (f64af126f1a618969737f6eacc87427db106224e)
