@@ -1,13 +1,16 @@
 //! Types for a `Device`.
 
 use js_sys::{Array, Map, Promise};
+use serde_json::Value;
 use wasm_bindgen::prelude::*;
 
 use crate::{
     encryption::EncryptionAlgorithm,
     future::future_to_promise,
     identifiers::{self, DeviceId, UserId},
-    impl_from_to_inner, requests, types, verification, vodozemac,
+    impl_from_to_inner,
+    requests::{self},
+    types, verification, vodozemac,
 };
 
 /// A device represents a E2EE capable client of an user.
@@ -48,6 +51,38 @@ impl Device {
             );
 
             Ok(tuple)
+        }))
+    }
+
+    /// Encrypt an event to be sent to this device.
+    /// (olm encryption).
+    ///
+    /// Prior to calling this method you must ensure that an olm session is
+    /// available for the target device. This can be done by calling the
+    /// [`get_missing_sessions()`](OlmMachine::get_missing_sessions)
+    ///
+    /// The caller is responsible for sending the encrypted
+    /// event to the target device. If multiple messages are
+    /// encrypted using this method they should be sent in the same order as
+    /// they are encrypted.
+    ///
+    /// # Returns
+    /// Returns a Promise for a `json` string of the encrypted event.
+    /// Can be used to create the payload for a `/sendToDevice` API.
+    #[wasm_bindgen(js_name = "encryptToDeviceEvent")]
+    pub fn encrypt_to_device_event(
+        &self,
+        event_type: String,
+        content: JsValue,
+    ) -> Result<Promise, JsError> {
+        let me = self.inner.clone();
+        let content: Value = serde_wasm_bindgen::from_value(content)?;
+        let event_type = event_type.clone();
+
+        Ok(future_to_promise(async move {
+            let raw_encrypted = me.encrypt_event_raw(event_type.as_str(), &content).await?;
+
+            Ok(raw_encrypted.into_json().to_string())
         }))
     }
 

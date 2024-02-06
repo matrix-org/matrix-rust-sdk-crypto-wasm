@@ -146,6 +146,140 @@ describe(OlmMachine.name, () => {
     });
 });
 
+describe("Send to device", () => {
+    const userId1 = new UserId("@alice:example.org");
+    const deviceId1 = new DeviceId("alice_device");
+
+    const userId2 = new UserId("@bob:example.org");
+    const deviceId2 = new DeviceId("bob_device");
+
+    function machine(newUser, newDevice) {
+        return OlmMachine.initialize(newUser || userId1, newDevice || deviceId1);
+    }
+
+    it("can send a to-device message", async () => {
+        // Olm machine.
+        const m = await machine(userId1, deviceId1);
+
+        // Make m aware of another device, and get some OTK to be able to establish a session.
+        {
+            // derived from https://github.com/matrix-org/matrix-rust-sdk/blob/7f49618d350fab66b7e1dc4eaf64ec25ceafd658/benchmarks/benches/crypto_bench/keys_query.json
+            const hypotheticalResponse = JSON.stringify({
+                device_keys: {
+                    "@example:localhost": {
+                        AFGUOBTZWM: {
+                            algorithms: ["m.olm.v1.curve25519-aes-sha2", "m.megolm.v1.aes-sha2"],
+                            device_id: "AFGUOBTZWM",
+                            keys: {
+                                "curve25519:AFGUOBTZWM": "boYjDpaC+7NkECQEeMh5dC+I1+AfriX0VXG2UV7EUQo",
+                                "ed25519:AFGUOBTZWM": "NayrMQ33ObqMRqz6R9GosmHdT6HQ6b/RX/3QlZ2yiec",
+                            },
+                            signatures: {
+                                "@example:localhost": {
+                                    "ed25519:AFGUOBTZWM":
+                                        "RoSWvru1jj6fs2arnTedWsyIyBmKHMdOu7r9gDi0BZ61h9SbCK2zLXzuJ9ZFLao2VvA0yEd7CASCmDHDLYpXCA",
+                                },
+                            },
+                            user_id: "@example:localhost",
+                            unsigned: {
+                                device_display_name: "rust-sdk",
+                            },
+                        },
+                    },
+                },
+                failures: {},
+                master_keys: {
+                    "@example:localhost": {
+                        user_id: "@example:localhost",
+                        usage: ["master"],
+                        keys: {
+                            "ed25519:n2lpJGx0LiKnuNE1IucZP3QExrD4SeRP0veBHPe3XUU":
+                                "n2lpJGx0LiKnuNE1IucZP3QExrD4SeRP0veBHPe3XUU",
+                        },
+                        signatures: {
+                            "@example:localhost": {
+                                "ed25519:TCSJXPWGVS":
+                                    "+j9G3L41I1fe0++wwusTTQvbboYW0yDtRWUEujhwZz4MAltjLSfJvY0hxhnz+wHHmuEXvQDen39XOpr1p29sAg",
+                            },
+                        },
+                    },
+                },
+                self_signing_keys: {
+                    "@example:localhost": {
+                        user_id: "@example:localhost",
+                        usage: ["self_signing"],
+                        keys: {
+                            "ed25519:kQXOuy639Yt47mvNTdrIluoC6DMvfbZLYbxAmwiDyhI":
+                                "kQXOuy639Yt47mvNTdrIluoC6DMvfbZLYbxAmwiDyhI",
+                        },
+                        signatures: {
+                            "@example:localhost": {
+                                "ed25519:n2lpJGx0LiKnuNE1IucZP3QExrD4SeRP0veBHPe3XUU":
+                                    "q32ifix/qyRpvmegw2BEJklwoBCAJldDNkcX+fp+lBA4Rpyqtycxge6BA4hcJdxYsy3oV0IHRuugS8rJMMFyAA",
+                            },
+                        },
+                    },
+                },
+                user_signing_keys: {
+                    "@example:localhost": {
+                        user_id: "@example:localhost",
+                        usage: ["user_signing"],
+                        keys: {
+                            "ed25519:g4ED07Fnqf3GzVWNN1pZ0IFrPQVdqQf+PYoJNH4eE0s":
+                                "g4ED07Fnqf3GzVWNN1pZ0IFrPQVdqQf+PYoJNH4eE0s",
+                        },
+                        signatures: {
+                            "@example:localhost": {
+                                "ed25519:n2lpJGx0LiKnuNE1IucZP3QExrD4SeRP0veBHPe3XUU":
+                                    "nKQu8alQKDefNbZz9luYPcNj+Z+ouQSot4fU/A23ELl1xrI06QVBku/SmDx0sIW1ytso0Cqwy1a+3PzCa1XABg",
+                            },
+                        },
+                    },
+                },
+            });
+            const marked = await m.markRequestAsSent("foo", RequestType.KeysQuery, hypotheticalResponse);
+        }
+
+        {
+            // derived from https://github.com/matrix-org/matrix-rust-sdk/blob/7f49618d350fab66b7e1dc4eaf64ec25ceafd658/benchmarks/benches/crypto_bench/keys_claim.json
+            const hypotheticalResponse = JSON.stringify({
+                one_time_keys: {
+                    "@example:localhost": {
+                        AFGUOBTZWM: {
+                            "signed_curve25519:AAAABQ": {
+                                key: "9IGouMnkB6c6HOd4xUsNv4i3Dulb4IS96TzDordzOws",
+                                signatures: {
+                                    "@example:localhost": {
+                                        "ed25519:AFGUOBTZWM":
+                                            "2bvUbbmJegrV0eVP/vcJKuIWC3kud+V8+C0dZtg4dVovOSJdTP/iF36tQn2bh5+rb9xLlSeztXBdhy4c+LiOAg",
+                                    },
+                                },
+                            },
+                        },
+                    },
+                },
+                failures: {},
+            });
+            const marked = await m.markRequestAsSent("bar", RequestType.KeysClaim, hypotheticalResponse);
+        }
+
+        // Pick the device we want to encrypt to.
+        const device2 = await m.getDevice(new UserId("@example:localhost"), new DeviceId("AFGUOBTZWM"));
+
+        const content = {
+            body: "Hello, World!",
+        };
+        const type = "some.custon.event.type";
+
+        const toDevice = await device2.encryptToDeviceEvent(type, content);
+
+        const olmContent = JSON.parse(toDevice);
+        expect(olmContent.algorithm).toStrictEqual("m.olm.v1.curve25519-aes-sha2");
+        expect(olmContent.ciphertext).toBeDefined();
+        expect(olmContent.ciphertext["boYjDpaC+7NkECQEeMh5dC+I1+AfriX0VXG2UV7EUQo"]).toBeDefined();
+    });
+});
+
 describe("Key Verification", () => {
     const userId1 = new UserId("@alice:example.org");
     const deviceId1 = new DeviceId("alice_device");
