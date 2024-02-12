@@ -4,10 +4,13 @@ use std::time::Duration;
 
 use js_sys::JsString;
 use matrix_sdk_common::ruma::{
-    api::client::keys::{
-        claim_keys::v3::Request as OriginalKeysClaimRequest,
-        upload_keys::v3::Request as OriginalKeysUploadRequest,
-        upload_signatures::v3::Request as OriginalSignatureUploadRequest,
+    api::client::{
+        dehydrated_device::put_dehydrated_device::unstable::Request as OriginalPutDehydratedDeviceRequest,
+        keys::{
+            claim_keys::v3::Request as OriginalKeysClaimRequest,
+            upload_keys::v3::Request as OriginalKeysUploadRequest,
+            upload_signatures::v3::Request as OriginalSignatureUploadRequest,
+        },
     },
     events::EventContent,
     exports::serde::ser::Error,
@@ -594,6 +597,69 @@ impl TryFrom<&OriginalUploadSigningKeysRequest> for UploadSigningKeysRequest {
                 },
             })
         }
+    }
+}
+
+#[wasm_bindgen(getter_with_clone)]
+#[derive(Debug)]
+/// Upload a dehydrated device to the server.
+pub struct PutDehydratedDeviceRequest {
+    /// A JSON-encoded string containing the rest of the payload: `rooms`.
+    ///
+    /// It represents the body of the HTTP request.
+    #[wasm_bindgen(readonly)]
+    pub body: JsString,
+}
+
+#[wasm_bindgen]
+impl PutDehydratedDeviceRequest {
+    /// Create a new `PutDehydratedDeviceRequest`
+    #[wasm_bindgen(constructor)]
+    pub fn new(body: JsString) -> PutDehydratedDeviceRequest {
+        Self { body }
+    }
+}
+
+impl TryFrom<OriginalPutDehydratedDeviceRequest> for PutDehydratedDeviceRequest {
+    type Error = serde_json::Error;
+    fn try_from(request: OriginalPutDehydratedDeviceRequest) -> Result<Self, Self::Error> {
+        Ok(Self {
+            body: {
+                let mut map = serde_json::Map::new();
+                map.insert(
+                    "device_id".to_owned(),
+                    serde_json::to_value(&request.device_id).unwrap(),
+                );
+                if let Some(initial_device_display_name) = request.initial_device_display_name {
+                    map.insert(
+                        "initial_device_display_name".to_owned(),
+                        serde_json::to_value(&initial_device_display_name).unwrap(),
+                    );
+                }
+                map.insert(
+                    "device_data".to_owned(),
+                    serde_json::to_value(&request.device_data).unwrap(),
+                );
+                map.insert(
+                    "device_keys".to_owned(),
+                    serde_json::to_value(&request.device_keys).unwrap(),
+                );
+                if !request.one_time_keys.is_empty() {
+                    map.insert(
+                        "one_time_keys".to_owned(),
+                        serde_json::to_value(&request.one_time_keys).unwrap(),
+                    );
+                }
+                if !request.fallback_keys.is_empty() {
+                    map.insert(
+                        "one_time_keys".to_owned(),
+                        serde_json::to_value(&request.fallback_keys).unwrap(),
+                    );
+                }
+                let object = serde_json::Value::Object(map);
+                serde_json::to_string(&object)?.into()
+            },
+        })
     }
 }
 

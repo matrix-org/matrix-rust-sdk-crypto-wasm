@@ -27,6 +27,7 @@ use wasm_bindgen_futures::{spawn_local, JsFuture};
 
 use crate::{
     backup::{BackupDecryptionKey, BackupKeys, RoomKeyCounts},
+    dehydrated_devices::DehydratedDevices,
     device, encryption,
     error::MegolmDecryptionError,
     future::{future_to_promise, future_to_promise_with_custom_error},
@@ -1437,6 +1438,12 @@ impl OlmMachine {
     ) -> Result<(), JsError> {
         self.inner.set_room_settings(&room_id.inner, &room_settings.into()).await?;
         Ok(())
+    }
+
+    /// Manage dehydrated devices
+    #[wasm_bindgen(js_name = "dehydratedDevices")]
+    pub fn dehydrated_devices(&self) -> DehydratedDevices {
+        self.inner.dehydrated_devices().into()
     }
 
     /// Shut down the `OlmMachine`.
