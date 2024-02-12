@@ -1,39 +1,18 @@
 import {
-    BackupDecryptionKey,
-    CrossSigningStatus,
-    DecryptedRoomEvent,
-    DecryptionErrorCode,
     DeviceId,
-    DeviceKeyId,
-    DeviceLists,
-    EncryptionSettings,
-    EventId,
-    getVersions,
-    InboundGroupSession,
-    KeysBackupRequest,
-    KeysClaimRequest,
-    KeysQueryRequest,
-    KeysUploadRequest,
-    MaybeSignature,
-    MegolmDecryptionError,
     OlmMachine,
-    OwnUserIdentity,
-    RequestType,
-    RoomId,
-    RoomMessageRequest,
-    ShieldColor,
-    SignatureState,
-    SignatureUploadRequest,
-    StoreHandle,
-    ToDeviceRequest,
     UserId,
-    UserIdentity,
-    VerificationRequest,
-    Versions,
 } from "../pkg/matrix_sdk_crypto_wasm";
 import "fake-indexeddb/auto";
 
-describe("dehydrate devices", () => {
+afterEach(() => {
+    // reset fake-indexeddb after each test, to make sure we don't leak data
+    // cf https://github.com/dumbmatter/fakeIndexedDB#wipingresetting-the-indexeddb-for-a-fresh-state
+    // eslint-disable-next-line no-global-assign
+    indexedDB = new IDBFactory();
+});
+
+describe("dehydrated devices", () => {
     test("can dehydrate and rehydrate a device", async () => {
         const machine = await OlmMachine.initialize(new UserId("@alice:example.org"), new DeviceId("ABCDEFG"));
         await machine.bootstrapCrossSigning(true);
