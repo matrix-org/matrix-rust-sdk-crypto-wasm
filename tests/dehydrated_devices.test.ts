@@ -1,8 +1,4 @@
-import {
-    DeviceId,
-    OlmMachine,
-    UserId,
-} from "../pkg/matrix_sdk_crypto_wasm";
+import { DeviceId, OlmMachine, UserId } from "../pkg/matrix_sdk_crypto_wasm";
 import "fake-indexeddb/auto";
 
 afterEach(() => {
