@@ -629,7 +629,7 @@ impl OlmMachine {
         let room_id = room_id.inner.clone();
         let me = self.inner.clone();
 
-        future_to_promise(async move { Ok(me.invalidate_group_session(&room_id).await?) })
+        future_to_promise(async move { Ok(me.discard_room_key(&room_id).await?) })
     }
 
     /// Get to-device requests to share a room key with users in a room.
@@ -890,16 +890,17 @@ impl OlmMachine {
 
         future_to_promise(async move {
             Ok(serde_json::to_string(
-                &me.export_room_keys(|session| {
-                    let session = session.clone();
+                &me.store()
+                    .export_room_keys(|session| {
+                        let session = session.clone();
 
-                    predicate
-                        .call1(&JsValue::NULL, &olm::InboundGroupSession::from(session).into())
-                        .expect("Predicate function passed to `export_room_keys` failed")
-                        .as_bool()
-                        .unwrap_or(false)
-                })
-                .await?,
+                        predicate
+                            .call1(&JsValue::NULL, &olm::InboundGroupSession::from(session).into())
+                            .expect("Predicate function passed to `export_room_keys` failed")
+                            .as_bool()
+                            .unwrap_or(false)
+                    })
+                    .await?,
             )?)
         })
     }
