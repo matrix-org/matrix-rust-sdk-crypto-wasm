@@ -933,6 +933,7 @@ dependencies = [
  "matrix-sdk-crypto",
  "matrix-sdk-indexeddb",
  "matrix-sdk-qrcode",
+ "serde",
  "serde-wasm-bindgen 0.5.0",
  "serde_json",
  "tracing",
