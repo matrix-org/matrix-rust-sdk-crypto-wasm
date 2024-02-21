@@ -1,5 +1,12 @@
 # UNRELEASED
 
+# matrix-sdk-crypto-wasm v4.6.0
+
+-   Update dependencies, including matrix-rust-sdk to
+    dcf00697539321cf4eac5cd4929d45347b947da7
+    Use the new export_room_keys_stream method to reduce one copy of the keys
+    made during export.
+
 # matrix-sdk-crypto-wasm v4.5.0
 
 -   Update dependencies, including matrix-rust-sdk to
