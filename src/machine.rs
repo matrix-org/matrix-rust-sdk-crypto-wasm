@@ -470,7 +470,7 @@ impl OlmMachine {
             let room_event = me
                 .decrypt_room_event(&event, room_id.as_ref())
                 .await
-                .map_err(|e| MegolmDecryptionError::from(e))?;
+                .map_err(MegolmDecryptionError::from)?;
             Ok(responses::DecryptedRoomEvent::from(room_event))
         }))
     }
@@ -1017,7 +1017,7 @@ impl OlmMachine {
                 {
                     keys.entry(room_id.clone()).or_default().insert(session_id.into(), key);
                 } else {
-                    failures = failures + 1;
+                    failures += 1;
                 }
             }
         }
@@ -1423,7 +1423,7 @@ impl OlmMachine {
         room_id: &identifiers::RoomId,
     ) -> Result<JsValue, JsError> {
         let result = self.inner.room_settings(&room_id.inner).await?;
-        Ok(result.map(|settings| RoomSettings::from(settings)).into())
+        Ok(result.map(RoomSettings::from).into())
     }
 
     /// Store encryption settings for the given room.
@@ -1542,8 +1542,8 @@ async fn send_device_updates_to_callback(
 async fn send_secret_gossip_to_callback(callback: &Function, secret: &GossippedSecret) {
     match promise_result_to_future(callback.call2(
         &JsValue::NULL,
-        &(secret.secret_name.as_str().into()),
-        &(&secret.event.content.secret.to_owned().into()),
+        &secret.secret_name.as_str().into(),
+        &secret.event.content.secret.to_owned().into(),
     ))
     .await
     {

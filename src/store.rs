@@ -73,7 +73,7 @@ impl StoreHandle {
     }
 
     async fn open_indexeddb(
-        store_name: &String,
+        store_name: &str,
         store_passphrase: Option<String>,
     ) -> Result<Arc<DynCryptoStore>, matrix_sdk_indexeddb::IndexeddbCryptoStoreError> {
         let store = match store_passphrase {
@@ -81,7 +81,7 @@ impl StoreHandle {
                 use zeroize::Zeroize;
 
                 let store = matrix_sdk_indexeddb::IndexeddbCryptoStore::open_with_passphrase(
-                    &store_name,
+                    store_name,
                     &store_passphrase,
                 )
                 .await?;
@@ -90,7 +90,7 @@ impl StoreHandle {
                 store
             }
 
-            None => matrix_sdk_indexeddb::IndexeddbCryptoStore::open_with_name(&store_name).await?,
+            None => matrix_sdk_indexeddb::IndexeddbCryptoStore::open_with_name(store_name).await?,
         };
 
         Ok(store.into_crypto_store())

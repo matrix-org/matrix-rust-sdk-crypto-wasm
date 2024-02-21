@@ -858,9 +858,7 @@ impl VerificationRequest {
     pub fn their_supported_methods(&self) -> Result<Option<Vec<VerificationMethod>>, JsError> {
         self.inner
             .their_supported_methods()
-            .map(|methods| {
-                methods.into_iter().map(|method| VerificationMethod::try_from(method)).collect()
-            })
+            .map(|methods| methods.into_iter().map(VerificationMethod::try_from).collect())
             .transpose()
     }
 
@@ -872,9 +870,7 @@ impl VerificationRequest {
     pub fn our_supported_methods(&self) -> Result<Option<Vec<VerificationMethod>>, JsError> {
         self.inner
             .our_supported_methods()
-            .map(|methods| {
-                methods.into_iter().map(|method| VerificationMethod::try_from(method)).collect()
-            })
+            .map(|methods| methods.into_iter().map(VerificationMethod::try_from).collect())
             .transpose()
     }
 
