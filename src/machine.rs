@@ -3,10 +3,11 @@
 use std::{
     collections::{BTreeMap, HashSet},
     ops::Deref,
+    pin::{pin, Pin},
     time::Duration,
 };
 
-use futures_util::{pin_mut, StreamExt};
+use futures_util::{pin_mut, Stream, StreamExt};
 use js_sys::{Array, Function, JsString, Map, Promise, Set};
 use matrix_sdk_common::ruma::{
     self, events::secret::request::SecretName, serde::Raw, DeviceKeyAlgorithm, OwnedDeviceId,
@@ -19,8 +20,8 @@ use matrix_sdk_crypto::{
     types::RoomKeyBackupInfo,
     CryptoStoreError, EncryptionSyncChanges, GossippedSecret,
 };
+use serde::{ser::SerializeSeq, Serialize, Serializer};
 use serde_json::json;
-use serde_wasm_bindgen;
 use tracing::warn;
 use wasm_bindgen::{convert::TryFromJsValue, prelude::*};
 use wasm_bindgen_futures::{spawn_local, JsFuture};
@@ -883,15 +884,18 @@ impl OlmMachine {
     /// `predicate` is a closure that will be called for every known
     /// `InboundGroupSession`, which represents a room key. If the closure
     /// returns `true`, the `InboundGroupSession` will be included in the
-    /// export, otherwise it won't.
+    /// export; otherwise it won't.
+    ///
+    /// Returns a Promise containing a Result containing a String which is a
+    /// JSON-encoded array of ExportedRoomKey objects.
     #[wasm_bindgen(js_name = "exportRoomKeys")]
     pub fn export_room_keys(&self, predicate: Function) -> Promise {
         let me = self.inner.clone();
 
         future_to_promise(async move {
-            Ok(serde_json::to_string(
-                &me.store()
-                    .export_room_keys(|session| {
+            stream_to_json_array(pin!(
+                me.store()
+                    .export_room_keys_stream(|session| {
                         let session = session.clone();
 
                         predicate
@@ -901,7 +905,8 @@ impl OlmMachine {
                             .unwrap_or(false)
                     })
                     .await?,
-            )?)
+            ))
+            .await
         })
     }
 
@@ -1571,4 +1576,20 @@ pub(crate) async fn promise_result_to_future(
             Err(e)
         }
     }
+}
+
+async fn stream_to_json_array<T, S>(mut stream: Pin<&mut S>) -> Result<String, anyhow::Error>
+where
+    T: Serialize,
+    S: Stream<Item = T>,
+{
+    let mut stream_json = vec![];
+    let mut ser = serde_json::Serializer::new(&mut stream_json);
+    let mut seq = ser.serialize_seq(None)?;
+    while let Some(key) = stream.next().await {
+        seq.serialize_element(&key)?;
+    }
+    seq.end()?;
+
+    Ok(String::from_utf8(stream_json)?)
 }
