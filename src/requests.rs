@@ -652,7 +652,7 @@ impl TryFrom<OriginalPutDehydratedDeviceRequest> for PutDehydratedDeviceRequest 
                 }
                 if !request.fallback_keys.is_empty() {
                     map.insert(
-                        "one_time_keys".to_owned(),
+                        "fallback_keys".to_owned(),
                         serde_json::to_value(&request.fallback_keys).unwrap(),
                     );
                 }
