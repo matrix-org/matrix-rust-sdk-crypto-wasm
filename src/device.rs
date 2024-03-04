@@ -54,8 +54,7 @@ impl Device {
         }))
     }
 
-    /// Encrypt an event to be sent to this device.
-    /// (olm encryption).
+    /// Encrypt a to-device message to be sent to this device, using Olm encryption.
     ///
     /// Prior to calling this method you must ensure that an olm session is
     /// available for the target device. This can be done by calling the
