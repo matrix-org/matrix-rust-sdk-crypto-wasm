@@ -157,7 +157,7 @@ describe("Send to-device message", () => {
         return OlmMachine.initialize(newUser || userId1, newDevice || deviceId1);
     }
 
-    it("can send a to-device message", async () => {
+    it("can encrypt a to-device message", async () => {
         // Olm machine.
         const m = await machine(userId1, deviceId1);
 
