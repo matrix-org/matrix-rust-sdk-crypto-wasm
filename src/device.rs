@@ -62,7 +62,7 @@ impl Device {
     ///
     /// The caller is responsible for sending the encrypted
     /// event to the target device. If multiple messages are
-    /// encrypted using this method they should be sent in the same order as
+    /// encrypted for the same device using this method they should be sent in the same order as
     /// they are encrypted.
     ///
     /// # Returns
