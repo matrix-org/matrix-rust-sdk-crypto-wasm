@@ -237,7 +237,7 @@ describe("Send to-device message", () => {
                     },
                 },
             });
-            const marked = await m.markRequestAsSent("foo", RequestType.KeysQuery, hypotheticalResponse);
+            await m.markRequestAsSent("foo", RequestType.KeysQuery, hypotheticalResponse);
         }
 
         {
@@ -260,7 +260,7 @@ describe("Send to-device message", () => {
                 },
                 failures: {},
             });
-            const marked = await m.markRequestAsSent("bar", RequestType.KeysClaim, hypotheticalResponse);
+            await m.markRequestAsSent("bar", RequestType.KeysClaim, hypotheticalResponse);
         }
 
         // Pick the device we want to encrypt to.
@@ -269,7 +269,7 @@ describe("Send to-device message", () => {
         const content = {
             body: "Hello, World!",
         };
-        const type = "some.custon.event.type";
+        const type = "some.custom.event.type";
 
         const toDevice = await device2.encryptToDeviceEvent(type, content);
 
