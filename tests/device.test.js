@@ -146,7 +146,7 @@ describe(OlmMachine.name, () => {
     });
 });
 
-describe("Send to device", () => {
+describe("Send to-device message", () => {
     const userId1 = new UserId("@alice:example.org");
     const deviceId1 = new DeviceId("alice_device");
 
