@@ -57,7 +57,7 @@ impl Device {
     /// Encrypt a to-device message to be sent to this device, using Olm encryption.
     ///
     /// Prior to calling this method you must ensure that an olm session is
-    /// available for the target device. This can be done by calling the
+    /// available for the target device. This can be done by calling
     /// [`get_missing_sessions()`](OlmMachine::get_missing_sessions)
     ///
     /// The caller is responsible for sending the encrypted
