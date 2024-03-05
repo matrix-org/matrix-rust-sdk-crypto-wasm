@@ -141,6 +141,7 @@ async fn migrate_base_data_to_store(
             // device keys to the server (it does it every time the stack is started). For safety,
             // let's assume it hasn't happened yet.
             shared: false,
+            dehydrated: false,
             // Assume we have 50 keys on the server, until we get a sync that says fewer.
             uploaded_signed_key_count: 50,
             creation_local_time: MilliSecondsSinceUnixEpoch::now(),
