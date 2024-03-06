@@ -54,7 +54,8 @@ impl Device {
         }))
     }
 
-    /// Encrypt a to-device message to be sent to this device, using Olm encryption.
+    /// Encrypt a to-device message to be sent to this device, using Olm
+    /// encryption.
     ///
     /// Prior to calling this method you must ensure that an olm session is
     /// available for the target device. This can be done by calling
@@ -62,11 +63,11 @@ impl Device {
     ///
     /// The caller is responsible for sending the encrypted
     /// event to the target device. If multiple messages are
-    /// encrypted for the same device using this method they should be sent in the same order as
-    /// they are encrypted.
+    /// encrypted for the same device using this method they should be sent in
+    /// the same order as they are encrypted.
     ///
     /// # Returns
-    /// Returns a Promise for a `json` string of the encrypted event.
+    /// Returns a Promise for a js object of the encrypted event.
     /// Can be used to create the payload for a `/sendToDevice` API.
     #[wasm_bindgen(js_name = "encryptToDeviceEvent")]
     pub fn encrypt_to_device_event(

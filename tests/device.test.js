@@ -150,11 +150,8 @@ describe("Send to-device message", () => {
     const userId1 = new UserId("@alice:example.org");
     const deviceId1 = new DeviceId("alice_device");
 
-    const userId2 = new UserId("@bob:example.org");
-    const deviceId2 = new DeviceId("bob_device");
-
     function machine(newUser, newDevice) {
-        return OlmMachine.initialize(newUser || userId1, newDevice || deviceId1);
+        return OlmMachine.initialize(newUser, newDevice);
     }
 
     it("can encrypt a to-device message", async () => {
@@ -188,54 +185,6 @@ describe("Send to-device message", () => {
                     },
                 },
                 failures: {},
-                master_keys: {
-                    "@example:localhost": {
-                        user_id: "@example:localhost",
-                        usage: ["master"],
-                        keys: {
-                            "ed25519:n2lpJGx0LiKnuNE1IucZP3QExrD4SeRP0veBHPe3XUU":
-                                "n2lpJGx0LiKnuNE1IucZP3QExrD4SeRP0veBHPe3XUU",
-                        },
-                        signatures: {
-                            "@example:localhost": {
-                                "ed25519:TCSJXPWGVS":
-                                    "+j9G3L41I1fe0++wwusTTQvbboYW0yDtRWUEujhwZz4MAltjLSfJvY0hxhnz+wHHmuEXvQDen39XOpr1p29sAg",
-                            },
-                        },
-                    },
-                },
-                self_signing_keys: {
-                    "@example:localhost": {
-                        user_id: "@example:localhost",
-                        usage: ["self_signing"],
-                        keys: {
-                            "ed25519:kQXOuy639Yt47mvNTdrIluoC6DMvfbZLYbxAmwiDyhI":
-                                "kQXOuy639Yt47mvNTdrIluoC6DMvfbZLYbxAmwiDyhI",
-                        },
-                        signatures: {
-                            "@example:localhost": {
-                                "ed25519:n2lpJGx0LiKnuNE1IucZP3QExrD4SeRP0veBHPe3XUU":
-                                    "q32ifix/qyRpvmegw2BEJklwoBCAJldDNkcX+fp+lBA4Rpyqtycxge6BA4hcJdxYsy3oV0IHRuugS8rJMMFyAA",
-                            },
-                        },
-                    },
-                },
-                user_signing_keys: {
-                    "@example:localhost": {
-                        user_id: "@example:localhost",
-                        usage: ["user_signing"],
-                        keys: {
-                            "ed25519:g4ED07Fnqf3GzVWNN1pZ0IFrPQVdqQf+PYoJNH4eE0s":
-                                "g4ED07Fnqf3GzVWNN1pZ0IFrPQVdqQf+PYoJNH4eE0s",
-                        },
-                        signatures: {
-                            "@example:localhost": {
-                                "ed25519:n2lpJGx0LiKnuNE1IucZP3QExrD4SeRP0veBHPe3XUU":
-                                    "nKQu8alQKDefNbZz9luYPcNj+Z+ouQSot4fU/A23ELl1xrI06QVBku/SmDx0sIW1ytso0Cqwy1a+3PzCa1XABg",
-                            },
-                        },
-                    },
-                },
             });
             await m.markRequestAsSent("foo", RequestType.KeysQuery, hypotheticalResponse);
         }
