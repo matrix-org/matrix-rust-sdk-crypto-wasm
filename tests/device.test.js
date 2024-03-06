@@ -159,9 +159,10 @@ describe("Send to-device message", () => {
         const m = await machine(userId1, deviceId1);
 
         // Make m aware of another device, and get some OTK to be able to establish a session.
-        {
-            // derived from https://github.com/matrix-org/matrix-rust-sdk/blob/7f49618d350fab66b7e1dc4eaf64ec25ceafd658/benchmarks/benches/crypto_bench/keys_query.json
-            const hypotheticalResponse = JSON.stringify({
+        await m.markRequestAsSent(
+            "foo",
+            RequestType.KeysQuery,
+            JSON.stringify({
                 device_keys: {
                     "@example:localhost": {
                         AFGUOBTZWM: {
@@ -185,13 +186,13 @@ describe("Send to-device message", () => {
                     },
                 },
                 failures: {},
-            });
-            await m.markRequestAsSent("foo", RequestType.KeysQuery, hypotheticalResponse);
-        }
+            }),
+        );
 
-        {
-            // derived from https://github.com/matrix-org/matrix-rust-sdk/blob/7f49618d350fab66b7e1dc4eaf64ec25ceafd658/benchmarks/benches/crypto_bench/keys_claim.json
-            const hypotheticalResponse = JSON.stringify({
+        await m.markRequestAsSent(
+            "bar",
+            RequestType.KeysClaim,
+            JSON.stringify({
                 one_time_keys: {
                     "@example:localhost": {
                         AFGUOBTZWM: {
@@ -208,9 +209,8 @@ describe("Send to-device message", () => {
                     },
                 },
                 failures: {},
-            });
-            await m.markRequestAsSent("bar", RequestType.KeysClaim, hypotheticalResponse);
-        }
+            }),
+        );
 
         // Pick the device we want to encrypt to.
         const device2 = await m.getDevice(new UserId("@example:localhost"), new DeviceId("AFGUOBTZWM"));
