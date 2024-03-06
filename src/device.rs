@@ -1,7 +1,9 @@
 //! Types for a `Device`.
 
 use js_sys::{Array, Map, Promise};
+use serde::Serialize;
 use serde_json::Value;
+use serde_wasm_bindgen::Serializer;
 use wasm_bindgen::prelude::*;
 
 use crate::{
@@ -82,7 +84,9 @@ impl Device {
         Ok(future_to_promise(async move {
             let raw_encrypted = me.encrypt_event_raw(event_type.as_str(), &content).await?;
 
-            Ok(raw_encrypted.into_json().to_string())
+            let to_device_encrypted = raw_encrypted.deserialize()?;
+            // Using json_compatible() to convert into plain object instead of Map.
+            Ok(to_device_encrypted.serialize(&Serializer::json_compatible()).unwrap())
         }))
     }
 

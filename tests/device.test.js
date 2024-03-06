@@ -222,10 +222,9 @@ describe("Send to-device message", () => {
 
         const toDevice = await device2.encryptToDeviceEvent(type, content);
 
-        const olmContent = JSON.parse(toDevice);
-        expect(olmContent.algorithm).toStrictEqual("m.olm.v1.curve25519-aes-sha2");
-        expect(olmContent.ciphertext).toBeDefined();
-        expect(olmContent.ciphertext["boYjDpaC+7NkECQEeMh5dC+I1+AfriX0VXG2UV7EUQo"]).toBeDefined();
+        expect(toDevice.algorithm).toStrictEqual("m.olm.v1.curve25519-aes-sha2");
+        expect(toDevice.ciphertext).toBeDefined();
+        expect(toDevice.ciphertext["boYjDpaC+7NkECQEeMh5dC+I1+AfriX0VXG2UV7EUQo"]).toBeDefined();
     });
 });
 
