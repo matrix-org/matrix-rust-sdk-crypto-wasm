@@ -61,7 +61,7 @@ impl Device {
     ///
     /// Prior to calling this method you must ensure that an olm session is
     /// available for the target device. This can be done by calling
-    /// [`get_missing_sessions()`](OlmMachine::get_missing_sessions)
+    /// {@link OlmMachine.getMissingSessions}.
     ///
     /// The caller is responsible for sending the encrypted
     /// event to the target device. If multiple messages are
