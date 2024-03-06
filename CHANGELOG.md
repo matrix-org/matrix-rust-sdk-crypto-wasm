@@ -1,5 +1,8 @@
 # UNRELEASED
 
+-   Adds a new API `Device#encryptToDeviceEvent` to encrypt a to-device event using
+    Olm.
+
 # matrix-sdk-crypto-wasm v4.6.0
 
 -   Update dependencies, including matrix-rust-sdk to
