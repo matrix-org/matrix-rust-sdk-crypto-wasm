@@ -1,5 +1,11 @@
 # UNRELEASED
 
+# matrix-sdk-crypto-wasm v4.7.0
+
+-   Update dependencies, including matrix-rust-sdk to
+    88a8a7007ca34408af21c7e0bee81b2c344b155c which provides the
+    _disable-minimum-rotation-period-ms feature flag.
+
 # matrix-sdk-crypto-wasm v4.6.0
 
 -   Update dependencies, including matrix-rust-sdk to
