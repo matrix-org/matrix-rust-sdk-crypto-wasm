@@ -68,6 +68,14 @@ pub struct Curve25519PublicKey {
 
 #[wasm_bindgen]
 impl Curve25519PublicKey {
+    /// Create a new [`Curve25519PublicKey`] from a base64 encoded string.
+    #[wasm_bindgen(constructor)]
+    pub fn new(key: &str) -> Result<Curve25519PublicKey, JsError> {
+        let inner = vodozemac::Curve25519PublicKey::from_base64(&key)?;
+
+        Ok(Self { inner })
+    }
+
     /// The number of bytes a Curve25519 public key has.
     #[wasm_bindgen(getter)]
     pub fn length(&self) -> usize {
