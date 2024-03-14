@@ -5,6 +5,8 @@ use wasm_bindgen::prelude::*;
 
 use crate::impl_from_to_inner;
 
+pub mod secure_channel;
+
 /// An Ed25519 public key, used to verify digital signatures.
 #[wasm_bindgen]
 #[derive(Debug, Clone)]

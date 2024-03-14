@@ -79,3 +79,6 @@ vergen = { version = "8.0.0", features = ["build", "git", "gitcl"] }
 git = "https://github.com/matrix-org/matrix-rust-sdk"
 default_features = false
 features = ["js", "automatic-room-key-forwarding", "message-ids"]
+
+[patch.crates-io]
+vodozemac = { git = "https://github.com/matrix-org/vodozemac", rev = "b60f5db06d07d22f54891ac566ba61a3df669c3b"}
