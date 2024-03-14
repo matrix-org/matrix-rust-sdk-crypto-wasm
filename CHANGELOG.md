@@ -1,5 +1,8 @@
 # UNRELEASED
 
+-   Add a constructor for the `Curve25519PublicKey` type. This allows us to
+    create a `Curve25519PublicKey` from a Base64 string on the Javascript side.
+
 # matrix-sdk-crypto-wasm v4.9.0
 
 -   Update matrix-rust-sdk to `ab9e4f73b`.
