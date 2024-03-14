@@ -59,9 +59,9 @@ console_error_panic_hook = "0.1.7"
 futures-util = "0.3.27"
 http = "0.2.6"
 js-sys = "0.3.49"
-matrix-sdk-common = { git = "https://github.com/matrix-org/matrix-rust-sdk", features = ["js"] }
-matrix-sdk-indexeddb = { git = "https://github.com/matrix-org/matrix-rust-sdk", default-features = false, features = ["e2e-encryption"] }
-matrix-sdk-qrcode = { git = "https://github.com/matrix-org/matrix-rust-sdk", optional = true }
+matrix-sdk-common = { git = "https://github.com/matrix-org/matrix-rust-sdk", features = ["js"], rev = "a699ad911b61edcecdad6fcfe2b5f2e406e07fc7" }
+matrix-sdk-indexeddb = { git = "https://github.com/matrix-org/matrix-rust-sdk", default-features = false, features = ["e2e-encryption"], rev = "a699ad911b61edcecdad6fcfe2b5f2e406e07fc7" }
+matrix-sdk-qrcode = { git = "https://github.com/matrix-org/matrix-rust-sdk", optional = true, rev = "a699ad911b61edcecdad6fcfe2b5f2e406e07fc7" }
 serde = "1.0.91"
 serde_json = "1.0.91"
 serde-wasm-bindgen = "0.5.0"
@@ -78,4 +78,8 @@ vergen = { version = "8.0.0", features = ["build", "git", "gitcl"] }
 [dependencies.matrix-sdk-crypto]
 git = "https://github.com/matrix-org/matrix-rust-sdk"
 default_features = false
+rev = "a699ad911b61edcecdad6fcfe2b5f2e406e07fc7"
 features = ["js", "automatic-room-key-forwarding", "message-ids"]
+
+[patch.crates-io]
+vodozemac = { git = "https://github.com/matrix-org/vodozemac", rev = "5a66b424abf6fea1ee252416693c7703ee54dda9"}
