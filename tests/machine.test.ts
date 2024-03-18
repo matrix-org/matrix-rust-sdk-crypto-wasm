@@ -32,7 +32,7 @@ import {
     UserIdentity,
     VerificationRequest,
     Versions,
-} from "../pkg/matrix_sdk_crypto_wasm";
+} from "../pkg";
 import "fake-indexeddb/auto";
 
 type AnyOutgoingRequest =

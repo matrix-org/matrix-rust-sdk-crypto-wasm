@@ -1,9 +1,4 @@
-const {
-    EncryptionAlgorithm,
-    EncryptionSettings,
-    HistoryVisibility,
-    VerificationState,
-} = require("../pkg/matrix_sdk_crypto_wasm");
+const { EncryptionAlgorithm, EncryptionSettings, HistoryVisibility, VerificationState } = require("../pkg");
 
 describe("EncryptionAlgorithm", () => {
     test("has the correct variant values", () => {

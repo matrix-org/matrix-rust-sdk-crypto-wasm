@@ -1,8 +1,34 @@
 # UNRELEASED
 
+-   Fix a problem when using matrix-sdk-crypto-wasm in a webapp running
+    in the webpack dev server; when rebuilding, the server would throw an
+    error.
+    ([#109](https://github.com/matrix-org/matrix-rust-sdk-crypto-wasm/pull/109))
+
 -   Add `OlmMachine.dehydratedDevices()` and `DehydratedDevices` class to
     support dehydrated devices.
     ([#104](https://github.com/matrix-org/matrix-rust-sdk-crypto-wasm/pull/104))
+
+# matrix-sdk-crypto-wasm v4.7.0
+
+-   Update dependencies, including matrix-rust-sdk to
+    88a8a7007ca34408af21c7e0bee81b2c344b155c which provides the
+    `_disable-minimum-rotation-period-ms` feature flag.
+
+# matrix-sdk-crypto-wasm v4.6.0
+
+-   Update dependencies, including matrix-rust-sdk to
+    dcf00697539321cf4eac5cd4929d45347b947da7
+    Use the new export_room_keys_stream method to reduce one copy of the keys
+    made during export.
+
+# matrix-sdk-crypto-wasm v4.5.0
+
+-   Update dependencies, including matrix-rust-sdk to
+    5957d9603bd8a3f00ddd9a52bda80224c853bcd1 to get
+    https://github.com/matrix-org/matrix-rust-sdk/pull/3095 which speeds up the
+    schema upgrade v8->v10 again. See
+    https://github.com/element-hq/element-web/issues/26948
 
 # matrix-sdk-crypto-wasm v4.4.0
 

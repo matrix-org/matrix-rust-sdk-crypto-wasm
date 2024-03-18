@@ -265,7 +265,7 @@ fn libolm_pickled_session_to_rust_pickled_session(
     libolm_session: PickledSession,
     pickle_key: &[u8],
 ) -> Result<matrix_sdk_crypto::olm::PickledSession> {
-    let session = vodozemac::olm::Session::from_libolm_pickle(&libolm_session.pickle, &pickle_key)?;
+    let session = vodozemac::olm::Session::from_libolm_pickle(&libolm_session.pickle, pickle_key)?;
 
     let creation_time = date_to_seconds_since_epoch(&libolm_session.creation_time)
         .ok_or_else(|| JsError::new("session creation time out of range"))?;
@@ -463,5 +463,5 @@ async fn import_megolm_sessions_to_store(
 fn date_to_seconds_since_epoch(date: &Date) -> Option<SecondsSinceUnixEpoch> {
     // javascript Dates are defined to be in milliseconds since the epoch
     let duration_since_epoch = Duration::from_millis(date.get_time() as u64);
-    return Some(SecondsSinceUnixEpoch(UInt::new(duration_since_epoch.as_secs())?));
+    Some(SecondsSinceUnixEpoch(UInt::new(duration_since_epoch.as_secs())?))
 }
