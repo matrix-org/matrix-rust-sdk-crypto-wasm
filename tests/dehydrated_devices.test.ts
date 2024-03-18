@@ -1,4 +1,14 @@
-import { DeviceId, OlmMachine, UserId } from "../pkg/matrix_sdk_crypto_wasm";
+import {
+    DeviceId,
+    DeviceLists,
+    EncryptionSettings,
+    KeysQueryRequest,
+    KeysUploadRequest,
+    OlmMachine,
+    RequestType,
+    RoomId,
+    UserId,
+} from "../pkg/matrix_sdk_crypto_wasm";
 import "fake-indexeddb/auto";
 
 afterEach(() => {
@@ -10,21 +20,119 @@ afterEach(() => {
 
 describe("dehydrated devices", () => {
     test("can dehydrate and rehydrate a device", async () => {
-        const machine = await OlmMachine.initialize(new UserId("@alice:example.org"), new DeviceId("ABCDEFG"));
-        await machine.bootstrapCrossSigning(true);
+        const room = new RoomId("!test:localhost");
+        const user = new UserId("@alice:example.org");
 
+        // set up OlmMachine to dehydrated device
+        const machine = await OlmMachine.initialize(user, new DeviceId("ABCDEFG"));
+        await machine.bootstrapCrossSigning(true);
+        machine.receiveSyncChanges(
+            JSON.stringify([]), // to-device events
+            new DeviceLists(),
+            new Map(), // otk counts
+            new Set(), // unused fallback keys
+        );
+        const [keysUploadRequest, keysQueryRequest] = await machine.outgoingRequests();
+        expect(keysUploadRequest).toBeInstanceOf(KeysUploadRequest);
+        expect(keysQueryRequest).toBeInstanceOf(KeysQueryRequest);
+        const keysUploadBody = JSON.parse(keysUploadRequest.body);
+        const otks = Object.values(keysUploadBody.one_time_keys);
+        await machine.markRequestAsSent(
+            keysUploadRequest.id!,
+            keysUploadRequest.type,
+            JSON.stringify({
+                one_time_key_counts: {
+                    signed_curve25519: otks.length,
+                },
+            }),
+        );
+
+        // create dehydrated device
         const dehydratedDevices = machine.dehydratedDevices();
         const device = await dehydratedDevices.create();
         const key = new Uint8Array(32);
-        const req = await device.keysForUpload("Dehydrated device", key);
-        const body = JSON.parse(req.body);
+        const dehydrationRequest = await device.keysForUpload("Dehydrated device", key);
+        const dehydrationBody = JSON.parse(dehydrationRequest.body);
 
-        const machine2 = await OlmMachine.initialize(new UserId("@alice:example.org"), new DeviceId("HIJKLMN"));
+        // let the machine know about the dehydrated device's device keys and OTK
+        await machine.markRequestAsSent(
+            keysQueryRequest.id!,
+            keysQueryRequest.type,
+            JSON.stringify({
+                device_keys: {
+                    "@alice:example.org": {
+                        ABCDEFG: keysUploadBody.device_keys,
+                        [dehydrationBody.device_id]: dehydrationBody.device_keys,
+                    },
+                },
+                failures: {},
+            }),
+        );
+
+        const [dehydratedOtkId, dehydratedOtk] = Object.entries(dehydrationBody.one_time_keys)[0];
+        await machine.markRequestAsSent(
+            "foo",
+            RequestType.KeysClaim,
+            JSON.stringify({
+                one_time_keys: {
+                    "@alice:example.org": {
+                        [dehydrationBody.device_id]: {
+                            [dehydratedOtkId]: dehydratedOtk,
+                        },
+                    },
+                },
+            }),
+        );
+
+        // encrypt an event and send key to dehydrated device
+        const [keyShareRequest] = await machine.shareRoomKey(room, [user.clone()], new EncryptionSettings());
+        const keyShareContent = JSON.parse(keyShareRequest.body).messages["@alice:example.org"][
+            dehydrationBody.device_id
+        ];
+
+        const encryptedMessage = await machine.encryptRoomEvent(
+            room,
+            "m.room.message",
+            JSON.stringify({
+                msgtype: "m.text",
+                body: "Hello, World!",
+            }),
+        );
+
+        // create new OlmMachine to rehydrate the device
+        const machine2 = await OlmMachine.initialize(user, new DeviceId("HIJKLMN"));
         const dehydratedDevices2 = machine2.dehydratedDevices();
         const rehydratedDevice = await dehydratedDevices2.rehydrate(
             key,
-            new DeviceId(body.device_id),
-            JSON.stringify(body.device_data),
+            new DeviceId(dehydrationBody.device_id),
+            JSON.stringify(dehydrationBody.device_data),
         );
+
+        // process the room key sent from the first machine
+        await rehydratedDevice.receiveEvents(
+            JSON.stringify([
+                {
+                    type: "m.room.encrypted",
+                    sender: "@alice:example.org",
+                    content: keyShareContent,
+                },
+            ]),
+        );
+
+        // decrypt the event sent by the first machine
+        const encryptedEvent = JSON.stringify({
+            type: "m.room.encrypted",
+            event_id: "$event_id:example.org",
+            origin_server_ts: Date.now(),
+            sender: "@alice:example.org",
+            content: JSON.parse(encryptedMessage),
+            unsigned: {
+                age: 0,
+            },
+        });
+
+        const decrypted = await machine2.decryptRoomEvent(encryptedEvent, room);
+        const decryptedEvent = JSON.parse(decrypted.event);
+        expect(decryptedEvent.content.body).toStrictEqual("Hello, World!");
     });
 });
