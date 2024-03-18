@@ -1,9 +1,4 @@
-const {
-    EncryptionAlgorithm,
-    EncryptionSettings,
-    HistoryVisibility,
-    VerificationState,
-} = require("../pkg");
+const { EncryptionAlgorithm, EncryptionSettings, HistoryVisibility, VerificationState } = require("../pkg");
 
 describe("EncryptionAlgorithm", () => {
     test("has the correct variant values", () => {
