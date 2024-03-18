@@ -1,5 +1,10 @@
 # UNRELEASED
 
+-   Fix a problem when using matrix-sdk-crypto-wasm in a webapp running
+    in the webpack dev server; when rebuilding, the server would throw an
+    error.
+    ([#109](https://github.com/matrix-org/matrix-rust-sdk-crypto-wasm/pull/109))
+
 # matrix-sdk-crypto-wasm v4.7.0
 
 -   Update dependencies, including matrix-rust-sdk to

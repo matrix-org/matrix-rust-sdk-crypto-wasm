@@ -18,13 +18,13 @@
         "ruma",
         "nio"
     ],
-    "main": "pkg/matrix_sdk_crypto_wasm.js",
-    "types": "pkg/matrix_sdk_crypto_wasm.d.ts",
+    "main": "pkg/index.js",
+    "types": "pkg/index.d.ts",
     "files": [
         "pkg/matrix_sdk_crypto_wasm_bg.wasm.js",
         "pkg/matrix_sdk_crypto_wasm_bg.wasm.d.ts",
-        "pkg/matrix_sdk_crypto_wasm.js",
-        "pkg/matrix_sdk_crypto_wasm.d.ts"
+        "pkg/index.js",
+        "pkg/index.d.ts"
     ],
     "devDependencies": {
         "@babel/core": "^7.23.5",
