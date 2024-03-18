@@ -63,7 +63,7 @@ impl Ed25519Signature {
 #[wasm_bindgen]
 #[derive(Debug, Clone)]
 pub struct Curve25519PublicKey {
-    inner: vodozemac::Curve25519PublicKey,
+    pub(crate) inner: vodozemac::Curve25519PublicKey,
 }
 
 #[wasm_bindgen]

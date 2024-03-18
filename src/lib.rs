@@ -31,6 +31,7 @@ pub mod libolm_migration;
 pub mod machine;
 mod macros;
 pub mod olm;
+pub mod qr_login;
 pub mod requests;
 pub mod responses;
 pub mod store;
