@@ -145,6 +145,7 @@ async fn migrate_base_data_to_store(
             // Assume we have 50 keys on the server, until we get a sync that says fewer.
             uploaded_signed_key_count: 50,
             creation_local_time: MilliSecondsSinceUnixEpoch::now(),
+            fallback_key_creation_timestamp: None,
         })?;
 
     let backup_decryption_key = data

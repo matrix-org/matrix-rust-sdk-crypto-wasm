@@ -515,10 +515,6 @@ pub fn outgoing_request_to_js_value(
         OutgoingRequests::RoomMessage(request) => {
             JsValue::from(RoomMessageRequest::try_from((request_id, request))?)
         }
-
-        OutgoingRequests::KeysBackup(request) => {
-            JsValue::from(KeysBackupRequest::try_from((request_id, request))?)
-        }
     })
 }
 
