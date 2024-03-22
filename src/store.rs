@@ -2,7 +2,10 @@
 
 use std::sync::Arc;
 
-use matrix_sdk_crypto::store::{DynCryptoStore, IntoCryptoStore, MemoryStore};
+use matrix_sdk_crypto::{
+    store::{DynCryptoStore, IntoCryptoStore, MemoryStore},
+    types::BackupSecrets,
+};
 use wasm_bindgen::prelude::*;
 
 use crate::{
@@ -170,3 +173,64 @@ impl RoomKeyInfo {
         self.inner.session_id.clone()
     }
 }
+
+#[wasm_bindgen]
+pub struct SecretsBundle {
+    pub(super) inner: matrix_sdk_crypto::types::SecretsBundle,
+}
+
+#[wasm_bindgen(getter_with_clone)]
+pub struct BackupSecretsBundle {
+    /// The backup decryption key.
+    pub key: String,
+    /// The backup version which this backup decryption key is used with.
+    pub backup_version: String,
+}
+
+#[wasm_bindgen]
+impl SecretsBundle {
+    /// The seed of the master key encoded as unpadded base64.
+    #[wasm_bindgen(getter, js_name = "masterKey")]
+    pub fn master_key(&self) -> String {
+        self.inner.cross_signing.master_key.clone()
+    }
+
+    /// The seed of the self signing key encoded as unpadded base64.
+    #[wasm_bindgen(getter, js_name = "selfSigningKey")]
+    pub fn self_signing_key(&self) -> String {
+        self.inner.cross_signing.self_signing_key.clone()
+    }
+
+    /// The seed of the user signing key encoded as unpadded base64.
+    #[wasm_bindgen(getter, js_name = "userSigningKey")]
+    pub fn user_signing_key(&self) -> String {
+        self.inner.cross_signing.user_signing_key.clone()
+    }
+
+    /// The bundle of the backup decryption key and backup version if any.
+    #[wasm_bindgen(getter, js_name = "backupBundle")]
+    pub fn backup_bundle(&self) -> Option<BackupSecretsBundle> {
+        if let Some(BackupSecrets::MegolmBackupV1Curve25519AesSha2(backup)) = &self.inner.backup {
+            Some(BackupSecretsBundle {
+                key: backup.key.to_base64(),
+                backup_version: backup.backup_version.clone(),
+            })
+        } else {
+            None
+        }
+    }
+
+    /// Serialize the [`SecretsBundle`] to a JSON string.
+    pub fn to_json(&self) -> Result<String, JsError> {
+        Ok(serde_json::to_string(&self.inner)?)
+    }
+
+    /// Deserialize the [`SecretsBundle`] from a JSON string.
+    pub fn from_json(string: &str) -> Result<SecretsBundle, JsError> {
+        let bundle = serde_json::from_str(string)?;
+
+        Ok(Self { inner: bundle })
+    }
+}
+
+impl_from_to_inner!(matrix_sdk_crypto::types::SecretsBundle => SecretsBundle);
