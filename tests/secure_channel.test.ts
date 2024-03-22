@@ -50,6 +50,27 @@ describe(SecretsBundle.name, () => {
         return response;
     }
 
+    test("can deserialize a secrets bundle", async () => {
+        const json = {
+            "type": "m.login.secrets",
+            "cross_signing": {
+                "master_key": "bMnVpkHI4S2wXRxy+IpaKM5PIAUUkl6DE+n0YLIW/qs",
+                "user_signing_key": "8tlgLjUrrb/zGJo4YKGhDTIDCEjtJTAS/Sh2AGNLuIo",
+                "self_signing_key": "pfDknmP5a0fVVRE54zhkUgJfzbNmvKcNfIWEW796bQs"
+            },
+            "backup": {
+                "algorithm": "m.megolm_backup.v1.curve25519-aes-sha2",
+                "key": "bYYv3aFLQ49jMNcOjuTtBY9EKDby2x1m3gfX81nIKRQ",
+                "backup_version": "9"
+            }
+        };
+
+        const cycle = JSON.parse(JSON.stringify(json));
+        const bundle = SecretsBundle.from_json(cycle);
+
+        expect(bundle.masterKey).toStrictEqual("bMnVpkHI4S2wXRxy+IpaKM5PIAUUkl6DE+n0YLIW/qs");
+    });
+
     test("can import a secrets bundle", async () => {
         const userId = new UserId("@alice:example.org");
         const firstDevice = new DeviceId("ABCDEF");
