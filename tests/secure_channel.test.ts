@@ -26,30 +26,6 @@ describe(SecureChannel.name, () => {
 });
 
 describe(SecretsBundle.name, () => {
-    async function bootstrapMachine(machine: OlmMachine): Promise<Object> {
-        let bootstrapRequest = await machine.bootstrapCrossSigning(false);
-        const crossSigning = JSON.parse(bootstrapRequest.uploadSigningKeysRequest.body);
-        const userIdStr = machine.userId.toString();
-
-        const response = {
-            device_keys: {
-                [userIdStr]: {},
-            },
-            master_keys: {
-                [userIdStr]: crossSigning.master_key,
-            },
-            self_signing_keys: {
-                [userIdStr]: crossSigning.self_signing_key,
-            },
-
-            user_signing_keys: {
-                [userIdStr]: crossSigning.user_signing_key,
-            }
-        };
-
-        return response;
-    }
-
     test("can deserialize a secrets bundle", async () => {
         const json = {
             "type": "m.login.secrets",
@@ -75,19 +51,11 @@ describe(SecretsBundle.name, () => {
         const userId = new UserId("@alice:example.org");
         const firstDevice = new DeviceId("ABCDEF");
         const secondDevice = new DeviceId("DEVICE2");
+
         const firstMachine = await OlmMachine.initialize(userId, firstDevice);
-
-        const keys_query_response = await bootstrapMachine(firstMachine);
-
         const secondMachine = await OlmMachine.initialize(userId, secondDevice);
-        secondMachine.mark
 
-        await secondMachine.markRequestAsSent(
-            "ID",
-            RequestType.KeysQuery,
-            JSON.stringify(keys_query_response),
-        );
-
+        await firstMachine.bootstrapCrossSigning(false);
         const bundle = await firstMachine.exportSecretsBundle();
 
         const alice = new SecureChannel();
@@ -97,7 +65,6 @@ describe(SecretsBundle.name, () => {
 
         const alice_established = alice.create_outbound_channel(bob.public_key());
         const initial_message = alice_established.encrypt(JSON.stringify(json_bundle));
-
         const { message, channel } = bob.create_inbound_channel(initial_message);
 
         const deserialize_message = JSON.parse(message);
@@ -115,6 +82,9 @@ describe(SecretsBundle.name, () => {
         expect(exported_bundle.masterKey).toStrictEqual(bundle.masterKey);
         expect(exported_bundle.selfSigningKey).toStrictEqual(bundle.selfSigningKey);
         expect(exported_bundle.userSigningKey).toStrictEqual(bundle.userSigningKey);
+
+        const identity = await secondMachine.getIdentity(userId);
+        expect(identity.isVerified).toBeTruthy();
     });
 });
 

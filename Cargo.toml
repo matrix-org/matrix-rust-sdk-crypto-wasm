@@ -59,9 +59,9 @@ console_error_panic_hook = "0.1.7"
 futures-util = "0.3.27"
 http = "0.2.6"
 js-sys = "0.3.49"
-matrix-sdk-common = { git = "https://github.com/matrix-org/matrix-rust-sdk", rev = "c7335476a387ab92592baea15d5df536669bf2bd", features = ["js"] }
-matrix-sdk-indexeddb = { git = "https://github.com/matrix-org/matrix-rust-sdk", rev = "c7335476a387ab92592baea15d5df536669bf2bd", default-features = false, features = ["e2e-encryption"] }
-matrix-sdk-qrcode = { git = "https://github.com/matrix-org/matrix-rust-sdk", rev = "c7335476a387ab92592baea15d5df536669bf2bd", optional = true }
+matrix-sdk-common = { git = "https://github.com/matrix-org/matrix-rust-sdk", rev = "116b68830ec5f5a626d6d3f28f8721f0d629633e", features = ["js"] }
+matrix-sdk-indexeddb = { git = "https://github.com/matrix-org/matrix-rust-sdk", rev = "116b68830ec5f5a626d6d3f28f8721f0d629633e", default-features = false, features = ["e2e-encryption"] }
+matrix-sdk-qrcode = { git = "https://github.com/matrix-org/matrix-rust-sdk", rev = "116b68830ec5f5a626d6d3f28f8721f0d629633e", optional = true }
 serde = "1.0.91"
 serde_json = "1.0.91"
 serde-wasm-bindgen = "0.5.0"
@@ -78,6 +78,6 @@ vergen = { version = "8.0.0", features = ["build", "git", "gitcl"] }
 
 [dependencies.matrix-sdk-crypto]
 git = "https://github.com/matrix-org/matrix-rust-sdk"
-rev = "c7335476a387ab92592baea15d5df536669bf2bd"
+rev = "116b68830ec5f5a626d6d3f28f8721f0d629633e"
 default_features = false
 features = ["js", "automatic-room-key-forwarding", "message-ids"]
