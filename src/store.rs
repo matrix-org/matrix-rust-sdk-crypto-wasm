@@ -221,13 +221,13 @@ impl SecretsBundle {
     }
 
     /// Serialize the [`SecretsBundle`] to a JSON string.
-    pub fn to_json(&self) -> Result<String, JsError> {
-        Ok(serde_json::to_string(&self.inner)?)
+    pub fn to_json(&self) -> Result<JsValue, JsError> {
+        Ok(serde_wasm_bindgen::to_value(&self.inner)?)
     }
 
     /// Deserialize the [`SecretsBundle`] from a JSON string.
-    pub fn from_json(string: &str) -> Result<SecretsBundle, JsError> {
-        let bundle = serde_json::from_str(string)?;
+    pub fn from_json(json: JsValue) -> Result<SecretsBundle, JsError> {
+        let bundle = serde_wasm_bindgen::from_value(json)?;
 
         Ok(Self { inner: bundle })
     }
