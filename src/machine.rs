@@ -521,6 +521,26 @@ impl OlmMachine {
         })
     }
 
+    #[wasm_bindgen(js_name = "exportSecretsBundle")]
+    pub fn export_secrets_bundle(&self) -> Promise {
+        let me = self.inner.clone();
+
+        future_to_promise(async move {
+            Ok(me.store().export_secrets_bundle().await.map(store::SecretsBundle::from)?)
+        })
+    }
+
+    #[wasm_bindgen(js_name = "importSecretsBundle")]
+    pub fn import_secrets_bundle(&self, bundle: store::SecretsBundle) -> Promise {
+        let me = self.inner.clone();
+
+        future_to_promise(async move {
+            me.store().import_secrets_bundle(&bundle.inner).await?;
+
+            Ok(JsValue::null())
+        })
+    }
+
     /// Export all the private cross signing keys we have.
     ///
     /// The export will contain the seeds for the ed25519 keys as
@@ -533,7 +553,11 @@ impl OlmMachine {
         let me = self.inner.clone();
 
         future_to_promise(async move {
-            Ok(me.export_cross_signing_keys().await?.map(store::CrossSigningKeyExport::from))
+            Ok(me
+                .store()
+                .export_cross_signing_keys()
+                .await?
+                .map(store::CrossSigningKeyExport::from))
         })
     }
 
@@ -557,7 +581,11 @@ impl OlmMachine {
         };
 
         future_to_promise(async move {
-            Ok(me.import_cross_signing_keys(export).await.map(olm::CrossSigningStatus::from)?)
+            Ok(me
+                .store()
+                .import_cross_signing_keys(export)
+                .await
+                .map(olm::CrossSigningStatus::from)?)
         })
     }
 

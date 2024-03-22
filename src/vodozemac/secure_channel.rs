@@ -5,16 +5,16 @@ use wasm_bindgen::prelude::*;
 
 use super::Curve25519PublicKey;
 
-#[wasm_bindgen]
-pub struct SecureChannel {
-    inner: Option<secure_channel::SecureChannel>,
-    public_key: Curve25519PublicKey,
-}
-
 #[wasm_bindgen(getter_with_clone)]
 pub struct ChannelCreationResult {
     pub channel: EstablishedSecureChannel,
     pub message: String,
+}
+
+#[wasm_bindgen]
+pub struct SecureChannel {
+    inner: Option<secure_channel::SecureChannel>,
+    public_key: Curve25519PublicKey,
 }
 
 #[wasm_bindgen]
