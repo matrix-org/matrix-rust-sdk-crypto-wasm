@@ -1,5 +1,9 @@
 # UNRELEASED
 
+-   Add `OlmMachine.dehydratedDevices()` and `DehydratedDevices` class to
+    support dehydrated devices.
+    ([#104](https://github.com/matrix-org/matrix-rust-sdk-crypto-wasm/pull/104))
+
 -   Fix a problem when using matrix-sdk-crypto-wasm in a webapp running
     in the webpack dev server; when rebuilding, the server would throw an
     error.

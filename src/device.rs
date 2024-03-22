@@ -208,6 +208,12 @@ impl Device {
             Ok(requests::SignatureUploadRequest::try_from(&device.verify().await?)?)
         })
     }
+
+    /// Whether or not the device is a dehydrated device.
+    #[wasm_bindgen(getter, js_name = "isDehydrated")]
+    pub fn is_dehydrated(&self) -> bool {
+        self.inner.is_dehydrated()
+    }
 }
 
 /// The local trust state of a device.
