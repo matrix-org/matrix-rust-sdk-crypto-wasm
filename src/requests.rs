@@ -598,7 +598,7 @@ impl TryFrom<&OriginalUploadSigningKeysRequest> for UploadSigningKeysRequest {
 
 #[wasm_bindgen(getter_with_clone)]
 #[derive(Debug)]
-/// Upload a dehydrated device to the server.
+/// A request that will upload a dehydrated device to the server.
 pub struct PutDehydratedDeviceRequest {
     /// A JSON-encoded string containing the rest of the payload: `rooms`.
     ///
