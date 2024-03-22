@@ -1,4 +1,4 @@
-# UNRELEASED
+# matrix-sdk-crypto-wasm v4.8.0
 
 -   Add `OlmMachine.dehydratedDevices()` and `DehydratedDevices` class to
     support dehydrated devices.
