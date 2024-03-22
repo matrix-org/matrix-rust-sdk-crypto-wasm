@@ -72,11 +72,15 @@ describe(SecretsBundle.name, () => {
         const alice = new SecureChannel();
         const bob = new SecureChannel();
 
+        const json_bundle = bundle.to_json();
+
         const alice_established = alice.create_outbound_channel(bob.public_key());
-        const initial_message = alice_established.encrypt(bundle.to_json());
+        const initial_message = alice_established.encrypt(JSON.stringify(json_bundle));
 
         const { message, channel } = bob.create_inbound_channel(initial_message);
-        const received_bundle = SecretsBundle.from_json(message);
+
+        const deserialize_message = JSON.parse(message);
+        const received_bundle = SecretsBundle.from_json(deserialize_message);
 
         await secondMachine.importSecretsBundle(received_bundle);
 
