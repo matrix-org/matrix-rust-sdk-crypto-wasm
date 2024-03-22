@@ -220,12 +220,12 @@ impl SecretsBundle {
         }
     }
 
-    /// Serialize the [`SecretsBundle`] to a JSON string.
+    /// Serialize the [`SecretsBundle`] to a JSON object.
     pub fn to_json(&self) -> Result<JsValue, JsError> {
         Ok(serde_wasm_bindgen::to_value(&self.inner)?)
     }
 
-    /// Deserialize the [`SecretsBundle`] from a JSON string.
+    /// Deserialize the [`SecretsBundle`] from a JSON object.
     pub fn from_json(json: JsValue) -> Result<SecretsBundle, JsError> {
         let bundle = serde_wasm_bindgen::from_value(json)?;
 
