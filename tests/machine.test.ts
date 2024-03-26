@@ -214,6 +214,13 @@ describe(OlmMachine.name, () => {
         expect((await machine()).deviceId.toString()).toStrictEqual(device.toString());
     });
 
+    test("can read creation time", async () => {
+        const startTime = Date.now();
+        const creationTime = (await machine()).deviceCreationTimeMs;
+        expect(creationTime).toBeLessThanOrEqual(Date.now());
+        expect(creationTime).toBeGreaterThanOrEqual(startTime);
+    });
+
     test("can read identity keys", async () => {
         const identityKeys = (await machine()).identityKeys;
 

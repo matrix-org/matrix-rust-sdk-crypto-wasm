@@ -1,5 +1,8 @@
 # UNRELEASED
 
+-   Add `OlmMachine.deviceCreationTimeMs`.
+    ([#112](https://github.com/matrix-org/matrix-rust-sdk-crypto-wasm/pull/112))
+
 # matrix-sdk-crypto-wasm v4.8.0
 
 -   Add `OlmMachine.dehydratedDevices()` and `DehydratedDevices` class to
