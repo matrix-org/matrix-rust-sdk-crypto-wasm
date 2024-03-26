@@ -1,5 +1,7 @@
 # UNRELEASED
 
+# matrix-sdk-crypto-wasm v4.9.0
+
 -   Add `OlmMachine.deviceCreationTimeMs`.
     ([#112](https://github.com/matrix-org/matrix-rust-sdk-crypto-wasm/pull/112))
 
