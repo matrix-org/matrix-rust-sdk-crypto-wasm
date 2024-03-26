@@ -150,6 +150,18 @@ impl OlmMachine {
         identifiers::DeviceId::from(self.inner.device_id().to_owned())
     }
 
+    /// The time, in milliseconds since the unix epoch, at which the `Account`
+    /// backing this `OlmMachine` was created.
+    ///
+    /// An `Account` is created when an `OlmMachine` is first instantiated
+    /// against a given `Store`, at which point it creates identity keys etc.
+    /// This method returns the timestamp, according to the local clock, at
+    /// which that happened.
+    #[wasm_bindgen(getter, js_name = "deviceCreationTimeMs")]
+    pub fn device_creation_time_ms(&self) -> f64 {
+        self.inner.device_creation_time().get().into()
+    }
+
     /// Get the public parts of our Olm identity keys.
     #[wasm_bindgen(getter, js_name = "identityKeys")]
     pub fn identity_keys(&self) -> vodozemac::IdentityKeys {
