@@ -860,7 +860,7 @@ dependencies = [
 [[package]]
 name = "matrix-sdk-common"
 version = "0.7.0"
-source = "git+https://github.com/matrix-org/matrix-rust-sdk?rev=116b68830ec5f5a626d6d3f28f8721f0d629633e#116b68830ec5f5a626d6d3f28f8721f0d629633e"
+source = "git+https://github.com/matrix-org/matrix-rust-sdk?rev=c3d0ac5b5b9adb19582075720ed600f090f5264c#c3d0ac5b5b9adb19582075720ed600f090f5264c"
 dependencies = [
  "async-trait",
  "futures-core",
@@ -882,7 +882,7 @@ dependencies = [
 [[package]]
 name = "matrix-sdk-crypto"
 version = "0.7.0"
-source = "git+https://github.com/matrix-org/matrix-rust-sdk?rev=116b68830ec5f5a626d6d3f28f8721f0d629633e#116b68830ec5f5a626d6d3f28f8721f0d629633e"
+source = "git+https://github.com/matrix-org/matrix-rust-sdk?rev=c3d0ac5b5b9adb19582075720ed600f090f5264c#c3d0ac5b5b9adb19582075720ed600f090f5264c"
 dependencies = [
  "aes",
  "as_variant",
@@ -948,7 +948,7 @@ dependencies = [
 [[package]]
 name = "matrix-sdk-indexeddb"
 version = "0.7.0"
-source = "git+https://github.com/matrix-org/matrix-rust-sdk?rev=116b68830ec5f5a626d6d3f28f8721f0d629633e#116b68830ec5f5a626d6d3f28f8721f0d629633e"
+source = "git+https://github.com/matrix-org/matrix-rust-sdk?rev=c3d0ac5b5b9adb19582075720ed600f090f5264c#c3d0ac5b5b9adb19582075720ed600f090f5264c"
 dependencies = [
  "anyhow",
  "async-trait",
@@ -973,7 +973,7 @@ dependencies = [
 [[package]]
 name = "matrix-sdk-qrcode"
 version = "0.7.0"
-source = "git+https://github.com/matrix-org/matrix-rust-sdk?rev=116b68830ec5f5a626d6d3f28f8721f0d629633e#116b68830ec5f5a626d6d3f28f8721f0d629633e"
+source = "git+https://github.com/matrix-org/matrix-rust-sdk?rev=c3d0ac5b5b9adb19582075720ed600f090f5264c#c3d0ac5b5b9adb19582075720ed600f090f5264c"
 dependencies = [
  "byteorder",
  "qrcode",
@@ -985,7 +985,7 @@ dependencies = [
 [[package]]
 name = "matrix-sdk-store-encryption"
 version = "0.7.0"
-source = "git+https://github.com/matrix-org/matrix-rust-sdk?rev=116b68830ec5f5a626d6d3f28f8721f0d629633e#116b68830ec5f5a626d6d3f28f8721f0d629633e"
+source = "git+https://github.com/matrix-org/matrix-rust-sdk?rev=c3d0ac5b5b9adb19582075720ed600f090f5264c#c3d0ac5b5b9adb19582075720ed600f090f5264c"
 dependencies = [
  "base64",
  "blake3",
@@ -1920,7 +1920,7 @@ checksum = "49874b5167b65d7193b8aba1567f5c7d93d001cafc34600cee003eda787e483f"
 [[package]]
 name = "vodozemac"
 version = "0.5.1"
-source = "git+https://github.com/matrix-org/vodozemac?rev=b60f5db06d07d22f54891ac566ba61a3df669c3b#b60f5db06d07d22f54891ac566ba61a3df669c3b"
+source = "git+https://github.com/matrix-org/vodozemac/?rev=19a677715813611f47653dc5e47f7b506e0f83f5#19a677715813611f47653dc5e47f7b506e0f83f5"
 dependencies = [
  "aes",
  "arrayvec",

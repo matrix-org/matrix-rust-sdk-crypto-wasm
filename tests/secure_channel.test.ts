@@ -67,6 +67,12 @@ describe(SecretsBundle.name, () => {
         const initial_message = alice_established.encrypt(JSON.stringify(json_bundle));
         const { message, channel } = bob.create_inbound_channel(initial_message);
 
+        const alice_check = alice_established.check_code();
+        const bob_check = channel.check_code();
+
+        expect(alice_check.as_bytes()).toStrictEqual(bob_check.as_bytes());
+        expect(alice_check.as_digit()).toStrictEqual(bob_check.as_digit());
+
         const deserialize_message = JSON.parse(message);
         const received_bundle = SecretsBundle.from_json(deserialize_message);
 

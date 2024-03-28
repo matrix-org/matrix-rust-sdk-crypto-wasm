@@ -84,6 +84,33 @@ impl EstablishedSecureChannel {
 
         Ok(String::from_utf8_lossy(&result).to_string())
     }
+
+    pub fn check_code(&self) -> CheckCode {
+        self.inner.lock().unwrap().check_code().into()
+    }
+}
+
+#[derive(Clone)]
+#[wasm_bindgen]
+pub struct CheckCode {
+    inner: matrix_sdk_crypto::vodozemac::secure_channel::CheckCode,
+}
+
+#[wasm_bindgen]
+impl CheckCode {
+    pub fn as_bytes(&self) -> Vec<u8> {
+        self.inner.as_bytes().to_vec()
+    }
+
+    pub fn as_digit(&self) -> u8 {
+        self.inner.to_digit()
+    }
+}
+
+impl From<&matrix_sdk_crypto::vodozemac::secure_channel::CheckCode> for CheckCode {
+    fn from(value: &matrix_sdk_crypto::vodozemac::secure_channel::CheckCode) -> Self {
+        Self { inner: value.clone() }
+    }
 }
 
 impl From<secure_channel::EstablishedSecureChannel> for EstablishedSecureChannel {

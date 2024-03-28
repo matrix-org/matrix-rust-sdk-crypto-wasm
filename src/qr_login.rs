@@ -12,11 +12,11 @@ pub enum QrCodeMode {
     Reciprocate,
 }
 
-impl From<qr_login::QrCodeModeNum> for QrCodeMode {
-    fn from(value: qr_login::QrCodeModeNum) -> Self {
+impl From<qr_login::QrCodeMode> for QrCodeMode {
+    fn from(value: qr_login::QrCodeMode) -> Self {
         match value {
-            qr_login::QrCodeModeNum::Login => Self::Login,
-            qr_login::QrCodeModeNum::Reciprocate => Self::Reciprocate,
+            qr_login::QrCodeMode::Login => Self::Login,
+            qr_login::QrCodeMode::Reciprocate => Self::Reciprocate,
         }
     }
 }
@@ -39,19 +39,19 @@ impl QrCodeData {
     #[wasm_bindgen(constructor)]
     pub fn new(
         public_key: Curve25519PublicKey,
-        rendevouz_url: &str,
+        rendezvous_url: &str,
         homeserver_url: Option<String>,
     ) -> Result<QrCodeData, JsError> {
         let public_key = public_key.inner;
-        let rendevouz_url = Url::parse(rendevouz_url)?;
+        let rendezvous_url = Url::parse(rendezvous_url)?;
 
         let mode = if let Some(homeserver_url) = homeserver_url {
-            qr_login::QrCodeMode::Reciprocate { homeserver_url: Url::parse(&homeserver_url)? }
+            qr_login::QrCodeModeData::Reciprocate { homeserver_url: Url::parse(&homeserver_url)? }
         } else {
-            qr_login::QrCodeMode::Login
+            qr_login::QrCodeModeData::Login
         };
 
-        let inner = qr_login::QrCodeData { public_key, rendevouz_url, mode };
+        let inner = qr_login::QrCodeData { public_key, rendezvous_url, mode };
 
         Ok(QrCodeData { inner })
     }
@@ -78,13 +78,13 @@ impl QrCodeData {
     }
 
     #[wasm_bindgen(getter)]
-    pub fn rendevouz_url(&self) -> String {
-        self.inner.rendevouz_url.as_str().to_owned()
+    pub fn rendezvous_url(&self) -> String {
+        self.inner.rendezvous_url.as_str().to_owned()
     }
 
     #[wasm_bindgen(getter)]
     pub fn homeserver_url(&self) -> Option<String> {
-        if let qr_login::QrCodeMode::Reciprocate { homeserver_url } = &self.inner.mode {
+        if let qr_login::QrCodeModeData::Reciprocate { homeserver_url } = &self.inner.mode {
             Some(homeserver_url.as_str().to_owned())
         } else {
             None
