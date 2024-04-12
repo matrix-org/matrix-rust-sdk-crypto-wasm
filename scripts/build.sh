@@ -16,7 +16,13 @@ set -e
 
 cd $(dirname "$0")/..
 
-wasm-pack build --target nodejs --scope matrix-org --out-dir pkg --weak-refs "${WASM_PACK_ARGS[@]}"
+# --no-pack disables generation of a `package.json` file. Such a file is
+# useless to us (our package uses the hand-written one in the root directory),
+# and contains incorrect data (our `main` is `index.js`).
+wasm-pack build --no-pack --target nodejs --scope matrix-org --out-dir pkg --weak-refs "${WASM_PACK_ARGS[@]}"
+
+# Make sure that any existing package.json is deleted.
+[ -f pkg/package.json ] && rm pkg/package.json
 
 # Convert the Wasm into a JS file that exports the base64'ed Wasm.
 {
@@ -28,12 +34,15 @@ wasm-pack build --target nodejs --scope matrix-org --out-dir pkg --weak-refs "${
 # In the JavaScript:
 #  1. Strip out the lines that load the WASM, and our new epilogue.
 #  2. Remove the imports of `TextDecoder` and `TextEncoder`. We rely on the global defaults.
+#
+# We create a new file, rather than overwriting the old one, otherwise any
+# webpack-dev-server instance which happens to be watching will get upset over
+# the `require("path")`. We call the output "index.js" because we may as well.
 {
   sed -e '/Text..coder.*= require(.util.)/d' \
       -e '/^const path = /,$d' pkg/matrix_sdk_crypto_wasm.js
   cat scripts/epilogue.js
-} > pkg/matrix_sdk_crypto_wasm.js.new
-mv pkg/matrix_sdk_crypto_wasm.js.new pkg/matrix_sdk_crypto_wasm.js
+} > pkg/index.js
 
-# also extend the typescript
-cat scripts/epilogue.d.ts >> pkg/matrix_sdk_crypto_wasm.d.ts
+# also extend the typescript, and give it a name to match the JS.
+cat pkg/matrix_sdk_crypto_wasm.d.ts scripts/epilogue.d.ts > pkg/index.d.ts

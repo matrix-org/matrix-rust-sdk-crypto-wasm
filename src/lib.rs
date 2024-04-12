@@ -20,6 +20,7 @@
 
 pub mod attachment;
 pub mod backup;
+pub mod dehydrated_devices;
 pub mod device;
 pub mod encryption;
 pub mod error;

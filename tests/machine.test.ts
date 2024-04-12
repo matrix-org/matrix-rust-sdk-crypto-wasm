@@ -32,7 +32,7 @@ import {
     UserIdentity,
     VerificationRequest,
     Versions,
-} from "../pkg/matrix_sdk_crypto_wasm";
+} from "../pkg";
 import "fake-indexeddb/auto";
 
 type AnyOutgoingRequest =
@@ -212,6 +212,13 @@ describe(OlmMachine.name, () => {
 
     test("can read device ID", async () => {
         expect((await machine()).deviceId.toString()).toStrictEqual(device.toString());
+    });
+
+    test("can read creation time", async () => {
+        const startTime = Date.now();
+        const creationTime = (await machine()).deviceCreationTimeMs;
+        expect(creationTime).toBeLessThanOrEqual(Date.now());
+        expect(creationTime).toBeGreaterThanOrEqual(startTime);
     });
 
     test("can read identity keys", async () => {

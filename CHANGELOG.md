@@ -1,5 +1,36 @@
 # UNRELEASED
 
+# matrix-sdk-crypto-wasm v4.9.0
+
+-   Update matrix-rust-sdk to `ab9e4f73b`.
+
+-   Add `OlmMachine.deviceCreationTimeMs`.
+    ([#112](https://github.com/matrix-org/matrix-rust-sdk-crypto-wasm/pull/112))
+
+# matrix-sdk-crypto-wasm v4.8.0
+
+-   Update matrix-rust-sdk to `6aee1f62bd`, which includes:
+
+    -   Fallback keys are rotated in a time-based manner, instead of waiting for
+        the server to tell us that a fallback key got used.
+        ([#3151](https://github.com/matrix-org/matrix-rust-sdk/pull/3151))
+
+    -   Log more details about the Olm session after encryption and decryption.
+        ([#3242](https://github.com/matrix-org/matrix-rust-sdk/pull/3242))
+
+    -   When Olm message decryption fails, report the error code(s) from the
+        failure.
+        ([#3212](https://github.com/matrix-org/matrix-rust-sdk/pull/3212))
+
+-   Add `OlmMachine.dehydratedDevices()` and `DehydratedDevices` class to
+    support dehydrated devices.
+    ([#104](https://github.com/matrix-org/matrix-rust-sdk-crypto-wasm/pull/104))
+
+-   Fix a problem when using matrix-sdk-crypto-wasm in a webapp running
+    in the webpack dev server; when rebuilding, the server would throw an
+    error.
+    ([#109](https://github.com/matrix-org/matrix-rust-sdk-crypto-wasm/pull/109))
+
 # matrix-sdk-crypto-wasm v4.7.0
 
 -   Update dependencies, including matrix-rust-sdk to

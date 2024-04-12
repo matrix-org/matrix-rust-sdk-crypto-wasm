@@ -25,7 +25,7 @@ const {
     Qr,
     QrCode,
     QrCodeScan,
-} = require("../pkg/matrix_sdk_crypto_wasm");
+} = require("../pkg");
 const { zip, addMachineToMachine } = require("./helper");
 const { VerificationRequestPhase, QrState } = require("../pkg");
 
