@@ -54,6 +54,7 @@
         "build:dev": "WASM_PACK_ARGS=--dev ./scripts/build.sh",
         "test": "jest --verbose && yarn run wasm-pack test --node",
         "doc": "typedoc --tsconfig .",
-        "prepack": "npm run build && npm run test"
+        "prepare": "npm run build",
+        "postpack": "npm run test"
     }
 }
