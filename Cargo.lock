@@ -131,6 +131,12 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "9d297deb1925b89f2ccc13d7635fa0714f12c87adce1c75356b39ca9b7178567"
 
 [[package]]
+name = "base64"
+version = "0.22.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "72b3254f16251a8381aa12e40e3c4d2f0199f8c6508fbecb9d91f575e0fbb8c6"
+
+[[package]]
 name = "base64ct"
 version = "1.6.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -337,6 +343,12 @@ dependencies = [
 ]
 
 [[package]]
+name = "date_header"
+version = "1.0.5"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "0c03c416ed1a30fbb027ef484ba6ab6f80e1eada675e1a2b92fd673c045a1f1d"
+
+[[package]]
 name = "delegate-display"
 version = "2.1.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -389,17 +401,6 @@ dependencies = [
  "block-buffer",
  "crypto-common",
  "subtle",
-]
-
-[[package]]
-name = "displaydoc"
-version = "0.2.4"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "487585f4d0c6655fe74905e2504d8ad6908e4db67f744eb140876906c2f3175d"
-dependencies = [
- "proc-macro2",
- "quote",
- "syn",
 ]
 
 [[package]]
@@ -623,9 +624,9 @@ dependencies = [
 
 [[package]]
 name = "http"
-version = "0.2.12"
+version = "1.1.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "601cbb57e577e2f5ef5be8e7b83f0f63994f25aa94d673e54a92d5c516d101f1"
+checksum = "21b9ddb458710bc376481b842f5da65cdf31522de232c1ca8146abce2a358258"
 dependencies = [
  "bytes",
  "fnv",
@@ -841,7 +842,7 @@ version = "0.1.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "93779aa78d39c2fe34746287b10a866192cf8af1b81767fff76bd64099acc0f5"
 dependencies = [
- "proc-macro-crate",
+ "proc-macro-crate 2.0.0",
  "proc-macro-error",
  "proc-macro2",
  "quote",
@@ -851,7 +852,7 @@ dependencies = [
 [[package]]
 name = "matrix-sdk-common"
 version = "0.7.0"
-source = "git+https://github.com/matrix-org/matrix-rust-sdk?rev=3d3115a53d630735f5eaa2ecdbef049933454799#3d3115a53d630735f5eaa2ecdbef049933454799"
+source = "git+https://github.com/matrix-org/matrix-rust-sdk?rev=d3164955bfa7f616e01018c64e65d5c331ba8428#d3164955bfa7f616e01018c64e65d5c331ba8428"
 dependencies = [
  "async-trait",
  "futures-core",
@@ -873,7 +874,7 @@ dependencies = [
 [[package]]
 name = "matrix-sdk-crypto"
 version = "0.7.0"
-source = "git+https://github.com/matrix-org/matrix-rust-sdk?rev=3d3115a53d630735f5eaa2ecdbef049933454799#3d3115a53d630735f5eaa2ecdbef049933454799"
+source = "git+https://github.com/matrix-org/matrix-rust-sdk?rev=d3164955bfa7f616e01018c64e65d5c331ba8428#d3164955bfa7f616e01018c64e65d5c331ba8428"
 dependencies = [
  "aes",
  "as_variant",
@@ -940,11 +941,11 @@ dependencies = [
 [[package]]
 name = "matrix-sdk-indexeddb"
 version = "0.7.0"
-source = "git+https://github.com/matrix-org/matrix-rust-sdk?rev=3d3115a53d630735f5eaa2ecdbef049933454799#3d3115a53d630735f5eaa2ecdbef049933454799"
+source = "git+https://github.com/matrix-org/matrix-rust-sdk?rev=d3164955bfa7f616e01018c64e65d5c331ba8428#d3164955bfa7f616e01018c64e65d5c331ba8428"
 dependencies = [
  "anyhow",
  "async-trait",
- "base64",
+ "base64 0.22.1",
  "getrandom",
  "gloo-utils",
  "indexed_db_futures",
@@ -965,7 +966,7 @@ dependencies = [
 [[package]]
 name = "matrix-sdk-qrcode"
 version = "0.7.0"
-source = "git+https://github.com/matrix-org/matrix-rust-sdk?rev=3d3115a53d630735f5eaa2ecdbef049933454799#3d3115a53d630735f5eaa2ecdbef049933454799"
+source = "git+https://github.com/matrix-org/matrix-rust-sdk?rev=d3164955bfa7f616e01018c64e65d5c331ba8428#d3164955bfa7f616e01018c64e65d5c331ba8428"
 dependencies = [
  "byteorder",
  "qrcode",
@@ -977,12 +978,11 @@ dependencies = [
 [[package]]
 name = "matrix-sdk-store-encryption"
 version = "0.7.0"
-source = "git+https://github.com/matrix-org/matrix-rust-sdk?rev=3d3115a53d630735f5eaa2ecdbef049933454799#3d3115a53d630735f5eaa2ecdbef049933454799"
+source = "git+https://github.com/matrix-org/matrix-rust-sdk?rev=d3164955bfa7f616e01018c64e65d5c331ba8428#d3164955bfa7f616e01018c64e65d5c331ba8428"
 dependencies = [
- "base64",
+ "base64 0.22.1",
  "blake3",
  "chacha20poly1305",
- "displaydoc",
  "hmac",
  "pbkdf2",
  "rand",
@@ -1156,12 +1156,20 @@ checksum = "5b40af805b3121feab8a3c29f04d8ad262fa8e0561883e7653e024ae4479e6de"
 
 [[package]]
 name = "proc-macro-crate"
-version = "2.0.2"
+version = "2.0.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b00f26d3400549137f92511a46ac1cd8ce37cb5598a96d382381458b992a5d24"
+checksum = "7e8366a6159044a37876a2b9817124296703c586a5c92e2c53751fa06d8d43e8"
 dependencies = [
- "toml_datetime",
- "toml_edit",
+ "toml_edit 0.20.2",
+]
+
+[[package]]
+name = "proc-macro-crate"
+version = "3.1.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "6d37c51ca738a55da99dc0c4a34860fd675453b8b36209178c2249bb13651284"
+dependencies = [
+ "toml_edit 0.21.1",
 ]
 
 [[package]]
@@ -1324,7 +1332,7 @@ dependencies = [
 [[package]]
 name = "ruma"
 version = "0.9.4"
-source = "git+https://github.com/ruma/ruma?rev=4c00bd010dbdca6005bd599b52e90a0b7015d056#4c00bd010dbdca6005bd599b52e90a0b7015d056"
+source = "git+https://github.com/ruma/ruma?rev=b6200c01a120120faf9f744ab4f171ff3beefd72#b6200c01a120120faf9f744ab4f171ff3beefd72"
 dependencies = [
  "assign",
  "js_int",
@@ -1332,16 +1340,18 @@ dependencies = [
  "ruma-client-api",
  "ruma-common",
  "ruma-events",
+ "web-time",
 ]
 
 [[package]]
 name = "ruma-client-api"
 version = "0.17.4"
-source = "git+https://github.com/ruma/ruma?rev=4c00bd010dbdca6005bd599b52e90a0b7015d056#4c00bd010dbdca6005bd599b52e90a0b7015d056"
+source = "git+https://github.com/ruma/ruma?rev=b6200c01a120120faf9f744ab4f171ff3beefd72#b6200c01a120120faf9f744ab4f171ff3beefd72"
 dependencies = [
  "as_variant",
  "assign",
  "bytes",
+ "date_header",
  "http",
  "js_int",
  "js_option",
@@ -1351,15 +1361,17 @@ dependencies = [
  "serde",
  "serde_html_form",
  "serde_json",
+ "thiserror",
+ "web-time",
 ]
 
 [[package]]
 name = "ruma-common"
 version = "0.12.1"
-source = "git+https://github.com/ruma/ruma?rev=4c00bd010dbdca6005bd599b52e90a0b7015d056#4c00bd010dbdca6005bd599b52e90a0b7015d056"
+source = "git+https://github.com/ruma/ruma?rev=b6200c01a120120faf9f744ab4f171ff3beefd72#b6200c01a120120faf9f744ab4f171ff3beefd72"
 dependencies = [
  "as_variant",
- "base64",
+ "base64 0.22.1",
  "bytes",
  "form_urlencoded",
  "getrandom",
@@ -1388,7 +1400,7 @@ dependencies = [
 [[package]]
 name = "ruma-events"
 version = "0.27.11"
-source = "git+https://github.com/ruma/ruma?rev=4c00bd010dbdca6005bd599b52e90a0b7015d056#4c00bd010dbdca6005bd599b52e90a0b7015d056"
+source = "git+https://github.com/ruma/ruma?rev=b6200c01a120120faf9f744ab4f171ff3beefd72#b6200c01a120120faf9f744ab4f171ff3beefd72"
 dependencies = [
  "as_variant",
  "indexmap",
@@ -1410,7 +1422,7 @@ dependencies = [
 [[package]]
 name = "ruma-identifiers-validation"
 version = "0.9.3"
-source = "git+https://github.com/ruma/ruma?rev=4c00bd010dbdca6005bd599b52e90a0b7015d056#4c00bd010dbdca6005bd599b52e90a0b7015d056"
+source = "git+https://github.com/ruma/ruma?rev=b6200c01a120120faf9f744ab4f171ff3beefd72#b6200c01a120120faf9f744ab4f171ff3beefd72"
 dependencies = [
  "js_int",
  "thiserror",
@@ -1419,10 +1431,10 @@ dependencies = [
 [[package]]
 name = "ruma-macros"
 version = "0.12.0"
-source = "git+https://github.com/ruma/ruma?rev=4c00bd010dbdca6005bd599b52e90a0b7015d056#4c00bd010dbdca6005bd599b52e90a0b7015d056"
+source = "git+https://github.com/ruma/ruma?rev=b6200c01a120120faf9f744ab4f171ff3beefd72#b6200c01a120120faf9f744ab4f171ff3beefd72"
 dependencies = [
  "once_cell",
- "proc-macro-crate",
+ "proc-macro-crate 3.1.0",
  "proc-macro2",
  "quote",
  "ruma-identifiers-validation",
@@ -1741,14 +1753,14 @@ dependencies = [
  "serde",
  "serde_spanned",
  "toml_datetime",
- "toml_edit",
+ "toml_edit 0.20.2",
 ]
 
 [[package]]
 name = "toml_datetime"
-version = "0.6.3"
+version = "0.6.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "7cda73e2f1397b1262d6dfdcef8aafae14d1de7748d66822d3bfeeb6d03e5e4b"
+checksum = "3550f4e9685620ac18a50ed434eb3aec30db8ba93b0287467bca5826ea25baf1"
 dependencies = [
  "serde",
 ]
@@ -1762,6 +1774,17 @@ dependencies = [
  "indexmap",
  "serde",
  "serde_spanned",
+ "toml_datetime",
+ "winnow",
+]
+
+[[package]]
+name = "toml_edit"
+version = "0.21.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "6a8534fd7f78b5405e860340ad6575217ce99f38d4d5c8f2442cb5ecb50090e1"
+dependencies = [
+ "indexmap",
  "toml_datetime",
  "winnow",
 ]
@@ -1914,11 +1937,11 @@ checksum = "49874b5167b65d7193b8aba1567f5c7d93d001cafc34600cee003eda787e483f"
 [[package]]
 name = "vodozemac"
 version = "0.5.1"
-source = "git+https://github.com/matrix-org/vodozemac/?rev=5a66b424abf6fea1ee252416693c7703ee54dda9#5a66b424abf6fea1ee252416693c7703ee54dda9"
+source = "git+https://github.com/matrix-org/vodozemac/?rev=8f383d3e8b59ee6ae1a75e3883c527b5ace243d6#8f383d3e8b59ee6ae1a75e3883c527b5ace243d6"
 dependencies = [
  "aes",
  "arrayvec",
- "base64",
+ "base64 0.21.7",
  "cbc",
  "chacha20poly1305",
  "curve25519-dalek",

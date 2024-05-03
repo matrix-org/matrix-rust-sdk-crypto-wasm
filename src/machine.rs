@@ -131,6 +131,7 @@ impl OlmMachine {
                 user_id.as_ref(),
                 device_id.as_ref(),
                 store_handle,
+                None,
             )
             .await
             .map_err(JsError::from)?,
