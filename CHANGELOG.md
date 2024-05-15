@@ -1,5 +1,8 @@
 # UNRELEASED
 
+-   Expose the vodozemac ECIES support, which can be used to establish the secure
+    channel required for QR code login described in [MSC4108](https://github.com/matrix-org/matrix-spec-proposals/pull/4108).
+
 -   Add `QrCodeData` and `QrCodeMode` classes which can be used to parse or
     generate QR codes intended for the QR code login mechanism described in
     [MSC4108](https://github.com/matrix-org/matrix-spec-proposals/pull/4108).
