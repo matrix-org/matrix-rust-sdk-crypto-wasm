@@ -1,5 +1,9 @@
 # UNRELEASED
 
+-   Add `OlmMachine.importSecretsBundle()` and `OlmMachine.exportSecretsBundle()`
+    methods as well as the `SecretsBundle` class to import end-to-end encryption
+    secrets in a bundled manner.
+
 -   Expose the vodozemac ECIES support, which can be used to establish the secure
     channel required for QR code login described in [MSC4108](https://github.com/matrix-org/matrix-spec-proposals/pull/4108).
 
