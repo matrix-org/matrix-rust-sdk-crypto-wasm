@@ -534,6 +534,49 @@ impl OlmMachine {
         })
     }
 
+    /// Export all the secrets we have in the store into a [`SecretsBundle`].
+    ///
+    /// This method will export all the private cross-signing keys and, if
+    /// available, the private part of a backup key and its accompanying
+    /// version.
+    ///
+    /// The method will fail if we don't have all three private cross-signing
+    /// keys available.
+    ///
+    /// **Warning**: Only export this and share it with a trusted recipient,
+    /// i.e. if an existing device is sharing this with a new device.
+    #[wasm_bindgen(js_name = "exportSecretsBundle")]
+    pub fn export_secrets_bundle(&self) -> Promise {
+        let me = self.inner.clone();
+
+        future_to_promise(async move {
+            Ok(me.store().export_secrets_bundle().await.map(store::SecretsBundle::from)?)
+        })
+    }
+
+    /// Import and persists secrets from a [`SecretsBundle`].
+    ///
+    /// This method will import all the private cross-signing keys and, if
+    /// available, the private part of a backup key and its accompanying
+    /// version into the store.
+    ///
+    /// **Warning**: Only import this from a trusted source, i.e. if an existing
+    /// device is sharing this with a new device. The imported cross-signing
+    /// keys will create a [`OwnUserIdentity`] and mark it as verified.
+    ///
+    /// The backup key will be persisted in the store and can be enabled using
+    /// the [`BackupMachine`].
+    #[wasm_bindgen(js_name = "importSecretsBundle")]
+    pub fn import_secrets_bundle(&self, bundle: store::SecretsBundle) -> Promise {
+        let me = self.inner.clone();
+
+        future_to_promise(async move {
+            me.store().import_secrets_bundle(&bundle.inner).await?;
+
+            Ok(JsValue::null())
+        })
+    }
+
     /// Export all the private cross signing keys we have.
     ///
     /// The export will contain the seeds for the ed25519 keys as
