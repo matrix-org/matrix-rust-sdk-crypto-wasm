@@ -1,5 +1,9 @@
 # UNRELEASED
 
+-   Add `QrCodeData` and `QrCodeMode` classes which can be used to parse or
+    generate QR codes intended for the QR code login mechanism described in
+    [MSC4108](https://github.com/matrix-org/matrix-spec-proposals/pull/4108).
+
 -   Update matrix-rust-sdk to `35173347f`, which includes:
 
     -   Add data types to parse the QR code data for the QR code login defined in
