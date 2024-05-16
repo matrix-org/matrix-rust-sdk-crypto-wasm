@@ -16,7 +16,7 @@ pub enum DecryptionErrorCode {
     /// device we received the room key from and the identity keys recorded in
     /// the plaintext of the room key to-device message.
     MismatchedIdentityKeys,
-    /// Other failuer
+    /// Other failure.
     UnableToDecrypt,
 }
 
@@ -30,7 +30,7 @@ pub struct MegolmDecryptionError {
     /// detailed description
     #[wasm_bindgen(readonly)]
     pub description: JsString,
-    /// Witheld code if any. Only for `UnknownMessageIndex` error code
+    /// Withheld code if any. Only for `UnknownMessageIndex` error code
     #[wasm_bindgen(readonly)]
     pub maybe_withheld: Option<JsString>,
 }
