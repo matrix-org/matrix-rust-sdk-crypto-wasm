@@ -924,6 +924,7 @@ dependencies = [
  "serde_json",
  "tracing",
  "tracing-subscriber",
+ "url",
  "vergen",
  "wasm-bindgen",
  "wasm-bindgen-futures",

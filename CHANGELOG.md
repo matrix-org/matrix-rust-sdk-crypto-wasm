@@ -1,5 +1,16 @@
 # UNRELEASED
 
+-   Add `OlmMachine.importSecretsBundle()` and `OlmMachine.exportSecretsBundle()`
+    methods as well as the `SecretsBundle` class to import end-to-end encryption
+    secrets in a bundled manner.
+
+-   Expose the vodozemac ECIES support, which can be used to establish the secure
+    channel required for QR code login described in [MSC4108](https://github.com/matrix-org/matrix-spec-proposals/pull/4108).
+
+-   Add `QrCodeData` and `QrCodeMode` classes which can be used to parse or
+    generate QR codes intended for the QR code login mechanism described in
+    [MSC4108](https://github.com/matrix-org/matrix-spec-proposals/pull/4108).
+
 -   Update matrix-rust-sdk to `7a887766c`, which includes:
 
     -   Add data types to parse the QR code data for the QR code login defined in

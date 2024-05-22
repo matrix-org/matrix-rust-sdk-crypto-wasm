@@ -3,7 +3,10 @@
 use std::sync::Arc;
 
 use anyhow::Context;
-use matrix_sdk_crypto::store::{DynCryptoStore, IntoCryptoStore, MemoryStore};
+use matrix_sdk_crypto::{
+    store::{DynCryptoStore, IntoCryptoStore, MemoryStore},
+    types::BackupSecrets,
+};
 use wasm_bindgen::prelude::*;
 use zeroize::{Zeroize, Zeroizing};
 
@@ -201,3 +204,69 @@ impl RoomKeyInfo {
         self.inner.session_id.clone()
     }
 }
+
+/// Struct containing the bundle of secrets to fully activate a new device for
+/// end-to-end encryption.
+#[derive(Debug)]
+#[wasm_bindgen]
+pub struct SecretsBundle {
+    pub(super) inner: matrix_sdk_crypto::types::SecretsBundle,
+}
+
+/// The backup-specific parts of a secrets bundle.
+#[derive(Debug)]
+#[wasm_bindgen(getter_with_clone)]
+pub struct BackupSecretsBundle {
+    /// The backup decryption key, encoded as unpadded base64.
+    pub key: String,
+    /// The backup version which this backup decryption key is used with.
+    pub backup_version: String,
+}
+
+#[wasm_bindgen]
+impl SecretsBundle {
+    /// The seed of the master key encoded as unpadded base64.
+    #[wasm_bindgen(getter, js_name = "masterKey")]
+    pub fn master_key(&self) -> String {
+        self.inner.cross_signing.master_key.clone()
+    }
+
+    /// The seed of the self signing key encoded as unpadded base64.
+    #[wasm_bindgen(getter, js_name = "selfSigningKey")]
+    pub fn self_signing_key(&self) -> String {
+        self.inner.cross_signing.self_signing_key.clone()
+    }
+
+    /// The seed of the user signing key encoded as unpadded base64.
+    #[wasm_bindgen(getter, js_name = "userSigningKey")]
+    pub fn user_signing_key(&self) -> String {
+        self.inner.cross_signing.user_signing_key.clone()
+    }
+
+    /// The bundle of the backup decryption key and backup version if any.
+    #[wasm_bindgen(getter, js_name = "backupBundle")]
+    pub fn backup_bundle(&self) -> Option<BackupSecretsBundle> {
+        if let Some(BackupSecrets::MegolmBackupV1Curve25519AesSha2(backup)) = &self.inner.backup {
+            Some(BackupSecretsBundle {
+                key: backup.key.to_base64(),
+                backup_version: backup.backup_version.clone(),
+            })
+        } else {
+            None
+        }
+    }
+
+    /// Serialize the [`SecretsBundle`] to a JSON object.
+    pub fn to_json(&self) -> Result<JsValue, JsError> {
+        Ok(serde_wasm_bindgen::to_value(&self.inner)?)
+    }
+
+    /// Deserialize the [`SecretsBundle`] from a JSON object.
+    pub fn from_json(json: JsValue) -> Result<SecretsBundle, JsError> {
+        let bundle = serde_wasm_bindgen::from_value(json)?;
+
+        Ok(Self { inner: bundle })
+    }
+}
+
+impl_from_to_inner!(matrix_sdk_crypto::types::SecretsBundle => SecretsBundle);
