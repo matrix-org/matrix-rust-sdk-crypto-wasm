@@ -2,11 +2,13 @@
 
 use std::sync::Arc;
 
+use anyhow::Context;
 use matrix_sdk_crypto::{
     store::{DynCryptoStore, IntoCryptoStore, MemoryStore},
     types::BackupSecrets,
 };
 use wasm_bindgen::prelude::*;
+use zeroize::{Zeroize, Zeroizing};
 
 use crate::{
     encryption::EncryptionAlgorithm, identifiers::RoomId, impl_from_to_inner,
@@ -34,7 +36,6 @@ impl StoreHandle {
     ///
     /// # Arguments
     ///
-    ///
     /// * `store_name` - The name that should be used to open the IndexedDB
     ///   based database. If this isn't provided, a memory-only store will be
     ///   used. *Note* the memory-only store will lose your E2EE keys when the
@@ -46,11 +47,8 @@ impl StoreHandle {
     pub async fn open_for_js(
         store_name: Option<String>,
         store_passphrase: Option<String>,
-    ) -> Result<JsValue, JsValue> {
-        Ok(StoreHandle::open(store_name, store_passphrase)
-            .await
-            .map_err(|e| JsError::from(&*e))?
-            .into())
+    ) -> Result<StoreHandle, JsError> {
+        StoreHandle::open(store_name, store_passphrase).await.map_err(|e| JsError::from(&*e))
     }
 
     pub(crate) async fn open(
@@ -97,6 +95,39 @@ impl StoreHandle {
         };
 
         Ok(store.into_crypto_store())
+    }
+
+    /// Open a crypto store based on IndexedDB, using the given key for
+    /// encryption.
+    ///
+    /// # Arguments
+    ///
+    /// * `store_name` - The name that should be used to open the IndexedDB
+    ///   based database.
+    ///
+    /// * `store_key` - The key that should be used to encrypt the store, for
+    ///   IndexedDB-based stores. Must be a 32-byte array.
+    #[wasm_bindgen(js_name = "openWithKey")]
+    pub async fn open_with_key(
+        store_name: String,
+        mut store_key: Vec<u8>,
+    ) -> Result<StoreHandle, JsError> {
+        let store_key_array: Zeroizing<[u8; 32]> = Zeroizing::new(
+            store_key
+                .as_slice()
+                .try_into()
+                .with_context(|| "Expected a key of length 32")
+                .map_err(|e| JsError::from(&*e))?,
+        );
+        store_key.zeroize();
+
+        let store = matrix_sdk_indexeddb::IndexeddbCryptoStore::open_with_key(
+            &store_name,
+            &store_key_array,
+        )
+        .await?;
+
+        Ok(Self { store: store.into_crypto_store() })
     }
 }
 

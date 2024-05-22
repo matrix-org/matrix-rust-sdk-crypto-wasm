@@ -34,6 +34,7 @@ import {
     Versions,
 } from "../pkg";
 import "fake-indexeddb/auto";
+import * as crypto from "node:crypto";
 
 type AnyOutgoingRequest =
     | KeysUploadRequest
@@ -81,7 +82,7 @@ describe(OlmMachine.name, () => {
         storeHandle.free();
     });
 
-    test("can be instantiated with store credentials", async () => {
+    test("can be instantiated with passphrase", async () => {
         let storeName = "hello2";
         let storePassphrase = "world";
 
@@ -111,6 +112,39 @@ describe(OlmMachine.name, () => {
 
         // Same number of databases.
         expect((await indexedDB.databases()).filter(byStoreName)).toHaveLength(2);
+    });
+
+    test("can be instantiated with a passphrase, and then migrated to a key", async () => {
+        const storeName = "hello3";
+        const pickleKey = new Uint8Array(32);
+        crypto.getRandomValues(pickleKey);
+
+        const b64Pickle = Buffer.from(pickleKey)
+            .toString("base64")
+            .replace(/={1,2}$/, "");
+        const storeHandle = await StoreHandle.open(storeName, b64Pickle);
+        const olmMachine: OlmMachine = await OlmMachine.initFromStore(
+            new UserId("@foo:bar.org"),
+            new DeviceId("baz"),
+            storeHandle,
+        );
+        storeHandle.free();
+        expect(olmMachine).toBeInstanceOf(OlmMachine);
+        const deviceKeys = olmMachine.identityKeys;
+
+        // re-open the store, using the key directly
+        const storeHandle2 = await StoreHandle.openWithKey(storeName, pickleKey);
+        const olmMachine2: OlmMachine = await OlmMachine.initFromStore(
+            new UserId("@foo:bar.org"),
+            new DeviceId("baz"),
+            storeHandle2,
+        );
+        storeHandle2.free();
+        expect(olmMachine2).toBeInstanceOf(OlmMachine);
+
+        // make sure that we got back the same device.
+        const deviceKeys2 = olmMachine2.identityKeys;
+        expect(deviceKeys2.ed25519.toBase64()).toEqual(deviceKeys.ed25519.toBase64());
     });
 
     describe("cannot be instantiated with a store", () => {
