@@ -1,5 +1,8 @@
 # UNRELEASED
 
+-   Expose new constructor function `OlmMachine.openWithKey()`.
+    ([#119](https://github.com/matrix-org/matrix-rust-sdk-crypto-wasm/pull/119))
+
 -   Add `OlmMachine.importSecretsBundle()` and `OlmMachine.exportSecretsBundle()`
     methods as well as the `SecretsBundle` class to import end-to-end encryption
     secrets in a bundled manner.
