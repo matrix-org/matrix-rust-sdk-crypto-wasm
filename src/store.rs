@@ -5,6 +5,7 @@ use std::sync::Arc;
 use anyhow::Context;
 use matrix_sdk_crypto::store::{DynCryptoStore, IntoCryptoStore, MemoryStore};
 use wasm_bindgen::prelude::*;
+use zeroize::{Zeroize, Zeroizing};
 
 use crate::{
     encryption::EncryptionAlgorithm, identifiers::RoomId, impl_from_to_inner,
@@ -108,13 +109,13 @@ impl StoreHandle {
         store_name: String,
         mut store_key: Vec<u8>,
     ) -> Result<StoreHandle, JsError> {
-        use zeroize::Zeroize;
-
-        let mut store_key_array: [u8; 32] = store_key
-            .as_slice()
-            .try_into()
-            .with_context(|| "Expected a key of length 32")
-            .map_err(|e| JsError::from(&*e))?;
+        let store_key_array: Zeroizing<[u8; 32]> = Zeroizing::new(
+            store_key
+                .as_slice()
+                .try_into()
+                .with_context(|| "Expected a key of length 32")
+                .map_err(|e| JsError::from(&*e))?,
+        );
         store_key.zeroize();
 
         let store = matrix_sdk_indexeddb::IndexeddbCryptoStore::open_with_key(
@@ -122,8 +123,6 @@ impl StoreHandle {
             &store_key_array,
         )
         .await?;
-
-        store_key_array.zeroize();
 
         Ok(Self { store: store.into_crypto_store() })
     }
