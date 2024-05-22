@@ -110,7 +110,7 @@ impl StoreHandle {
     ) -> Result<StoreHandle, JsError> {
         use zeroize::Zeroize;
 
-        let mut store_key_slice: [u8; 32] = store_key
+        let mut store_key_array: [u8; 32] = store_key
             .as_slice()
             .try_into()
             .with_context(|| "Expected a key of length 32")
@@ -119,11 +119,11 @@ impl StoreHandle {
 
         let store = matrix_sdk_indexeddb::IndexeddbCryptoStore::open_with_key(
             &store_name,
-            &store_key_slice,
+            &store_key_array,
         )
         .await?;
 
-        store_key_slice.zeroize();
+        store_key_array.zeroize();
 
         Ok(Self { store: store.into_crypto_store() })
     }
