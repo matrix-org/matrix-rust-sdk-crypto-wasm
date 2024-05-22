@@ -1,5 +1,7 @@
 # UNRELEASED
 
+# matrix-sdk-crypto-wasm v4.10.0
+
 -   Expose new constructor function `OlmMachine.openWithKey()`.
     ([#119](https://github.com/matrix-org/matrix-rust-sdk-crypto-wasm/pull/119))
 
@@ -14,6 +16,9 @@
     generate QR codes intended for the QR code login mechanism described in
     [MSC4108](https://github.com/matrix-org/matrix-spec-proposals/pull/4108).
 
+-   Add a constructor for the `Curve25519PublicKey` type. This allows us to
+    create a `Curve25519PublicKey` from a Base64 string on the Javascript side.
+
 -   Update matrix-rust-sdk to `7a887766c`, which includes:
 
     -   Add data types to parse the QR code data for the QR code login defined in
@@ -22,9 +27,6 @@
     -   Don't log the private part of the backup key, introduced in [#71136e4](https://github.com/matrix-org/matrix-rust-sdk/commit/71136e44c03c79f80d6d1a2446673bc4d53a2067).
 
     -   Expose new method `CryptoStore::clear_caches`. ([#3338](https://github.com/matrix-org/matrix-rust-sdk/pull/3338))
-
--   Add a constructor for the `Curve25519PublicKey` type. This allows us to
-    create a `Curve25519PublicKey` from a Base64 string on the Javascript side.
 
 # matrix-sdk-crypto-wasm v4.9.0
 
