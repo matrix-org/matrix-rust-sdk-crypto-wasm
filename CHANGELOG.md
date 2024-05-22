@@ -1,6 +1,6 @@
 # UNRELEASED
 
--   Update matrix-rust-sdk to `35173347f`, which includes:
+-   Update matrix-rust-sdk to `7a887766c`, which includes:
 
     -   Add data types to parse the QR code data for the QR code login defined in
         [MSC4108](https://github.com/matrix-org/matrix-spec-proposals/pull/4108)
