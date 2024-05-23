@@ -1,5 +1,11 @@
 # UNRELEASED
 
+**BREAKING CHANGES**
+
+-   `OlmMachine.importBackedUpRoomKeys` now takes a `backupVersion` argument.
+
+**Other changes**
+
 -   Update matrix-rust-sdk to `7e44fbca7`, which includes:
 
     - Avoid emitting entries from `identities_stream_raw` and `devices_stream` when

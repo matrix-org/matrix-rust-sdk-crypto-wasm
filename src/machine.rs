@@ -15,7 +15,7 @@ use matrix_sdk_common::ruma::{
 };
 use matrix_sdk_crypto::{
     backups::MegolmV1BackupKey,
-    olm::BackedUpRoomKey,
+    olm::{BackedUpRoomKey, ExportedRoomKey},
     store::{DeviceChanges, IdentityChanges},
     types::RoomKeyBackupInfo,
     CryptoStoreError, EncryptionSyncChanges, GossippedSecret,
@@ -1052,11 +1052,12 @@ impl OlmMachine {
         &self,
         backed_up_room_keys: &Map,
         progress_listener: Option<Function>,
+        backup_version: String,
     ) -> Result<Promise, JsValue> {
         let me = self.inner.clone();
 
         // convert the js-side data into rust data
-        let mut keys: BTreeMap<_, BTreeMap<_, _>> = BTreeMap::new();
+        let mut keys = Vec::new();
         let mut failures = 0;
         for backed_up_room_keys_entry in backed_up_room_keys.entries() {
             let backed_up_room_keys_entry: Array = backed_up_room_keys_entry?.dyn_into()?;
@@ -1071,7 +1072,11 @@ impl OlmMachine {
                 if let Ok(key) =
                     serde_wasm_bindgen::from_value::<BackedUpRoomKey>(room_room_keys_entry.get(1))
                 {
-                    keys.entry(room_id.clone()).or_default().insert(session_id.into(), key);
+                    keys.push(ExportedRoomKey::from_backed_up_room_key(
+                        room_id.clone(),
+                        session_id.into(),
+                        key,
+                    ));
                 } else {
                     failures += 1;
                 }
@@ -1080,8 +1085,8 @@ impl OlmMachine {
 
         Ok(future_to_promise(async move {
             let result: RoomKeyImportResult = me
-                .backup_machine()
-                .import_backed_up_room_keys(keys, |progress, total_valid| {
+                .store()
+                .import_room_keys(keys, Some(&backup_version), |progress, total_valid| {
                     if let Some(callback) = &progress_listener {
                         callback
                             .call3(

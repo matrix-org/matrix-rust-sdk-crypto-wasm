@@ -1257,7 +1257,7 @@ describe(OlmMachine.name, () => {
             const progressListener = jest.fn();
             const m2 = await machine();
             await m2.saveBackupDecryptionKey(keyBackupKey, "1");
-            const result = await m2.importBackedUpRoomKeys(decryptedKeyMap, progressListener);
+            const result = await m2.importBackedUpRoomKeys(decryptedKeyMap, progressListener, "1");
             expect(result.importedCount).toStrictEqual(1);
             expect(result.totalCount).toStrictEqual(1);
             expect(result.keys()).toMatchObject(
