@@ -8,13 +8,13 @@
 
 -   Update matrix-rust-sdk to `7e44fbca7`, which includes:
 
-    - Avoid emitting entries from `identities_stream_raw` and `devices_stream` when
-      we receive a `/keys/query` response which shows that no devices changed.
-      ([#3442](https://github.com/matrix-org/matrix-rust-sdk/pull/3442)).
+    -   Avoid emitting entries from `identities_stream_raw` and `devices_stream` when
+        we receive a `/keys/query` response which shows that no devices changed.
+        ([#3442](https://github.com/matrix-org/matrix-rust-sdk/pull/3442)).
 
-    - Fix to a bug introduced in matrix-sdk-crypto-wasm v4.10.0 which caused
-      keys that had been imported from key backup to be backed up again, when
-      using the in-memory datastore.
+    -   Fix to a bug introduced in matrix-sdk-crypto-wasm v4.10.0 which caused
+        keys that had been imported from key backup to be backed up again, when
+        using the in-memory datastore.
 
 # matrix-sdk-crypto-wasm v4.10.0
 
