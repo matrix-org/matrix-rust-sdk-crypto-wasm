@@ -1257,7 +1257,7 @@ describe(OlmMachine.name, () => {
             const progressListener = jest.fn();
             const m2 = await machine();
             await m2.saveBackupDecryptionKey(keyBackupKey, "1");
-            const result = await m2.importBackedUpRoomKeys(decryptedKeyMap, progressListener);
+            const result = await m2.importBackedUpRoomKeys(decryptedKeyMap, progressListener, "1");
             expect(result.importedCount).toStrictEqual(1);
             expect(result.totalCount).toStrictEqual(1);
             expect(result.keys()).toMatchObject(
@@ -1442,27 +1442,32 @@ describe(OlmMachine.name, () => {
     test("Updating devices should call devicesUpdatedCallback", async () => {
         const userId = new UserId("@alice:example.org");
         const deviceId = new DeviceId("ABCDEF");
-        const machine = await OlmMachine.initialize(userId, deviceId);
+        const firstMachine = await OlmMachine.initialize(userId, deviceId);
 
         const callback = jest.fn().mockImplementation(() => Promise.resolve(undefined));
-        machine.registerDevicesUpdatedCallback(callback);
+        firstMachine.registerDevicesUpdatedCallback(callback);
 
-        const outgoingRequests = await machine.outgoingRequests();
+        const secondDeviceId = new DeviceId("GHIJKL");
+        const secondMachine = await OlmMachine.initialize(userId, secondDeviceId);
+
+        // Fish the KeysUploadRequest out of secondMachine's outgoingRequests.
         let deviceKeys;
-        // outgoingRequests will have a KeysUploadRequest before the
-        // KeysQueryRequest, so we grab the device upload and put it in the
-        // response to the /keys/query
-        for (const request of outgoingRequests) {
+        for (const request of await secondMachine.outgoingRequests()) {
             if (request instanceof KeysUploadRequest) {
                 deviceKeys = JSON.parse(request.body).device_keys;
-            } else if (request instanceof KeysQueryRequest) {
-                await machine.markRequestAsSent(
+            }
+        }
+
+        // ... and feed it into firstMachine's KeysQueryRequest
+        for (const request of await firstMachine.outgoingRequests()) {
+            if (request instanceof KeysQueryRequest) {
+                await firstMachine.markRequestAsSent(
                     request.id,
                     request.type,
                     JSON.stringify({
                         device_keys: {
                             "@alice:example.org": {
-                                ABCDEF: deviceKeys,
+                                GHIJKL: deviceKeys,
                             },
                         },
                     }),

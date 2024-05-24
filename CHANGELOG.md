@@ -1,5 +1,21 @@
 # UNRELEASED
 
+**BREAKING CHANGES**
+
+-   `OlmMachine.importBackedUpRoomKeys` now takes a `backupVersion` argument.
+
+**Other changes**
+
+-   Update matrix-rust-sdk to `7e44fbca7`, which includes:
+
+    -   Avoid emitting entries from `identities_stream_raw` and `devices_stream` when
+        we receive a `/keys/query` response which shows that no devices changed.
+        ([#3442](https://github.com/matrix-org/matrix-rust-sdk/pull/3442)).
+
+    -   Fix to a bug introduced in matrix-sdk-crypto-wasm v4.10.0 which caused
+        keys that had been imported from key backup to be backed up again, when
+        using the in-memory datastore.
+
 # matrix-sdk-crypto-wasm v4.10.0
 
 -   Expose new constructor function `OlmMachine.openWithKey()`.
@@ -19,7 +35,7 @@
 -   Add a constructor for the `Curve25519PublicKey` type. This allows us to
     create a `Curve25519PublicKey` from a Base64 string on the Javascript side.
 
--   Update matrix-rust-sdk to `7a887766c`, which includes:
+-   Update matrix-rust-sdk to `d7a887766c`, which includes:
 
     -   Add data types to parse the QR code data for the QR code login defined in
         [MSC4108](https://github.com/matrix-org/matrix-spec-proposals/pull/4108)
