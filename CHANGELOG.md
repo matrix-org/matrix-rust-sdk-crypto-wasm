@@ -1,5 +1,7 @@
 # UNRELEASED
 
+# matrix-sdk-crypto-wasm v5.0.0
+
 **BREAKING CHANGES**
 
 -   `OlmMachine.importBackedUpRoomKeys` now takes a `backupVersion` argument.
