@@ -546,12 +546,8 @@ impl OlmMachine {
     /// **Warning**: Only export this and share it with a trusted recipient,
     /// i.e. if an existing device is sharing this with a new device.
     #[wasm_bindgen(js_name = "exportSecretsBundle")]
-    pub fn export_secrets_bundle(&self) -> Promise {
-        let me = self.inner.clone();
-
-        future_to_promise(async move {
-            Ok(me.store().export_secrets_bundle().await.map(store::SecretsBundle::from)?)
-        })
+    pub async fn export_secrets_bundle(&self) -> Result<store::SecretsBundle, JsError> {
+        Ok(self.inner.store().export_secrets_bundle().await?.into())
     }
 
     /// Import and persists secrets from a [`SecretsBundle`].
@@ -567,14 +563,9 @@ impl OlmMachine {
     /// The backup key will be persisted in the store and can be enabled using
     /// the [`BackupMachine`].
     #[wasm_bindgen(js_name = "importSecretsBundle")]
-    pub fn import_secrets_bundle(&self, bundle: store::SecretsBundle) -> Promise {
-        let me = self.inner.clone();
-
-        future_to_promise(async move {
-            me.store().import_secrets_bundle(&bundle.inner).await?;
-
-            Ok(JsValue::null())
-        })
+    pub async fn import_secrets_bundle(&self, bundle: store::SecretsBundle) -> Result<(), JsError> {
+        self.inner.store().import_secrets_bundle(&bundle.inner).await?;
+        Ok(())
     }
 
     /// Export all the private cross signing keys we have.
