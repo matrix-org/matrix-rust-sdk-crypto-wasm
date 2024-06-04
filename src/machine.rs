@@ -534,7 +534,8 @@ impl OlmMachine {
         })
     }
 
-    /// Export all the secrets we have in the store into a [`SecretsBundle`].
+    /// Export all the secrets we have in the store into a {@link
+    /// SecretsBundle}.
     ///
     /// This method will export all the private cross-signing keys and, if
     /// available, the private part of a backup key and its accompanying
@@ -546,15 +547,11 @@ impl OlmMachine {
     /// **Warning**: Only export this and share it with a trusted recipient,
     /// i.e. if an existing device is sharing this with a new device.
     #[wasm_bindgen(js_name = "exportSecretsBundle")]
-    pub fn export_secrets_bundle(&self) -> Promise {
-        let me = self.inner.clone();
-
-        future_to_promise(async move {
-            Ok(me.store().export_secrets_bundle().await.map(store::SecretsBundle::from)?)
-        })
+    pub async fn export_secrets_bundle(&self) -> Result<store::SecretsBundle, JsError> {
+        Ok(self.inner.store().export_secrets_bundle().await?.into())
     }
 
-    /// Import and persists secrets from a [`SecretsBundle`].
+    /// Import and persists secrets from a {@link SecretsBundle}.
     ///
     /// This method will import all the private cross-signing keys and, if
     /// available, the private part of a backup key and its accompanying
@@ -562,19 +559,17 @@ impl OlmMachine {
     ///
     /// **Warning**: Only import this from a trusted source, i.e. if an existing
     /// device is sharing this with a new device. The imported cross-signing
-    /// keys will create a [`OwnUserIdentity`] and mark it as verified.
+    /// keys will create a {@link OwnUserIdentity} and mark it as verified.
     ///
     /// The backup key will be persisted in the store and can be enabled using
-    /// the [`BackupMachine`].
+    /// the {@link BackupMachine}.
+    ///
+    /// The provided `SecretsBundle` is freed by this method; be careful not to
+    /// use it once this method has been called.
     #[wasm_bindgen(js_name = "importSecretsBundle")]
-    pub fn import_secrets_bundle(&self, bundle: store::SecretsBundle) -> Promise {
-        let me = self.inner.clone();
-
-        future_to_promise(async move {
-            me.store().import_secrets_bundle(&bundle.inner).await?;
-
-            Ok(JsValue::null())
-        })
+    pub async fn import_secrets_bundle(&self, bundle: store::SecretsBundle) -> Result<(), JsError> {
+        self.inner.store().import_secrets_bundle(&bundle.inner).await?;
+        Ok(())
     }
 
     /// Export all the private cross signing keys we have.

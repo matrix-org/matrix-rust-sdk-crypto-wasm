@@ -18,6 +18,9 @@
         keys that had been imported from key backup to be backed up again, when
         using the in-memory datastore.
 
+-   Improve the return types of `OlmMachine.{import,export}exportSecretsBundle()`.
+    ([#123](https://github.com/matrix-org/matrix-rust-sdk-crypto-wasm/pull/123))
+
 # matrix-sdk-crypto-wasm v4.10.0
 
 -   Expose new constructor function `OlmMachine.openWithKey()`.
