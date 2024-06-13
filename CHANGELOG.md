@@ -1,5 +1,16 @@
 # UNRELEASED
 
+**BREAKING CHANGES**
+
+-   Update matrix-rust-sdk to `9b05d0d82`, which includes:
+
+    -   `Device.requestVerification`, `UserIdentities.requestVerification`, and
+        `UserIdentities.verificationRequestContent` is not async anymore.
+        ([#3513](https://github.com/matrix-org/matrix-rust-sdk/pull/3513))
+
+    -   Use the server name in the `QrCodeData` instead of the homeserver URL.
+        ([#3537](https://github.com/matrix-org/matrix-rust-sdk/pull/3537))
+
 # matrix-sdk-crypto-wasm v5.0.0
 
 **BREAKING CHANGES**

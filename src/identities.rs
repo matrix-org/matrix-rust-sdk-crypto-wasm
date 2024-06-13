@@ -3,7 +3,11 @@
 use js_sys::{Array, Promise};
 use wasm_bindgen::prelude::*;
 
-use crate::{future::future_to_promise, identifiers, impl_from_to_inner, requests, verification};
+use crate::{
+    future::future_to_promise,
+    identifiers, impl_from_to_inner, requests,
+    verification::{self, VerificationRequest},
+};
 
 pub(crate) struct UserIdentities {
     inner: matrix_sdk_crypto::UserIdentities,
@@ -164,18 +168,13 @@ impl UserIdentity {
         room_id: &identifiers::RoomId,
         request_event_id: &identifiers::EventId,
         methods: Option<Vec<verification::VerificationMethod>>,
-    ) -> Result<Promise, JsError> {
+    ) -> Result<VerificationRequest, JsError> {
         let me = self.inner.clone();
         let room_id = room_id.inner.clone();
         let request_event_id = request_event_id.inner.clone();
         let methods = methods.map(|methods| methods.iter().map(Into::into).collect());
 
-        Ok(future_to_promise::<_, verification::VerificationRequest>(async move {
-            Ok(me
-                .request_verification(room_id.as_ref(), request_event_id.as_ref(), methods)
-                .await
-                .into())
-        }))
+        Ok(me.request_verification(room_id.as_ref(), request_event_id.as_ref(), methods).into())
     }
 
     /// Send a verification request to the given user.
@@ -189,13 +188,11 @@ impl UserIdentity {
     pub fn verification_request_content(
         &self,
         methods: Option<Vec<verification::VerificationMethod>>,
-    ) -> Result<Promise, JsError> {
+    ) -> Result<String, JsError> {
         let me = self.inner.clone();
         let methods = methods.map(|methods| methods.iter().map(Into::into).collect());
 
-        Ok(future_to_promise(async move {
-            Ok(serde_json::to_string(&me.verification_request_content(methods).await)?)
-        }))
+        Ok(serde_json::to_string(&me.verification_request_content(methods))?)
     }
 
     /// Get the master key of the identity.
