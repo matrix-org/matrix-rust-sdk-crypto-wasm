@@ -2,6 +2,10 @@
 
 **BREAKING CHANGES**
 
+-   Rename the `QrCodeData.homeserver_url` method to `QrCodeData.server_name`
+    to reflect the changed data stored in the QR code.
+    ([#124](https://github.com/matrix-org/matrix-rust-sdk-crypto-wasm/pull/124))
+
 -   Update matrix-rust-sdk to `9b05d0d82`, which includes:
 
     -   `Device.requestVerification`, `UserIdentities.requestVerification`, and
