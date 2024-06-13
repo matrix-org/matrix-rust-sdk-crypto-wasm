@@ -44,26 +44,26 @@ pub struct QrCodeData {
 #[wasm_bindgen]
 impl QrCodeData {
     /// Create new [`QrCodeData`] from a given public key, a rendezvous URL and,
-    /// optionally, a homeserver URL.
+    /// optionally, a server name for the homeserver.
     ///
-    /// If a homeserver URL is given, then the [`QrCodeData`] mode will be
+    /// If a server name is given, then the [`QrCodeData`] mode will be
     /// [`QrCodeMode::Reciprocate`], i.e. the QR code will contain data for the
     /// existing device to display the QR code.
     ///
-    /// If no homeserver is given, the [`QrCodeData`] mode will be
+    /// If no server name is given, the [`QrCodeData`] mode will be
     /// [`QrCodeMode::Login`], i.e. the QR code will contain data for the
     /// new device to display the QR code.
     #[wasm_bindgen(constructor)]
     pub fn new(
         public_key: Curve25519PublicKey,
         rendezvous_url: &str,
-        homeserver_url: Option<String>,
+        server_name: Option<String>,
     ) -> Result<QrCodeData, JsError> {
         let public_key = public_key.inner;
         let rendezvous_url = Url::parse(rendezvous_url)?;
 
-        let mode_data = if let Some(homeserver_url) = homeserver_url {
-            qr_login::QrCodeModeData::Reciprocate { homeserver_url: Url::parse(&homeserver_url)? }
+        let mode_data = if let Some(server_name) = server_name {
+            qr_login::QrCodeModeData::Reciprocate { server_name }
         } else {
             qr_login::QrCodeModeData::Login
         };
@@ -120,14 +120,15 @@ impl QrCodeData {
         self.inner.rendezvous_url.as_str().to_owned()
     }
 
-    /// Get the homeserver URL which the new device will be logged in to.
+    /// Get the server name of the homeserver which the new device will be
+    /// logged in to.
     ///
     /// This will be only available if the existing device has generated the QR
     /// code and the new device is the one scanning the QR code.
     #[wasm_bindgen(getter)]
-    pub fn homeserver_url(&self) -> Option<String> {
-        if let qr_login::QrCodeModeData::Reciprocate { homeserver_url } = &self.inner.mode_data {
-            Some(homeserver_url.as_str().to_owned())
+    pub fn server_name(&self) -> Option<String> {
+        if let qr_login::QrCodeModeData::Reciprocate { server_name } = &self.inner.mode_data {
+            Some(server_name.to_owned())
         } else {
             None
         }

@@ -29,26 +29,24 @@ impl Device {
     pub fn request_verification(
         &self,
         methods: Option<Vec<verification::VerificationMethod>>,
-    ) -> Result<Promise, JsError> {
+    ) -> Result<Array, JsError> {
         let me = self.inner.clone();
         let methods = methods.map(|methods| methods.iter().map(Into::into).collect());
 
-        Ok(future_to_promise(async move {
-            let tuple = Array::new();
-            let (verification_request, outgoing_verification_request) = match methods {
-                Some(methods) => me.request_verification_with_methods(methods).await,
-                None => me.request_verification().await,
-            };
+        let tuple = Array::new();
+        let (verification_request, outgoing_verification_request) = match methods {
+            Some(methods) => me.request_verification_with_methods(methods),
+            None => me.request_verification(),
+        };
 
-            tuple.set(0, verification::VerificationRequest::from(verification_request).into());
-            tuple.set(
-                1,
-                verification::OutgoingVerificationRequest::from(outgoing_verification_request)
-                    .try_into()?,
-            );
+        tuple.set(0, verification::VerificationRequest::from(verification_request).into());
+        tuple.set(
+            1,
+            verification::OutgoingVerificationRequest::from(outgoing_verification_request)
+                .try_into()?,
+        );
 
-            Ok(tuple)
-        }))
+        Ok(tuple)
     }
 
     /// Is this device considered to be verified.
