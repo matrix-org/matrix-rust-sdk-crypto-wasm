@@ -76,6 +76,7 @@ impl QrCodeData {
     /// Attempt to decode a slice of bytes into a {@link QrCodeData} object.
     ///
     /// The slice of bytes would generally be returned by a QR code decoder.
+    #[wasm_bindgen(js_name = "fromBytes")]
     pub fn from_bytes(bytes: &[u8]) -> Result<QrCodeData, JsError> {
         Ok(Self { inner: qr_login::QrCodeData::from_bytes(bytes)? })
     }
@@ -84,12 +85,14 @@ impl QrCodeData {
     ///
     /// The list of bytes can be used by a QR code generator to create an image
     /// containing a QR code.
+    #[wasm_bindgen(js_name = "toBytes")]
     pub fn to_bytes(&self) -> Vec<u8> {
         self.inner.to_bytes()
     }
 
     /// Attempt to decode a base64 encoded string into a {@link QrCodeData}
     /// object.
+    #[wasm_bindgen(js_name = "fromBase64")]
     pub fn from_base64(data: &str) -> Result<QrCodeData, JsError> {
         Ok(Self { inner: qr_login::QrCodeData::from_base64(data)? })
     }
@@ -99,6 +102,7 @@ impl QrCodeData {
     /// This format can be used for debugging purposes and the
     /// [`QrcodeData::from_base64()`] method can be used to parse the string
     /// again.
+    #[wasm_bindgen(js_name = "toBase64")]
     pub fn to_base64(&self) -> String {
         self.inner.to_base64()
     }
@@ -109,14 +113,14 @@ impl QrCodeData {
     /// [ECIES](https://en.wikipedia.org/wiki/Integrated_Encryption_Scheme)
     /// (Elliptic Curve Integrated Encryption Scheme) channel with the other
     /// device.
-    #[wasm_bindgen(getter)]
+    #[wasm_bindgen(getter, js_name = "publicKey")]
     pub fn public_key(&self) -> Curve25519PublicKey {
         self.inner.public_key.into()
     }
 
     /// Get the URL of the rendezvous server which will be used to exchange
     /// messages between the two devices.
-    #[wasm_bindgen(getter)]
+    #[wasm_bindgen(getter, js_name = "rendezvousUrl")]
     pub fn rendezvous_url(&self) -> String {
         self.inner.rendezvous_url.as_str().to_owned()
     }
@@ -126,7 +130,7 @@ impl QrCodeData {
     ///
     /// This will be only available if the existing device has generated the QR
     /// code and the new device is the one scanning the QR code.
-    #[wasm_bindgen(getter)]
+    #[wasm_bindgen(getter, js_name = "serverName")]
     pub fn server_name(&self) -> Option<String> {
         if let qr_login::QrCodeModeData::Reciprocate { server_name } = &self.inner.mode_data {
             Some(server_name.to_owned())
