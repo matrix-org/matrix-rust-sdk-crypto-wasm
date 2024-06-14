@@ -33,8 +33,8 @@ impl From<qr_login::QrCodeMode> for QrCodeMode {
 
 /// Data for the QR code login mechanism.
 ///
-/// The [`QrCodeData`] can be serialized and encoded as a QR code or it can be
-/// decoded from a QR code.
+/// The {@link QrCodeData} can be serialized and encoded as a QR code or it can
+/// be decoded from a QR code.
 #[wasm_bindgen]
 #[derive(Debug)]
 pub struct QrCodeData {
@@ -43,15 +43,15 @@ pub struct QrCodeData {
 
 #[wasm_bindgen]
 impl QrCodeData {
-    /// Create new [`QrCodeData`] from a given public key, a rendezvous URL and,
-    /// optionally, a server name for the homeserver.
+    /// Create new {@link QrCodeData} from a given public key, a rendezvous URL
+    /// and, optionally, a server name for the homeserver.
     ///
-    /// If a server name is given, then the [`QrCodeData`] mode will be
-    /// [`QrCodeMode::Reciprocate`], i.e. the QR code will contain data for the
-    /// existing device to display the QR code.
+    /// If a server name is given, then the {@link QrCodeData} mode will be
+    /// {@link QrCodeMode.Reciprocate}, i.e. the QR code will contain data for
+    /// the existing device to display the QR code.
     ///
-    /// If no server name is given, the [`QrCodeData`] mode will be
-    /// [`QrCodeMode::Login`], i.e. the QR code will contain data for the
+    /// If no server name is given, the {@link QrCodeData} mode will be
+    /// {@link QrCodeMode.Login}, i.e. the QR code will contain data for the
     /// new device to display the QR code.
     #[wasm_bindgen(constructor)]
     pub fn new(
@@ -73,14 +73,14 @@ impl QrCodeData {
         Ok(QrCodeData { inner })
     }
 
-    /// Attempt to decode a slice of bytes into a [`QrCodeData`] object.
+    /// Attempt to decode a slice of bytes into a {@link QrCodeData} object.
     ///
     /// The slice of bytes would generally be returned by a QR code decoder.
     pub fn from_bytes(bytes: &[u8]) -> Result<QrCodeData, JsError> {
         Ok(Self { inner: qr_login::QrCodeData::from_bytes(bytes)? })
     }
 
-    /// Encode the [`QrCodeData`] into a list of bytes.
+    /// Encode the {@link QrCodeData} into a list of bytes.
     ///
     /// The list of bytes can be used by a QR code generator to create an image
     /// containing a QR code.
@@ -88,12 +88,13 @@ impl QrCodeData {
         self.inner.to_bytes()
     }
 
-    /// Attempt to decode a base64 encoded string into a [`QrCodeData`] object.
+    /// Attempt to decode a base64 encoded string into a {@link QrCodeData}
+    /// object.
     pub fn from_base64(data: &str) -> Result<QrCodeData, JsError> {
         Ok(Self { inner: qr_login::QrCodeData::from_base64(data)? })
     }
 
-    /// Encode the [`QrCodeData`] into a string using base64.
+    /// Encode the {@link QrCodeData} into a string using base64.
     ///
     /// This format can be used for debugging purposes and the
     /// [`QrcodeData::from_base64()`] method can be used to parse the string
@@ -102,7 +103,7 @@ impl QrCodeData {
         self.inner.to_base64()
     }
 
-    /// Get the Curve25519 public key embedded in the [`QrCodeData`].
+    /// Get the Curve25519 public key embedded in the {@link QrCodeData}.
     ///
     /// This Curve25519 public key should be used to establish an
     /// [ECIES](https://en.wikipedia.org/wiki/Integrated_Encryption_Scheme)
@@ -134,7 +135,7 @@ impl QrCodeData {
         }
     }
 
-    /// Get the mode of this [`QrCodeData`] instance.
+    /// Get the mode of this {@link QrCodeData} instance.
     #[wasm_bindgen(getter)]
     pub fn mode(&self) -> QrCodeMode {
         self.inner.mode().into()
