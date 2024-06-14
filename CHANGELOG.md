@@ -2,6 +2,9 @@
 
 **BREAKING CHANGES**
 
+-   Rename the `QrCodeData` related methods so they use camel case.
+    ([0d58c688d](https://github.com/matrix-org/matrix-rust-sdk-crypto-wasm/commit/0d58c688454d40269d93fc4f763b2d1a754ace9d))
+
 -   Rename the `QrCodeData.homeserver_url` method to `QrCodeData.server_name`
     to reflect the changed data stored in the QR code.
     ([#124](https://github.com/matrix-org/matrix-rust-sdk-crypto-wasm/pull/124))
