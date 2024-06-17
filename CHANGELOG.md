@@ -1,5 +1,7 @@
 # UNRELEASED
 
+# matrix-sdk-crypto-wasm v6.0.0
+
 **BREAKING CHANGES**
 
 -   Rename the `QrCodeData` related methods so they use camel case.
