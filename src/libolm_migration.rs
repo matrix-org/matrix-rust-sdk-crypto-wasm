@@ -144,7 +144,16 @@ async fn migrate_base_data_to_store(
             dehydrated: false,
             // Assume we have 50 keys on the server, until we get a sync that says fewer.
             uploaded_signed_key_count: 50,
-            creation_local_time: MilliSecondsSinceUnixEpoch::now(),
+
+            // The legacy crypto stack didn't keep a record of when the device was created, so we
+            // have to make something up.
+            //
+            // The main thing the creation time is used for is determining whether an event was sent
+            // before the device was created (and hence should not expect to receive the keys).
+            // To avoid incorrectly marking UTD events sent before migration as "expected UTDs", we
+            // set the "creation time" to zero.
+            creation_local_time: MilliSecondsSinceUnixEpoch(UInt::MIN),
+
             fallback_key_creation_timestamp: None,
         })?;
 
