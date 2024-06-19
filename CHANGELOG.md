@@ -1,5 +1,7 @@
 # UNRELEASED
 
+# matrix-sdk-crypto-wasm v6.1.0
+
 -   Set "creation time" of `OlmAccount`s which were migrated from legacy libolm data to the unix epoch, instead of "now". Fixes https://github.com/element-hq/element-web/issues/27590.
     ([#128](https://github.com/matrix-org/matrix-rust-sdk-crypto-wasm/pull/128))
 
