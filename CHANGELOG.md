@@ -1,5 +1,11 @@
 # UNRELEASED
 
+# matrix-sdk-crypto-wasm v6.2.0
+
+-   Update matrix-rust-sdk to `09d53a52a`, which includes:
+
+    -   Improve the efficiency of objects stored in the crypto store. ([#3645](https://github.com/matrix-org/matrix-rust-sdk/pull/3645))
+
 # matrix-sdk-crypto-wasm v6.1.0
 
 -   Set "creation time" of `OlmAccount`s which were migrated from legacy libolm data to the unix epoch, instead of "now". Fixes https://github.com/element-hq/element-web/issues/27590.
