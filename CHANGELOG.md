@@ -1,5 +1,10 @@
 # UNRELEASED
 
+# matrix-sdk-crypto-wasm v6.2.1
+
+-   Update matrix-rust-sdk to `7b25a1c2f`, which includes fixes to bugs introduced in v6.2.0.
+    ([#3651](https://github.com/matrix-org/matrix-rust-sdk/pull/3651))
+
 # matrix-sdk-crypto-wasm v6.2.0
 
 -   Update matrix-rust-sdk to `09d53a52a`, which includes:
