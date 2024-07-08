@@ -1,5 +1,15 @@
 # UNRELEASED
 
+**BREAKING CHANGES**
+
+-   `EncryptionSettings.onlyAllowTrustedDevices` has been replaced with
+    `EncryptionSettings.sharingStrategy`, which adds the ability to share only
+    with cross-signed devices.
+
+-   Update matrix-rust-sdk to `11cbf849c`, which includes:
+
+    -   refactor(sdk-crypto): Room key sharing, introduce extensible strategy ([#3605](https://github.com/matrix-org/matrix-rust-sdk/pull/3605))
+
 # matrix-sdk-crypto-wasm v6.2.1
 
 -   Update matrix-rust-sdk to `7b25a1c2f`, which includes fixes to bugs introduced in v6.2.0.
