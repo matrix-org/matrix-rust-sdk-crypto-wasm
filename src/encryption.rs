@@ -116,18 +116,24 @@ impl From<matrix_sdk_crypto::types::EventEncryptionAlgorithm> for EncryptionAlgo
     }
 }
 
-#[wasm_bindgen()]
-#[derive(Debug, Clone, PartialEq, Eq)]
 /// Strategy to collect the devices that should receive room keys for the
 /// current discussion.
-///
-/// See matrix_sdk_crypto::CollectStrategy
+#[wasm_bindgen()]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub enum CollectStrategy {
     /// Device based sharing strategy, excluding devices that are not trusted.
+    /// A device is trusted if any of the following is true:
+    ///     - It was manually marked as trusted.
+    ///     - It was marked as verified via interactive verification.
+    ///     - It is signed by its owner identity, and this identity has been
+    ///       trusted via interactive verification.
+    ///     - It is the current own device of the user.
     DeviceBasedStrategyOnlyTrustedDevices,
     /// Device based sharing strategy, including all devices.
     DeviceBasedStrategyAllDevices,
-    /// Only distribute to devices signed by their owner.
+    /// Share based on identity. Only distribute to devices signed by their
+    /// owner. If a user has no published identity he will not receive
+    /// any room keys.
     IdentityBasedStrategy,
 }
 
