@@ -5,8 +5,13 @@
 -   `EncryptionSettings.onlyAllowTrustedDevices` has been replaced with
     `EncryptionSettings.sharingStrategy`, which adds the ability to share only
     with cross-signed devices.
+    ([#134](https://github.com/matrix-org/matrix-rust-sdk-crypto-wasm/pull/134))
 
 **Other changes**
+
+-   Add `OlmMachine.registerRoomKeysWithheldCallback` to notify when we are
+    told that room keys have been withheld.
+    ([#136](https://github.com/matrix-org/matrix-rust-sdk-crypto-wasm/pull/136))
 
 -   Update matrix-rust-sdk to `11cbf849c`, which includes:
 
