@@ -21,6 +21,7 @@ import {
     OwnUserIdentity,
     RequestType,
     RoomId,
+    RoomKeyWithheldInfo,
     RoomMessageRequest,
     RoomSettings,
     ShieldColor,
@@ -770,6 +771,41 @@ describe(OlmMachine.name, () => {
         expect(callback).toHaveBeenCalledTimes(1);
         const [userId] = callback.mock.calls[0];
         expect(userId.toString()).toEqual(user.toString());
+    });
+
+    test("Receiving a withheld message should call roomKeysWithheldCallback", async () => {
+        const m = await machine();
+
+        const callback = jest.fn().mockImplementation(() => Promise.resolve(undefined));
+        await m.registerRoomKeysWithheldCallback(callback);
+
+        let toDeviceEvents = [
+            {
+                sender: "@alice:example.com",
+                type: "m.room_key.withheld",
+                content: {
+                    algorithm: "m.megolm.v1.aes-sha2",
+                    code: "m.unverified",
+                    reason: "Device not verified",
+                    room_id: "!Cuyf34gef24t:localhost",
+                    sender_key: "RF3s+E7RkTQTGF2d8Deol0FkQvgII2aJDf3/Jp5mxVU",
+                    session_id: "X3lUlvLELLYxeTx4yOVu6UDpasGEVO0Jbu+QFnm0cKQ",
+                },
+            },
+        ];
+        await m.receiveSyncChanges(
+            JSON.stringify(toDeviceEvents),
+            new DeviceLists(),
+            new Map<string, number>(),
+            undefined,
+        );
+
+        expect(callback).toHaveBeenCalledTimes(1);
+        const withheld: RoomKeyWithheldInfo[] = callback.mock.calls[0][0];
+        expect(withheld[0].sender.toString()).toEqual("@alice:example.com");
+        expect(withheld[0].roomId.toString()).toEqual("!Cuyf34gef24t:localhost");
+        expect(withheld[0].sessionId).toEqual("X3lUlvLELLYxeTx4yOVu6UDpasGEVO0Jbu+QFnm0cKQ");
+        expect(withheld[0].withheldCode).toEqual("m.unverified");
     });
 
     test("can export room keys", async () => {

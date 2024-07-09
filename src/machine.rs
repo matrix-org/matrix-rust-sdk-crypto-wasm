@@ -37,7 +37,7 @@ use crate::{
     requests::{outgoing_request_to_js_value, CrossSigningBootstrapRequests, ToDeviceRequest},
     responses::{self, response_from_string},
     store,
-    store::{RoomKeyInfo, StoreHandle},
+    store::{RoomKeyInfo, RoomKeyWithheldInfo, StoreHandle},
     sync_events,
     types::{self, RoomKeyImportResult, RoomSettings, SignatureVerification},
     verification, vodozemac,
@@ -1315,6 +1315,31 @@ impl OlmMachine {
             },
             callback,
             "room-key-received",
+        );
+    }
+
+    /// Register a callback which will be called whenever we receive a
+    /// notification that some room keys have been withheld.
+    ///
+    /// `callback` should be a function that takes a single argument (an array
+    /// of {@link RoomKeyWithheldInfo}) and returns a Promise.
+    #[wasm_bindgen(js_name = "registerRoomKeysWithheldCallback")]
+    pub async fn register_room_keys_withheld_callback(&self, callback: Function) {
+        let stream = self.inner.store().room_keys_withheld_received_stream();
+
+        copy_stream_to_callback(
+            stream,
+            |input| {
+                iter::once(
+                    input
+                        .into_iter()
+                        .map(RoomKeyWithheldInfo::from)
+                        .map(JsValue::from)
+                        .collect::<Array>(),
+                )
+            },
+            callback,
+            "room-key-withheld",
         );
     }
 
