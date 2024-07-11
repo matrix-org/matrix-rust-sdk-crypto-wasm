@@ -1,5 +1,7 @@
 # UNRELEASED
 
+# matrix-sdk-crypto-wasm v7.0.0
+
 **BREAKING CHANGES**
 
 -   `EncryptionSettings.onlyAllowTrustedDevices` has been replaced with
