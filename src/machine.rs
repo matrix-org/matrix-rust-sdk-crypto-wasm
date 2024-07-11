@@ -2,6 +2,7 @@
 
 use std::{
     collections::{BTreeMap, HashSet},
+    iter,
     ops::Deref,
     pin::{pin, Pin},
     time::Duration,
@@ -36,7 +37,7 @@ use crate::{
     requests::{outgoing_request_to_js_value, CrossSigningBootstrapRequests, ToDeviceRequest},
     responses::{self, response_from_string},
     store,
-    store::{RoomKeyInfo, StoreHandle},
+    store::{RoomKeyInfo, RoomKeyWithheldInfo, StoreHandle},
     sync_events,
     types::{self, RoomKeyImportResult, RoomSettings, SignatureVerification},
     verification, vodozemac,
@@ -1305,14 +1306,41 @@ impl OlmMachine {
     pub async fn register_room_key_updated_callback(&self, callback: Function) {
         let stream = self.inner.store().room_keys_received_stream();
 
-        // fire up a promise chain which will call `cb` on each result from the stream
-        spawn_local(async move {
-            // take a reference to `callback` (which we then pass into the closure), to stop
-            // the callback being moved into the closure (which would mean we could only
-            // call the closure once)
-            let callback_ref = &callback;
-            stream.for_each(move |item| send_room_key_info_to_callback(callback_ref, item)).await;
-        });
+        copy_stream_to_callback(
+            stream,
+            |input| {
+                iter::once(
+                    input.into_iter().map(RoomKeyInfo::from).map(JsValue::from).collect::<Array>(),
+                )
+            },
+            callback,
+            "room-key-received",
+        );
+    }
+
+    /// Register a callback which will be called whenever we receive a
+    /// notification that some room keys have been withheld.
+    ///
+    /// `callback` should be a function that takes a single argument (an array
+    /// of {@link RoomKeyWithheldInfo}) and returns a Promise.
+    #[wasm_bindgen(js_name = "registerRoomKeysWithheldCallback")]
+    pub async fn register_room_keys_withheld_callback(&self, callback: Function) {
+        let stream = self.inner.store().room_keys_withheld_received_stream();
+
+        copy_stream_to_callback(
+            stream,
+            |input| {
+                iter::once(
+                    input
+                        .into_iter()
+                        .map(RoomKeyWithheldInfo::from)
+                        .map(JsValue::from)
+                        .collect::<Array>(),
+                )
+            },
+            callback,
+            "room-key-withheld",
+        );
     }
 
     /// Register a callback which will be called whenever there is an update to
@@ -1324,14 +1352,18 @@ impl OlmMachine {
     pub async fn register_user_identity_updated_callback(&self, callback: Function) {
         let stream = self.inner.store().identities_stream_raw();
 
-        // fire up a promise chain which will call `cb` on each result from the stream
-        spawn_local(async move {
-            // take a reference to `callback` (which we then pass into the closure), to stop
-            // the callback being moved into the closure (which would mean we could only
-            // call the closure once)
-            let callback_ref = &callback;
-            stream.for_each(move |item| send_user_identities_to_callback(callback_ref, item)).await;
-        });
+        copy_stream_to_callback(
+            stream,
+            |(identity_updates, _)| {
+                identity_updates
+                    .new
+                    .into_iter()
+                    .chain(identity_updates.changed.into_iter())
+                    .map(|update| identifiers::UserId::from(update.user_id().to_owned()))
+            },
+            callback,
+            "user-identity-updated",
+        );
     }
 
     /// Register a callback which will be called whenever there is an update to
@@ -1343,15 +1375,25 @@ impl OlmMachine {
     pub async fn register_devices_updated_callback(&self, callback: Function) {
         let stream = self.inner.store().identities_stream_raw();
 
-        // fire up a promise chain which will call `callback` on each result from the
-        // stream
-        spawn_local(async move {
-            // take a reference to `callback` (which we then pass into the closure), to stop
-            // the callback being moved into the closure (which would mean we could only
-            // call the closure once)
-            let callback_ref = &callback;
-            stream.for_each(move |item| send_device_updates_to_callback(callback_ref, item)).await;
-        });
+        fn mapper(changes: (IdentityChanges, DeviceChanges)) -> iter::Once<Array> {
+            let (_, device_updates) = changes;
+
+            // get the user IDs of all the devices that have changed
+            let updated_chain = device_updates
+                .new
+                .into_iter()
+                .chain(device_updates.changed.into_iter())
+                .chain(device_updates.deleted.into_iter());
+
+            // put them in a set to make them unique
+            let updated_users: HashSet<String> =
+                HashSet::from_iter(updated_chain.map(|device| device.user_id().to_string()));
+
+            // ... and collect to a JS Array
+            iter::once(updated_users.into_iter().map(JsValue::from).collect())
+        }
+
+        copy_stream_to_callback(stream, mapper, callback, "device-updated");
     }
 
     /// Register a callback which will be called whenever a secret
@@ -1538,66 +1580,41 @@ impl OlmMachine {
     }
 }
 
-// helper for register_room_key_received_callback: wraps the key info
-// into our own RoomKeyInfo struct, and passes it into the javascript
-// function
-async fn send_room_key_info_to_callback(
-    callback: &Function,
-    room_key_info: Vec<matrix_sdk_crypto::store::RoomKeyInfo>,
-) {
-    let rki: Array = room_key_info.into_iter().map(RoomKeyInfo::from).map(JsValue::from).collect();
-    match promise_result_to_future(callback.call1(&JsValue::NULL, &rki)).await {
-        Ok(_) => (),
-        Err(e) => {
-            warn!("Error calling room-key-received callback: {:?}", e);
-        }
-    }
-}
+/// Helper for `register_*_callback` methods: fires off a background job (or
+/// rather, a chain of JS promises) which will copy items from the stream to the
+/// callback.
+///
+/// # Arguments
+///
+/// * `stream`: the stream to copy items from.
+/// * `mapper`: a function which takes items from the stream, and converts them
+///   to an iterator of values to send to the callback. Each entry in the
+///   iterator will result in a call to the callback.
+/// * `callback`: the javascript callback function.
+/// * `callback_name`: a name for this type of callback, for error reporting.
+fn copy_stream_to_callback<Item, MappedTypeIterator, MappedType>(
+    stream: impl Stream<Item = Item> + 'static,
+    mapper: impl Fn(Item) -> MappedTypeIterator + 'static,
+    callback: Function,
+    callback_name: &'static str,
+) where
+    MappedTypeIterator: Iterator<Item = MappedType>,
+    MappedType: Into<JsValue>,
+{
+    spawn_local(async move {
+        pin_mut!(stream);
 
-// helper for register_user_identity_updated_callback: passes the user ID into
-// the javascript function
-async fn send_user_identities_to_callback(
-    callback: &Function,
-    (identity_updates, _): (IdentityChanges, DeviceChanges),
-) {
-    let update_chain = identity_updates.new.into_iter().chain(identity_updates.changed.into_iter());
-    for update in update_chain {
-        let user_id = identifiers::UserId::from(update.user_id().to_owned());
-        match promise_result_to_future(callback.call1(&JsValue::NULL, &(user_id.into()))).await {
-            Ok(_) => (),
-            Err(e) => {
-                warn!("Error calling user-identity-updated callback: {:?}", e);
+        while let Some(item) = stream.next().await {
+            for val in mapper(item) {
+                match promise_result_to_future(callback.call1(&JsValue::NULL, &val.into())).await {
+                    Ok(_) => (),
+                    Err(e) => {
+                        warn!("Error calling {} callback: {:?}", callback_name, e);
+                    }
+                }
             }
         }
-    }
-}
-
-// helper for register_device_updated_callback: passes the user IDs into
-// the javascript function
-async fn send_device_updates_to_callback(
-    callback: &Function,
-    (_, device_updates): (IdentityChanges, DeviceChanges),
-) {
-    // get the user IDs of all the devices that have changed
-    let updated_chain = device_updates
-        .new
-        .into_iter()
-        .chain(device_updates.changed.into_iter())
-        .chain(device_updates.deleted.into_iter());
-    // put them in a set to make them unique
-    let updated_users: HashSet<String> =
-        HashSet::from_iter(updated_chain.map(|device| device.user_id().to_string()));
-    let updated_users_vec = Vec::from_iter(updated_users.iter());
-    match promise_result_to_future(
-        callback.call1(&JsValue::NULL, &serde_wasm_bindgen::to_value(&updated_users_vec).unwrap()),
-    )
-    .await
-    {
-        Ok(_) => (),
-        Err(e) => {
-            warn!("Error calling device-updated callback: {:?}", e);
-        }
-    }
+    });
 }
 
 // helper for register_secret_receive_callback: passes the secret name and value

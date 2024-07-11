@@ -11,7 +11,9 @@ use wasm_bindgen::prelude::*;
 use zeroize::{Zeroize, Zeroizing};
 
 use crate::{
-    encryption::EncryptionAlgorithm, identifiers::RoomId, impl_from_to_inner,
+    encryption::EncryptionAlgorithm,
+    identifiers::{RoomId, UserId},
+    impl_from_to_inner,
     vodozemac::Curve25519PublicKey,
 };
 
@@ -202,6 +204,49 @@ impl RoomKeyInfo {
     #[wasm_bindgen(getter, js_name = "sessionId")]
     pub fn session_id(&self) -> String {
         self.inner.session_id.clone()
+    }
+}
+
+/// Information on a received `m.room_key.withheld` event.
+#[wasm_bindgen]
+#[derive(Debug)]
+pub struct RoomKeyWithheldInfo {
+    pub(crate) inner: matrix_sdk_crypto::store::RoomKeyWithheldInfo,
+}
+
+impl_from_to_inner!(matrix_sdk_crypto::store::RoomKeyWithheldInfo => RoomKeyWithheldInfo);
+
+#[wasm_bindgen]
+impl RoomKeyWithheldInfo {
+    /// The User ID of the user that sent us the `m.room_key.withheld` message.
+    #[wasm_bindgen(getter)]
+    pub fn sender(&self) -> UserId {
+        self.inner.withheld_event.sender.to_owned().into()
+    }
+
+    /// The encryption algorithm of the session that is being withheld.
+    #[wasm_bindgen(getter)]
+    pub fn algorithm(&self) -> EncryptionAlgorithm {
+        self.inner.withheld_event.content.algorithm().into()
+    }
+
+    /// The `code` from the `m.room_key.withheld` message, such as
+    /// `m.unverified`.
+    #[wasm_bindgen(getter, js_name = "withheldCode")]
+    pub fn withheld_code(&self) -> String {
+        self.inner.withheld_event.content.withheld_code().as_str().to_owned()
+    }
+
+    /// The room ID of the session that is being withheld.
+    #[wasm_bindgen(getter, js_name = "roomId")]
+    pub fn room_id(&self) -> RoomId {
+        self.inner.room_id.to_owned().into()
+    }
+
+    /// The session ID of the session that is being withheld.
+    #[wasm_bindgen(getter, js_name = "sessionId")]
+    pub fn session_id(&self) -> String {
+        self.inner.session_id.to_owned()
     }
 }
 
