@@ -1,5 +1,7 @@
 # UNRELEASED
 
+# matrix-sdk-crypto-wasm v7.0.0
+
 **BREAKING CHANGES**
 
 -   `EncryptionSettings.onlyAllowTrustedDevices` has been replaced with
@@ -13,7 +15,7 @@
     told that room keys have been withheld.
     ([#136](https://github.com/matrix-org/matrix-rust-sdk-crypto-wasm/pull/136))
 
--   Update matrix-rust-sdk to `8d54bd92d`, which includes:
+-   Update matrix-rust-sdk to `d9b2b53f8`, which includes:
 
     -   refactor(sdk-crypto): Room key sharing, introduce extensible strategy
         ([#3605](https://github.com/matrix-org/matrix-rust-sdk/pull/3605))
