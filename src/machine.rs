@@ -178,6 +178,19 @@ impl OlmMachine {
         future_to_promise(async move { Ok(me.display_name().await?) })
     }
 
+    #[wasm_bindgen(js_name = "updateClientData")]
+    pub async fn update_client_data(&self, data: JsValue) -> Result<(), JsError> {
+        /*let data = if data.is_null() || data.is_undefined() {
+            None
+        } else {
+            Some(serde_wasm_bindgen::from_value(data))
+        };
+        */
+        let data = serde_wasm_bindgen::from_value(data)?;
+        self.inner.update_client_data(data).await?;
+        Ok(())
+    }
+
     /// Whether automatic transmission of room key requests is enabled.
     ///
     /// Room key requests allow the device to request room keys that it might
