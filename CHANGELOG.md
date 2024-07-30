@@ -2,8 +2,8 @@
 
 **Security Fixes**
 
-- Fix `UserIdentity.isVerified` to take into account our own identity
-  [#d8d9dae](https://github.com/matrix-org/matrix-rust-sdk/commit/d8d9dae9d77bee48a2591b9aad9bd2fa466354cc) (Moderate, [GHSA-4qg4-cvh2-crgg](https://github.com/matrix-org/matrix-rust-sdk/security/advisories/GHSA-4qg4-cvh2-crgg)).
+-   Fix `UserIdentity.isVerified` to take into account our own identity
+    [#d8d9dae](https://github.com/matrix-org/matrix-rust-sdk/commit/d8d9dae9d77bee48a2591b9aad9bd2fa466354cc) (Moderate, [GHSA-4qg4-cvh2-crgg](https://github.com/matrix-org/matrix-rust-sdk/security/advisories/GHSA-4qg4-cvh2-crgg)).
 
 # matrix-sdk-crypto-wasm v7.0.0
 
