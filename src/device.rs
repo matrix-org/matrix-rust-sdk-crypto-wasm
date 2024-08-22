@@ -1,9 +1,7 @@
 //! Types for a `Device`.
 
 use js_sys::{Array, Map, Promise};
-use serde::Serialize;
 use serde_json::Value;
-use serde_wasm_bindgen::Serializer;
 use wasm_bindgen::prelude::*;
 
 use crate::{
@@ -66,8 +64,9 @@ impl Device {
     /// the same order as they are encrypted.
     ///
     /// # Returns
-    /// Returns a Promise for a JS object of the encrypted event.
-    /// Can be used to create the payload for a `/sendToDevice` API.
+    ///
+    /// Returns a promise for a JSON string containing the `content` of an encrypted event,
+    /// which be used to create the payload for a `/sendToDevice` API.
     #[wasm_bindgen(js_name = "encryptToDeviceEvent")]
     pub fn encrypt_to_device_event(
         &self,
@@ -79,10 +78,7 @@ impl Device {
 
         Ok(future_to_promise(async move {
             let raw_encrypted = me.encrypt_event_raw(event_type.as_str(), &content).await?;
-
-            let to_device_encrypted = raw_encrypted.deserialize()?;
-            // Using json_compatible() to convert into plain object instead of Map.
-            Ok(to_device_encrypted.serialize(&Serializer::json_compatible()).unwrap())
+            Ok(raw_encrypted.into_json().get().to_owned())
         }))
     }
 

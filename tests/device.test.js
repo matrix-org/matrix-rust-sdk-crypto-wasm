@@ -220,7 +220,7 @@ describe("Send to-device message", () => {
         };
         const type = "some.custom.event.type";
 
-        const toDevice = await device2.encryptToDeviceEvent(type, content);
+        const toDevice = JSON.parse(await device2.encryptToDeviceEvent(type, content));
 
         expect(toDevice.algorithm).toStrictEqual("m.olm.v1.curve25519-aes-sha2");
         expect(toDevice.ciphertext).toBeDefined();
