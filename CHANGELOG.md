@@ -7,7 +7,7 @@
 
 **Other changes**
 
--   Add a new API `Device#encryptToDeviceEvent` to encrypt a to-device message using
+-   Add a new API `Device.encryptToDeviceEvent` to encrypt a to-device message using
     Olm.
     ([#101](https://github.com/matrix-org/matrix-rust-sdk-crypto-wasm/pull/101))
 
