@@ -73,6 +73,8 @@ impl Device {
         content: JsValue,
     ) -> Result<String, JsError> {
         let me = self.inner.clone();
+
+        // JSON-serialize the payload
         let content: Value = serde_wasm_bindgen::from_value(content)?;
 
         let raw_encrypted = me.encrypt_event_raw(event_type.as_str(), &content).await?;
