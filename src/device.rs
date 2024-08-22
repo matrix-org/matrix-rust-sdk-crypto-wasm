@@ -8,9 +8,7 @@ use crate::{
     encryption::EncryptionAlgorithm,
     future::future_to_promise,
     identifiers::{self, DeviceId, UserId},
-    impl_from_to_inner,
-    requests,
-    types, verification, vodozemac,
+    impl_from_to_inner, requests, types, verification, vodozemac,
 };
 
 /// A device represents a E2EE capable client of an user.
@@ -65,8 +63,9 @@ impl Device {
     ///
     /// # Returns
     ///
-    /// Returns a promise for a JSON string containing the `content` of an encrypted event,
-    /// which be used to create the payload for a `/sendToDevice` API.
+    /// Returns a promise for a JSON string containing the `content` of an
+    /// encrypted event, which be used to create the payload for a
+    /// `/sendToDevice` API.
     #[wasm_bindgen(js_name = "encryptToDeviceEvent")]
     pub async fn encrypt_to_device_event(
         &self,
