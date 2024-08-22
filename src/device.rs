@@ -11,7 +11,7 @@ use crate::{
     future::future_to_promise,
     identifiers::{self, DeviceId, UserId},
     impl_from_to_inner,
-    requests::{self},
+    requests,
     types, verification, vodozemac,
 };
 
@@ -59,7 +59,7 @@ impl Device {
     /// Encrypt a to-device message to be sent to this device, using Olm
     /// encryption.
     ///
-    /// Prior to calling this method you must ensure that an olm session is
+    /// Prior to calling this method you must ensure that an Olm session is
     /// available for the target device. This can be done by calling
     /// {@link OlmMachine.getMissingSessions}.
     ///
@@ -69,7 +69,7 @@ impl Device {
     /// the same order as they are encrypted.
     ///
     /// # Returns
-    /// Returns a Promise for a js object of the encrypted event.
+    /// Returns a Promise for a JS object of the encrypted event.
     /// Can be used to create the payload for a `/sendToDevice` API.
     #[wasm_bindgen(js_name = "encryptToDeviceEvent")]
     pub fn encrypt_to_device_event(
@@ -79,7 +79,6 @@ impl Device {
     ) -> Result<Promise, JsError> {
         let me = self.inner.clone();
         let content: Value = serde_wasm_bindgen::from_value(content)?;
-        let event_type = event_type.clone();
 
         Ok(future_to_promise(async move {
             let raw_encrypted = me.encrypt_event_raw(event_type.as_str(), &content).await?;
