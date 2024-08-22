@@ -1,6 +1,7 @@
 //! Types for a `Device`.
 
 use js_sys::{Array, Map, Promise};
+use serde_json::Value;
 use wasm_bindgen::prelude::*;
 
 use crate::{
@@ -46,6 +47,38 @@ impl Device {
         );
 
         Ok(tuple)
+    }
+
+    /// Encrypt a to-device message to be sent to this device, using Olm
+    /// encryption.
+    ///
+    /// Prior to calling this method you must ensure that an Olm session is
+    /// available for the target device. This can be done by calling
+    /// {@link OlmMachine.getMissingSessions}.
+    ///
+    /// The caller is responsible for sending the encrypted
+    /// event to the target device. If multiple messages are
+    /// encrypted for the same device using this method they should be sent in
+    /// the same order as they are encrypted.
+    ///
+    /// # Returns
+    ///
+    /// Returns a promise for a JSON string containing the `content` of an
+    /// encrypted event, which be used to create the payload for a
+    /// `/sendToDevice` API.
+    #[wasm_bindgen(js_name = "encryptToDeviceEvent")]
+    pub async fn encrypt_to_device_event(
+        &self,
+        event_type: String,
+        content: JsValue,
+    ) -> Result<String, JsError> {
+        let me = self.inner.clone();
+
+        // JSON-serialize the payload
+        let content: Value = serde_wasm_bindgen::from_value(content)?;
+
+        let raw_encrypted = me.encrypt_event_raw(event_type.as_str(), &content).await?;
+        Ok(raw_encrypted.into_json().get().to_owned())
     }
 
     /// Is this device considered to be verified.

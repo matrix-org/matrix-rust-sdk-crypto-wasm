@@ -5,6 +5,12 @@
 -   Fix `UserIdentity.isVerified` to take into account our own identity
     [#d8d9dae](https://github.com/matrix-org/matrix-rust-sdk/commit/d8d9dae9d77bee48a2591b9aad9bd2fa466354cc) (Moderate, [GHSA-4qg4-cvh2-crgg](https://github.com/matrix-org/matrix-rust-sdk/security/advisories/GHSA-4qg4-cvh2-crgg)).
 
+**Other changes**
+
+-   Add a new API `Device.encryptToDeviceEvent` to encrypt a to-device message using
+    Olm.
+    ([#101](https://github.com/matrix-org/matrix-rust-sdk-crypto-wasm/pull/101))
+
 # matrix-sdk-crypto-wasm v7.0.0
 
 **BREAKING CHANGES**
