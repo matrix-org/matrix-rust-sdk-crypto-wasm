@@ -68,18 +68,16 @@ impl Device {
     /// Returns a promise for a JSON string containing the `content` of an encrypted event,
     /// which be used to create the payload for a `/sendToDevice` API.
     #[wasm_bindgen(js_name = "encryptToDeviceEvent")]
-    pub fn encrypt_to_device_event(
+    pub async fn encrypt_to_device_event(
         &self,
         event_type: String,
         content: JsValue,
-    ) -> Result<Promise, JsError> {
+    ) -> Result<String, JsError> {
         let me = self.inner.clone();
         let content: Value = serde_wasm_bindgen::from_value(content)?;
 
-        Ok(future_to_promise(async move {
-            let raw_encrypted = me.encrypt_event_raw(event_type.as_str(), &content).await?;
-            Ok(raw_encrypted.into_json().get().to_owned())
-        }))
+        let raw_encrypted = me.encrypt_event_raw(event_type.as_str(), &content).await?;
+        Ok(raw_encrypted.into_json().get().to_owned())
     }
 
     /// Is this device considered to be verified.
