@@ -69,6 +69,7 @@ describe("Migration", () => {
         );
         expect(olmMachine.identityKeys.curve25519.toBase64()).toEqual("LKv0bKbc0EC4h0jknbemv3QalEkeYvuNeUXVRgVVTTU");
         expect(olmMachine.identityKeys.ed25519.toBase64()).toEqual("qK70DEqIXq7T+UU3v/al47Ab4JkMEBLpNrTBMbS5rrw");
+        expect(olmMachine.deviceCreationTimeMs).toEqual(0);
 
         const backupKeys: BackupKeys = await olmMachine.getBackupKeys();
         expect(backupKeys.backupVersion).toEqual("3");

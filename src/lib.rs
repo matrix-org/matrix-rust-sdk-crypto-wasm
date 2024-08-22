@@ -20,6 +20,7 @@
 
 pub mod attachment;
 pub mod backup;
+pub mod dehydrated_devices;
 pub mod device;
 pub mod encryption;
 pub mod error;
@@ -31,6 +32,7 @@ pub mod libolm_migration;
 pub mod machine;
 mod macros;
 pub mod olm;
+pub mod qr_login;
 pub mod requests;
 pub mod responses;
 pub mod store;

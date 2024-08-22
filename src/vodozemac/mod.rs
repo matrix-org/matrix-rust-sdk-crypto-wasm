@@ -5,6 +5,8 @@ use wasm_bindgen::prelude::*;
 
 use crate::impl_from_to_inner;
 
+pub mod ecies;
+
 /// An Ed25519 public key, used to verify digital signatures.
 #[wasm_bindgen]
 #[derive(Debug, Clone)]
@@ -61,11 +63,19 @@ impl Ed25519Signature {
 #[wasm_bindgen]
 #[derive(Debug, Clone)]
 pub struct Curve25519PublicKey {
-    inner: vodozemac::Curve25519PublicKey,
+    pub(crate) inner: vodozemac::Curve25519PublicKey,
 }
 
 #[wasm_bindgen]
 impl Curve25519PublicKey {
+    /// Create a new [`Curve25519PublicKey`] from a base64 encoded string.
+    #[wasm_bindgen(constructor)]
+    pub fn new(key: &str) -> Result<Curve25519PublicKey, JsError> {
+        let inner = vodozemac::Curve25519PublicKey::from_base64(&key)?;
+
+        Ok(Self { inner })
+    }
+
     /// The number of bytes a Curve25519 public key has.
     #[wasm_bindgen(getter)]
     pub fn length(&self) -> usize {

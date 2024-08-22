@@ -21,6 +21,7 @@ import {
     OwnUserIdentity,
     RequestType,
     RoomId,
+    RoomKeyWithheldInfo,
     RoomMessageRequest,
     RoomSettings,
     ShieldColor,
@@ -32,8 +33,9 @@ import {
     UserIdentity,
     VerificationRequest,
     Versions,
-} from "../pkg/matrix_sdk_crypto_wasm";
+} from "../pkg";
 import "fake-indexeddb/auto";
+import * as crypto from "node:crypto";
 
 type AnyOutgoingRequest =
     | KeysUploadRequest
@@ -81,7 +83,7 @@ describe(OlmMachine.name, () => {
         storeHandle.free();
     });
 
-    test("can be instantiated with store credentials", async () => {
+    test("can be instantiated with passphrase", async () => {
         let storeName = "hello2";
         let storePassphrase = "world";
 
@@ -101,7 +103,7 @@ describe(OlmMachine.name, () => {
         expect(databases).toHaveLength(2);
         expect(databases).toStrictEqual([
             { name: `${storeName}::matrix-sdk-crypto-meta`, version: 1 },
-            { name: `${storeName}::matrix-sdk-crypto`, version: 10 },
+            { name: `${storeName}::matrix-sdk-crypto`, version: 11 },
         ]);
 
         // Creating a new Olm machine, with the stored state.
@@ -111,6 +113,39 @@ describe(OlmMachine.name, () => {
 
         // Same number of databases.
         expect((await indexedDB.databases()).filter(byStoreName)).toHaveLength(2);
+    });
+
+    test("can be instantiated with a passphrase, and then migrated to a key", async () => {
+        const storeName = "hello3";
+        const pickleKey = new Uint8Array(32);
+        crypto.getRandomValues(pickleKey);
+
+        const b64Pickle = Buffer.from(pickleKey)
+            .toString("base64")
+            .replace(/={1,2}$/, "");
+        const storeHandle = await StoreHandle.open(storeName, b64Pickle);
+        const olmMachine: OlmMachine = await OlmMachine.initFromStore(
+            new UserId("@foo:bar.org"),
+            new DeviceId("baz"),
+            storeHandle,
+        );
+        storeHandle.free();
+        expect(olmMachine).toBeInstanceOf(OlmMachine);
+        const deviceKeys = olmMachine.identityKeys;
+
+        // re-open the store, using the key directly
+        const storeHandle2 = await StoreHandle.openWithKey(storeName, pickleKey);
+        const olmMachine2: OlmMachine = await OlmMachine.initFromStore(
+            new UserId("@foo:bar.org"),
+            new DeviceId("baz"),
+            storeHandle2,
+        );
+        storeHandle2.free();
+        expect(olmMachine2).toBeInstanceOf(OlmMachine);
+
+        // make sure that we got back the same device.
+        const deviceKeys2 = olmMachine2.identityKeys;
+        expect(deviceKeys2.ed25519.toBase64()).toEqual(deviceKeys.ed25519.toBase64());
     });
 
     describe("cannot be instantiated with a store", () => {
@@ -187,7 +222,7 @@ describe(OlmMachine.name, () => {
         expect(databases).toHaveLength(2);
         expect(databases).toStrictEqual([
             { name: `${storeName}::matrix-sdk-crypto-meta`, version: 1 },
-            { name: `${storeName}::matrix-sdk-crypto`, version: 10 },
+            { name: `${storeName}::matrix-sdk-crypto`, version: 11 },
         ]);
 
         // Let's force to close the `OlmMachine`.
@@ -212,6 +247,13 @@ describe(OlmMachine.name, () => {
 
     test("can read device ID", async () => {
         expect((await machine()).deviceId.toString()).toStrictEqual(device.toString());
+    });
+
+    test("can read creation time", async () => {
+        const startTime = Date.now();
+        const creationTime = (await machine()).deviceCreationTimeMs;
+        expect(creationTime).toBeLessThanOrEqual(Date.now());
+        expect(creationTime).toBeGreaterThanOrEqual(startTime);
     });
 
     test("can read identity keys", async () => {
@@ -731,6 +773,41 @@ describe(OlmMachine.name, () => {
         expect(userId.toString()).toEqual(user.toString());
     });
 
+    test("Receiving a withheld message should call roomKeysWithheldCallback", async () => {
+        const m = await machine();
+
+        const callback = jest.fn().mockImplementation(() => Promise.resolve(undefined));
+        await m.registerRoomKeysWithheldCallback(callback);
+
+        let toDeviceEvents = [
+            {
+                sender: "@alice:example.com",
+                type: "m.room_key.withheld",
+                content: {
+                    algorithm: "m.megolm.v1.aes-sha2",
+                    code: "m.unverified",
+                    reason: "Device not verified",
+                    room_id: "!Cuyf34gef24t:localhost",
+                    sender_key: "RF3s+E7RkTQTGF2d8Deol0FkQvgII2aJDf3/Jp5mxVU",
+                    session_id: "X3lUlvLELLYxeTx4yOVu6UDpasGEVO0Jbu+QFnm0cKQ",
+                },
+            },
+        ];
+        await m.receiveSyncChanges(
+            JSON.stringify(toDeviceEvents),
+            new DeviceLists(),
+            new Map<string, number>(),
+            undefined,
+        );
+
+        expect(callback).toHaveBeenCalledTimes(1);
+        const withheld: RoomKeyWithheldInfo[] = callback.mock.calls[0][0];
+        expect(withheld[0].sender.toString()).toEqual("@alice:example.com");
+        expect(withheld[0].roomId.toString()).toEqual("!Cuyf34gef24t:localhost");
+        expect(withheld[0].sessionId).toEqual("X3lUlvLELLYxeTx4yOVu6UDpasGEVO0Jbu+QFnm0cKQ");
+        expect(withheld[0].withheldCode).toEqual("m.unverified");
+    });
+
     test("can export room keys", async () => {
         let m = await machine();
         await m.shareRoomKey(room, [new UserId("@bob:example.org")], new EncryptionSettings());
@@ -1216,7 +1293,7 @@ describe(OlmMachine.name, () => {
             const progressListener = jest.fn();
             const m2 = await machine();
             await m2.saveBackupDecryptionKey(keyBackupKey, "1");
-            const result = await m2.importBackedUpRoomKeys(decryptedKeyMap, progressListener);
+            const result = await m2.importBackedUpRoomKeys(decryptedKeyMap, progressListener, "1");
             expect(result.importedCount).toStrictEqual(1);
             expect(result.totalCount).toStrictEqual(1);
             expect(result.keys()).toMatchObject(
@@ -1401,27 +1478,32 @@ describe(OlmMachine.name, () => {
     test("Updating devices should call devicesUpdatedCallback", async () => {
         const userId = new UserId("@alice:example.org");
         const deviceId = new DeviceId("ABCDEF");
-        const machine = await OlmMachine.initialize(userId, deviceId);
+        const firstMachine = await OlmMachine.initialize(userId, deviceId);
 
         const callback = jest.fn().mockImplementation(() => Promise.resolve(undefined));
-        machine.registerDevicesUpdatedCallback(callback);
+        firstMachine.registerDevicesUpdatedCallback(callback);
 
-        const outgoingRequests = await machine.outgoingRequests();
+        const secondDeviceId = new DeviceId("GHIJKL");
+        const secondMachine = await OlmMachine.initialize(userId, secondDeviceId);
+
+        // Fish the KeysUploadRequest out of secondMachine's outgoingRequests.
         let deviceKeys;
-        // outgoingRequests will have a KeysUploadRequest before the
-        // KeysQueryRequest, so we grab the device upload and put it in the
-        // response to the /keys/query
-        for (const request of outgoingRequests) {
+        for (const request of await secondMachine.outgoingRequests()) {
             if (request instanceof KeysUploadRequest) {
                 deviceKeys = JSON.parse(request.body).device_keys;
-            } else if (request instanceof KeysQueryRequest) {
-                await machine.markRequestAsSent(
+            }
+        }
+
+        // ... and feed it into firstMachine's KeysQueryRequest
+        for (const request of await firstMachine.outgoingRequests()) {
+            if (request instanceof KeysQueryRequest) {
+                await firstMachine.markRequestAsSent(
                     request.id,
                     request.type,
                     JSON.stringify({
                         device_keys: {
                             "@alice:example.org": {
-                                ABCDEF: deviceKeys,
+                                GHIJKL: deviceKeys,
                             },
                         },
                     }),

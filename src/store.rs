@@ -2,11 +2,18 @@
 
 use std::sync::Arc;
 
-use matrix_sdk_crypto::store::{DynCryptoStore, IntoCryptoStore, MemoryStore};
+use anyhow::Context;
+use matrix_sdk_crypto::{
+    store::{DynCryptoStore, IntoCryptoStore, MemoryStore},
+    types::BackupSecrets,
+};
 use wasm_bindgen::prelude::*;
+use zeroize::{Zeroize, Zeroizing};
 
 use crate::{
-    encryption::EncryptionAlgorithm, identifiers::RoomId, impl_from_to_inner,
+    encryption::EncryptionAlgorithm,
+    identifiers::{RoomId, UserId},
+    impl_from_to_inner,
     vodozemac::Curve25519PublicKey,
 };
 
@@ -31,7 +38,6 @@ impl StoreHandle {
     ///
     /// # Arguments
     ///
-    ///
     /// * `store_name` - The name that should be used to open the IndexedDB
     ///   based database. If this isn't provided, a memory-only store will be
     ///   used. *Note* the memory-only store will lose your E2EE keys when the
@@ -43,11 +49,8 @@ impl StoreHandle {
     pub async fn open_for_js(
         store_name: Option<String>,
         store_passphrase: Option<String>,
-    ) -> Result<JsValue, JsValue> {
-        Ok(StoreHandle::open(store_name, store_passphrase)
-            .await
-            .map_err(|e| JsError::from(&*e))?
-            .into())
+    ) -> Result<StoreHandle, JsError> {
+        StoreHandle::open(store_name, store_passphrase).await.map_err(|e| JsError::from(&*e))
     }
 
     pub(crate) async fn open(
@@ -94,6 +97,39 @@ impl StoreHandle {
         };
 
         Ok(store.into_crypto_store())
+    }
+
+    /// Open a crypto store based on IndexedDB, using the given key for
+    /// encryption.
+    ///
+    /// # Arguments
+    ///
+    /// * `store_name` - The name that should be used to open the IndexedDB
+    ///   based database.
+    ///
+    /// * `store_key` - The key that should be used to encrypt the store, for
+    ///   IndexedDB-based stores. Must be a 32-byte array.
+    #[wasm_bindgen(js_name = "openWithKey")]
+    pub async fn open_with_key(
+        store_name: String,
+        mut store_key: Vec<u8>,
+    ) -> Result<StoreHandle, JsError> {
+        let store_key_array: Zeroizing<[u8; 32]> = Zeroizing::new(
+            store_key
+                .as_slice()
+                .try_into()
+                .with_context(|| "Expected a key of length 32")
+                .map_err(|e| JsError::from(&*e))?,
+        );
+        store_key.zeroize();
+
+        let store = matrix_sdk_indexeddb::IndexeddbCryptoStore::open_with_key(
+            &store_name,
+            &store_key_array,
+        )
+        .await?;
+
+        Ok(Self { store: store.into_crypto_store() })
     }
 }
 
@@ -170,3 +206,112 @@ impl RoomKeyInfo {
         self.inner.session_id.clone()
     }
 }
+
+/// Information on a received `m.room_key.withheld` event.
+#[wasm_bindgen]
+#[derive(Debug)]
+pub struct RoomKeyWithheldInfo {
+    pub(crate) inner: matrix_sdk_crypto::store::RoomKeyWithheldInfo,
+}
+
+impl_from_to_inner!(matrix_sdk_crypto::store::RoomKeyWithheldInfo => RoomKeyWithheldInfo);
+
+#[wasm_bindgen]
+impl RoomKeyWithheldInfo {
+    /// The User ID of the user that sent us the `m.room_key.withheld` message.
+    #[wasm_bindgen(getter)]
+    pub fn sender(&self) -> UserId {
+        self.inner.withheld_event.sender.to_owned().into()
+    }
+
+    /// The encryption algorithm of the session that is being withheld.
+    #[wasm_bindgen(getter)]
+    pub fn algorithm(&self) -> EncryptionAlgorithm {
+        self.inner.withheld_event.content.algorithm().into()
+    }
+
+    /// The `code` from the `m.room_key.withheld` message, such as
+    /// `m.unverified`.
+    #[wasm_bindgen(getter, js_name = "withheldCode")]
+    pub fn withheld_code(&self) -> String {
+        self.inner.withheld_event.content.withheld_code().as_str().to_owned()
+    }
+
+    /// The room ID of the session that is being withheld.
+    #[wasm_bindgen(getter, js_name = "roomId")]
+    pub fn room_id(&self) -> RoomId {
+        self.inner.room_id.to_owned().into()
+    }
+
+    /// The session ID of the session that is being withheld.
+    #[wasm_bindgen(getter, js_name = "sessionId")]
+    pub fn session_id(&self) -> String {
+        self.inner.session_id.to_owned()
+    }
+}
+
+/// Struct containing the bundle of secrets to fully activate a new device for
+/// end-to-end encryption.
+#[derive(Debug)]
+#[wasm_bindgen]
+pub struct SecretsBundle {
+    pub(super) inner: matrix_sdk_crypto::types::SecretsBundle,
+}
+
+/// The backup-specific parts of a secrets bundle.
+#[derive(Debug)]
+#[wasm_bindgen(getter_with_clone)]
+pub struct BackupSecretsBundle {
+    /// The backup decryption key, encoded as unpadded base64.
+    pub key: String,
+    /// The backup version which this backup decryption key is used with.
+    pub backup_version: String,
+}
+
+#[wasm_bindgen]
+impl SecretsBundle {
+    /// The seed of the master key encoded as unpadded base64.
+    #[wasm_bindgen(getter, js_name = "masterKey")]
+    pub fn master_key(&self) -> String {
+        self.inner.cross_signing.master_key.clone()
+    }
+
+    /// The seed of the self signing key encoded as unpadded base64.
+    #[wasm_bindgen(getter, js_name = "selfSigningKey")]
+    pub fn self_signing_key(&self) -> String {
+        self.inner.cross_signing.self_signing_key.clone()
+    }
+
+    /// The seed of the user signing key encoded as unpadded base64.
+    #[wasm_bindgen(getter, js_name = "userSigningKey")]
+    pub fn user_signing_key(&self) -> String {
+        self.inner.cross_signing.user_signing_key.clone()
+    }
+
+    /// The bundle of the backup decryption key and backup version if any.
+    #[wasm_bindgen(getter, js_name = "backupBundle")]
+    pub fn backup_bundle(&self) -> Option<BackupSecretsBundle> {
+        if let Some(BackupSecrets::MegolmBackupV1Curve25519AesSha2(backup)) = &self.inner.backup {
+            Some(BackupSecretsBundle {
+                key: backup.key.to_base64(),
+                backup_version: backup.backup_version.clone(),
+            })
+        } else {
+            None
+        }
+    }
+
+    /// Serialize the [`SecretsBundle`] to a JSON object.
+    pub fn to_json(&self) -> Result<JsValue, JsError> {
+        Ok(serde_wasm_bindgen::to_value(&self.inner)?)
+    }
+
+    /// Deserialize the [`SecretsBundle`] from a JSON object.
+    pub fn from_json(json: JsValue) -> Result<SecretsBundle, JsError> {
+        let bundle = serde_wasm_bindgen::from_value(json)?;
+
+        Ok(Self { inner: bundle })
+    }
+}
+
+impl_from_to_inner!(matrix_sdk_crypto::types::SecretsBundle => SecretsBundle);

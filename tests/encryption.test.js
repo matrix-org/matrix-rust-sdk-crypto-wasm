@@ -1,9 +1,10 @@
 const {
+    CollectStrategy,
     EncryptionAlgorithm,
     EncryptionSettings,
     HistoryVisibility,
     VerificationState,
-} = require("../pkg/matrix_sdk_crypto_wasm");
+} = require("../pkg");
 
 describe("EncryptionAlgorithm", () => {
     test("has the correct variant values", () => {
@@ -28,6 +29,17 @@ describe(EncryptionSettings.name, () => {
         es.historyVisibility = HistoryVisibility.Invited;
 
         expect(es.historyVisibility).toStrictEqual(HistoryVisibility.Invited);
+        expect(() => {
+            es.historyVisibility = 42;
+        }).toThrow();
+    });
+
+    test("checks the sharing strategy values", () => {
+        const es = new EncryptionSettings();
+
+        es.sharingStrategy = CollectStrategy.DeviceBasedStrategyAllDevices;
+
+        expect(es.sharingStrategy).toStrictEqual(CollectStrategy.DeviceBasedStrategyAllDevices);
         expect(() => {
             es.historyVisibility = 42;
         }).toThrow();

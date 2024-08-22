@@ -1,7 +1,165 @@
 # UNRELEASED
 
--   Adds a new API `Device#encryptToDeviceEvent` to encrypt a to-device event using
+**Security Fixes**
+
+-   Fix `UserIdentity.isVerified` to take into account our own identity
+    [#d8d9dae](https://github.com/matrix-org/matrix-rust-sdk/commit/d8d9dae9d77bee48a2591b9aad9bd2fa466354cc) (Moderate, [GHSA-4qg4-cvh2-crgg](https://github.com/matrix-org/matrix-rust-sdk/security/advisories/GHSA-4qg4-cvh2-crgg)).
+
+**Other changes**
+
+-   Add a new API `Device#encryptToDeviceEvent` to encrypt a to-device message using
     Olm.
+    ([#101](https://github.com/matrix-org/matrix-rust-sdk-crypto-wasm/pull/101))
+
+# matrix-sdk-crypto-wasm v7.0.0
+
+**BREAKING CHANGES**
+
+-   `EncryptionSettings.onlyAllowTrustedDevices` has been replaced with
+    `EncryptionSettings.sharingStrategy`, which adds the ability to share only
+    with cross-signed devices.
+    ([#134](https://github.com/matrix-org/matrix-rust-sdk-crypto-wasm/pull/134))
+
+**Other changes**
+
+-   Add `OlmMachine.registerRoomKeysWithheldCallback` to notify when we are
+    told that room keys have been withheld.
+    ([#136](https://github.com/matrix-org/matrix-rust-sdk-crypto-wasm/pull/136))
+
+-   Update matrix-rust-sdk to `d9b2b53f8`, which includes:
+
+    -   refactor(sdk-crypto): Room key sharing, introduce extensible strategy
+        ([#3605](https://github.com/matrix-org/matrix-rust-sdk/pull/3605))
+
+    -   Log the content of received `m.room_key.withheld` to-device events.
+        ([#3591](https://github.com/matrix-org/matrix-rust-sdk/pull/3591))
+
+    -   Attempt to decrypt bundled events (reactions and the latest thread reply) if they are found in the unsigned part of an event.
+        ([#3468](https://github.com/matrix-org/matrix-rust-sdk/pull/3468))
+
+# matrix-sdk-crypto-wasm v6.2.1
+
+-   Update matrix-rust-sdk to `7b25a1c2f`, which includes fixes to bugs introduced in v6.2.0.
+    ([#3651](https://github.com/matrix-org/matrix-rust-sdk/pull/3651))
+
+# matrix-sdk-crypto-wasm v6.2.0
+
+-   Update matrix-rust-sdk to `09d53a52a`, which includes:
+
+    -   Improve the efficiency of objects stored in the crypto store. ([#3645](https://github.com/matrix-org/matrix-rust-sdk/pull/3645))
+
+# matrix-sdk-crypto-wasm v6.1.0
+
+-   Set "creation time" of `OlmAccount`s which were migrated from legacy libolm data to the unix epoch, instead of "now". Fixes https://github.com/element-hq/element-web/issues/27590.
+    ([#128](https://github.com/matrix-org/matrix-rust-sdk-crypto-wasm/pull/128))
+
+-   Update matrix-rust-sdk to `a2235d50c`. No changes relevant to these bindings.
+
+# matrix-sdk-crypto-wasm v6.0.0
+
+**BREAKING CHANGES**
+
+-   Rename the `QrCodeData` related methods so they use camel case.
+    ([0d58c688d](https://github.com/matrix-org/matrix-rust-sdk-crypto-wasm/commit/0d58c688454d40269d93fc4f763b2d1a754ace9d))
+
+-   Rename the `QrCodeData.homeserver_url` method to `QrCodeData.server_name`
+    to reflect the changed data stored in the QR code.
+    ([#124](https://github.com/matrix-org/matrix-rust-sdk-crypto-wasm/pull/124))
+
+-   Update matrix-rust-sdk to `9b05d0d82`, which includes:
+
+    -   `Device.requestVerification`, `UserIdentities.requestVerification`, and
+        `UserIdentities.verificationRequestContent` is not async anymore.
+        ([#3513](https://github.com/matrix-org/matrix-rust-sdk/pull/3513))
+
+    -   Use the server name in the `QrCodeData` instead of the homeserver URL.
+        ([#3537](https://github.com/matrix-org/matrix-rust-sdk/pull/3537))
+
+# matrix-sdk-crypto-wasm v5.0.0
+
+**BREAKING CHANGES**
+
+-   `OlmMachine.importBackedUpRoomKeys` now takes a `backupVersion` argument.
+
+**Other changes**
+
+-   Update matrix-rust-sdk to `7e44fbca7`, which includes:
+
+    -   Avoid emitting entries from `identities_stream_raw` and `devices_stream` when
+        we receive a `/keys/query` response which shows that no devices changed.
+        ([#3442](https://github.com/matrix-org/matrix-rust-sdk/pull/3442)).
+
+    -   Fix to a bug introduced in matrix-sdk-crypto-wasm v4.10.0 which caused
+        keys that had been imported from key backup to be backed up again, when
+        using the in-memory datastore.
+
+-   Improve the return types of `OlmMachine.{import,export}exportSecretsBundle()`.
+    ([#123](https://github.com/matrix-org/matrix-rust-sdk-crypto-wasm/pull/123))
+
+# matrix-sdk-crypto-wasm v4.10.0
+
+-   Expose new constructor function `OlmMachine.openWithKey()`.
+    ([#119](https://github.com/matrix-org/matrix-rust-sdk-crypto-wasm/pull/119))
+
+-   Add `OlmMachine.importSecretsBundle()` and `OlmMachine.exportSecretsBundle()`
+    methods as well as the `SecretsBundle` class to import end-to-end encryption
+    secrets in a bundled manner.
+
+-   Expose the vodozemac ECIES support, which can be used to establish the secure
+    channel required for QR code login described in [MSC4108](https://github.com/matrix-org/matrix-spec-proposals/pull/4108).
+
+-   Add `QrCodeData` and `QrCodeMode` classes which can be used to parse or
+    generate QR codes intended for the QR code login mechanism described in
+    [MSC4108](https://github.com/matrix-org/matrix-spec-proposals/pull/4108).
+
+-   Add a constructor for the `Curve25519PublicKey` type. This allows us to
+    create a `Curve25519PublicKey` from a Base64 string on the Javascript side.
+
+-   Update matrix-rust-sdk to `d7a887766c`, which includes:
+
+    -   Add data types to parse the QR code data for the QR code login defined in
+        [MSC4108](https://github.com/matrix-org/matrix-spec-proposals/pull/4108)
+
+    -   Don't log the private part of the backup key, introduced in [#71136e4](https://github.com/matrix-org/matrix-rust-sdk/commit/71136e44c03c79f80d6d1a2446673bc4d53a2067).
+
+    -   Expose new method `CryptoStore::clear_caches`. ([#3338](https://github.com/matrix-org/matrix-rust-sdk/pull/3338))
+
+# matrix-sdk-crypto-wasm v4.9.0
+
+-   Update matrix-rust-sdk to `ab9e4f73b`.
+
+-   Add `OlmMachine.deviceCreationTimeMs`.
+    ([#112](https://github.com/matrix-org/matrix-rust-sdk-crypto-wasm/pull/112))
+
+# matrix-sdk-crypto-wasm v4.8.0
+
+-   Update matrix-rust-sdk to `6aee1f62bd`, which includes:
+
+    -   Fallback keys are rotated in a time-based manner, instead of waiting for
+        the server to tell us that a fallback key got used.
+        ([#3151](https://github.com/matrix-org/matrix-rust-sdk/pull/3151))
+
+    -   Log more details about the Olm session after encryption and decryption.
+        ([#3242](https://github.com/matrix-org/matrix-rust-sdk/pull/3242))
+
+    -   When Olm message decryption fails, report the error code(s) from the
+        failure.
+        ([#3212](https://github.com/matrix-org/matrix-rust-sdk/pull/3212))
+
+-   Add `OlmMachine.dehydratedDevices()` and `DehydratedDevices` class to
+    support dehydrated devices.
+    ([#104](https://github.com/matrix-org/matrix-rust-sdk-crypto-wasm/pull/104))
+
+-   Fix a problem when using matrix-sdk-crypto-wasm in a webapp running
+    in the webpack dev server; when rebuilding, the server would throw an
+    error.
+    ([#109](https://github.com/matrix-org/matrix-rust-sdk-crypto-wasm/pull/109))
+
+# matrix-sdk-crypto-wasm v4.7.0
+
+-   Update dependencies, including matrix-rust-sdk to
+    88a8a7007ca34408af21c7e0bee81b2c344b155c which provides the
+    `_disable-minimum-rotation-period-ms` feature flag.
 
 # matrix-sdk-crypto-wasm v4.6.0
 

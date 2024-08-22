@@ -106,3 +106,7 @@ The documentation is generated in the `./docs` directory.
 [Matrix]: https://matrix.org/
 [Rust]: https://www.rust-lang.org/
 [npm]: https://www.npmjs.com/
+
+## Contributing
+
+Thank you! See the [contributing](CONTRIBUTING.md) doc for more info.

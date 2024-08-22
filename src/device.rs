@@ -28,32 +28,29 @@ impl_from_to_inner!(matrix_sdk_crypto::Device => Device);
 impl Device {
     /// Request an interactive verification with this device.
     ///
-    /// Returns a Promise for a 2-element array `[VerificationRequest,
-    /// ToDeviceRequest]`.
+    /// Returns a 2-element array `[VerificationRequest, ToDeviceRequest]`.
     #[wasm_bindgen(js_name = "requestVerification")]
     pub fn request_verification(
         &self,
         methods: Option<Vec<verification::VerificationMethod>>,
-    ) -> Result<Promise, JsError> {
+    ) -> Result<Array, JsError> {
         let me = self.inner.clone();
         let methods = methods.map(|methods| methods.iter().map(Into::into).collect());
 
-        Ok(future_to_promise(async move {
-            let tuple = Array::new();
-            let (verification_request, outgoing_verification_request) = match methods {
-                Some(methods) => me.request_verification_with_methods(methods).await,
-                None => me.request_verification().await,
-            };
+        let tuple = Array::new();
+        let (verification_request, outgoing_verification_request) = match methods {
+            Some(methods) => me.request_verification_with_methods(methods),
+            None => me.request_verification(),
+        };
 
-            tuple.set(0, verification::VerificationRequest::from(verification_request).into());
-            tuple.set(
-                1,
-                verification::OutgoingVerificationRequest::from(outgoing_verification_request)
-                    .try_into()?,
-            );
+        tuple.set(0, verification::VerificationRequest::from(verification_request).into());
+        tuple.set(
+            1,
+            verification::OutgoingVerificationRequest::from(outgoing_verification_request)
+                .try_into()?,
+        );
 
-            Ok(tuple)
-        }))
+        Ok(tuple)
     }
 
     /// Encrypt a to-device message to be sent to this device, using Olm
@@ -246,6 +243,12 @@ impl Device {
         future_to_promise(async move {
             Ok(requests::SignatureUploadRequest::try_from(&device.verify().await?)?)
         })
+    }
+
+    /// Whether or not the device is a dehydrated device.
+    #[wasm_bindgen(getter, js_name = "isDehydrated")]
+    pub fn is_dehydrated(&self) -> bool {
+        self.inner.is_dehydrated()
     }
 }
 
