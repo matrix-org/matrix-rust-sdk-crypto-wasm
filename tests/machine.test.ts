@@ -3,6 +3,7 @@ import {
     CrossSigningStatus,
     DecryptedRoomEvent,
     DecryptionErrorCode,
+    DecryptionSettings,
     DeviceId,
     DeviceKeyId,
     DeviceLists,
@@ -30,6 +31,7 @@ import {
     SignatureUploadRequest,
     StoreHandle,
     ToDeviceRequest,
+    TrustRequirement,
     UserId,
     UserIdentity,
     VerificationRequest,
@@ -619,7 +621,8 @@ describe(OlmMachine.name, () => {
                 },
             });
 
-            const decrypted = await m.decryptRoomEvent(stringifiedEvent, room);
+            const decryptionSettings = new DecryptionSettings(TrustRequirement.Untrusted);
+            const decrypted = await m.decryptRoomEvent(stringifiedEvent, room, decryptionSettings);
             expect(decrypted).toBeInstanceOf(DecryptedRoomEvent);
 
             const event = JSON.parse(decrypted.event);
@@ -661,7 +664,8 @@ describe(OlmMachine.name, () => {
             },
         };
         try {
-            await m.decryptRoomEvent(JSON.stringify(evt), room);
+            const decryptionSettings = new DecryptionSettings(TrustRequirement.Untrusted);
+            await m.decryptRoomEvent(JSON.stringify(evt), room, decryptionSettings);
             fail("it should not reach here");
         } catch (err) {
             expect(err).toBeInstanceOf(MegolmDecryptionError);

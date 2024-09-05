@@ -213,6 +213,31 @@ impl From<TrustRequirement> for matrix_sdk_crypto::TrustRequirement {
     }
 }
 
+/// Settings for decrypting messages
+#[wasm_bindgen(getter_with_clone)]
+#[derive(Debug, Clone)]
+pub struct DecryptionSettings {
+    /// The trust level required to decrypt the event
+    pub sender_device_trust_requirement: TrustRequirement,
+}
+
+#[wasm_bindgen]
+impl DecryptionSettings {
+    /// Create a new `DecryptionSettings` with the given trust requirement.
+    #[wasm_bindgen(constructor)]
+    pub fn new(sender_device_trust_requirement: TrustRequirement) -> DecryptionSettings {
+        Self { sender_device_trust_requirement }
+    }
+}
+
+impl From<&DecryptionSettings> for matrix_sdk_crypto::DecryptionSettings {
+    fn from(value: &DecryptionSettings) -> Self {
+        Self {
+            sender_device_trust_requirement: value.sender_device_trust_requirement.clone().into(),
+        }
+    }
+}
+
 /// Take a look at [`matrix_sdk_common::deserialized_responses::ShieldState`]
 /// for more info.
 #[wasm_bindgen]

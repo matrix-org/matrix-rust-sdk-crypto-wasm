@@ -16,6 +16,8 @@ pub enum DecryptionErrorCode {
     /// device we received the room key from and the identity keys recorded in
     /// the plaintext of the room key to-device message.
     MismatchedIdentityKeys,
+    /// The sender does not satisfy the requested trust requirement.
+    SenderIdentityNotTrusted,
     /// Other failure.
     UnableToDecrypt,
 }
@@ -65,6 +67,11 @@ impl From<MegolmError> for MegolmDecryptionError {
             },
             MegolmError::MismatchedIdentityKeys { .. } => MegolmDecryptionError {
                 code: DecryptionErrorCode::UnknownMessageIndex,
+                description: value.to_string().into(),
+                maybe_withheld: None,
+            },
+            MegolmError::SenderIdentityNotTrusted(..) => MegolmDecryptionError {
+                code: DecryptionErrorCode::SenderIdentityNotTrusted,
                 description: value.to_string().into(),
                 maybe_withheld: None,
             },
