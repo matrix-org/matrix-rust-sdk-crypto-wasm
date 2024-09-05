@@ -25,6 +25,7 @@ import {
     RoomMessageRequest,
     RoomSettings,
     ShieldColor,
+    ShieldStateCode,
     SignatureState,
     SignatureUploadRequest,
     StoreHandle,
@@ -631,7 +632,9 @@ describe(OlmMachine.name, () => {
             expect(decrypted.senderClaimedEd25519Key).toBeDefined();
             expect(decrypted.forwardingCurve25519KeyChain).toHaveLength(0);
             expect(decrypted.shieldState(true).color).toStrictEqual(ShieldColor.Red);
+            expect(decrypted.shieldState(true).code).toStrictEqual(ShieldStateCode.UnverifiedIdentity);
             expect(decrypted.shieldState(false).color).toStrictEqual(ShieldColor.Red);
+            expect(decrypted.shieldState(false).code).toStrictEqual(ShieldStateCode.UnsignedDevice);
 
             const decryptionInfo = await m.getRoomEventEncryptionInfo(stringifiedEvent, room);
             expect(decryptionInfo.sender.toString()).toStrictEqual(user.toString());
@@ -639,7 +642,9 @@ describe(OlmMachine.name, () => {
             expect(decryptionInfo.senderCurve25519Key).toBeDefined();
             expect(decryptionInfo.senderClaimedEd25519Key).toBeDefined();
             expect(decryptionInfo.shieldState(true).color).toStrictEqual(ShieldColor.Red);
+            expect(decryptionInfo.shieldState(true).code).toStrictEqual(ShieldStateCode.UnverifiedIdentity);
             expect(decryptionInfo.shieldState(false).color).toStrictEqual(ShieldColor.Red);
+            expect(decryptionInfo.shieldState(false).code).toStrictEqual(ShieldStateCode.UnsignedDevice);
         });
     });
 

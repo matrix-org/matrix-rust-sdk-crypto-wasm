@@ -3,6 +3,7 @@
 use std::time::Duration;
 
 use matrix_sdk_common::deserialized_responses::ShieldState as RustShieldState;
+pub use matrix_sdk_common::deserialized_responses::ShieldStateCode;
 use wasm_bindgen::prelude::*;
 
 use crate::events;
@@ -187,6 +188,9 @@ pub enum ShieldColor {
 pub struct ShieldState {
     /// The shield color
     pub color: ShieldColor,
+    /// A machine-readable representation of the authenticity for a
+    /// `ShieldState`.
+    pub code: Option<ShieldStateCode>,
     message: Option<String>,
 }
 
@@ -202,13 +206,17 @@ impl ShieldState {
 impl From<RustShieldState> for ShieldState {
     fn from(value: RustShieldState) -> Self {
         match value {
-            RustShieldState::Red { message } => {
-                Self { color: ShieldColor::Red, message: Some(message.to_owned()) }
-            }
-            RustShieldState::Grey { message } => {
-                Self { color: ShieldColor::Grey, message: Some(message.to_owned()) }
-            }
-            RustShieldState::None => Self { color: ShieldColor::None, message: None },
+            RustShieldState::Red { message, code } => Self {
+                color: ShieldColor::Red,
+                code: Some(code),
+                message: Some(message.to_owned()),
+            },
+            RustShieldState::Grey { message, code } => Self {
+                color: ShieldColor::Grey,
+                code: Some(code),
+                message: Some(message.to_owned()),
+            },
+            RustShieldState::None => Self { color: ShieldColor::None, code: None, message: None },
         }
     }
 }
