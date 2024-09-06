@@ -1,5 +1,7 @@
 # UNRELEASED
 
+# matrix-sdk-crypto-wasm v8.0.0
+
 **BREAKING CHANGES**
 
 -   The format for `EncryptionSettings.sharingStrategy` has changed. It must
