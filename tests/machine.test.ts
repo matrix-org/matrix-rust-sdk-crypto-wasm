@@ -731,6 +731,10 @@ describe(OlmMachine.name, () => {
 
         const identity = await m.getIdentity(user);
 
+        expect(identity.isVerified()).toStrictEqual(true);
+        expect(identity.wasPreviouslyVerified()).toStrictEqual(true);
+        expect(identity.hasVerificationViolation()).toStrictEqual(false);
+
         expect(identity).toBeInstanceOf(OwnUserIdentity);
         const masterKey = JSON.parse(identity.masterKey);
         const selfSigningKey = JSON.parse(identity.selfSigningKey);
@@ -1055,6 +1059,9 @@ describe(OlmMachine.name, () => {
 
             expect(identity).toBeInstanceOf(UserIdentity);
             expect(identity.isVerified()).toStrictEqual(false);
+            expect(identity.wasPreviouslyVerified()).toStrictEqual(false);
+            expect(identity.hasVerificationViolation()).toStrictEqual(false);
+            expect(identity.identityNeedsUserApproval()).toStrictEqual(false);
 
             const eventId = new EventId("$Rqnc-F-dvnEYJTyHq_iKxU2bZ1CI92-kuZq3a5lr5Zg");
             const verificationRequest = await identity.requestVerification(room, eventId);
