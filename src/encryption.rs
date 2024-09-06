@@ -127,7 +127,7 @@ pub struct CollectStrategy {
 
 #[wasm_bindgen]
 impl CollectStrategy {
-    /// Tests for equality between two [`CollecStrategy`]s.
+    /// Tests for equality between two [`CollectStrategy`]s.
     #[wasm_bindgen]
     pub fn eq(&self, other: &CollectStrategy) -> bool {
         self == other
