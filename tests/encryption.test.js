@@ -37,9 +37,9 @@ describe(EncryptionSettings.name, () => {
     test("checks the sharing strategy values", () => {
         const es = new EncryptionSettings();
 
-        es.sharingStrategy = CollectStrategy.DeviceBasedStrategyAllDevices;
+        es.sharingStrategy = CollectStrategy.deviceBasedStrategy(false, false);
 
-        expect(es.sharingStrategy).toStrictEqual(CollectStrategy.DeviceBasedStrategyAllDevices);
+        expect(es.sharingStrategy.eq(CollectStrategy.deviceBasedStrategy(false, false))).toBe(true);
         expect(() => {
             es.historyVisibility = 42;
         }).toThrow();

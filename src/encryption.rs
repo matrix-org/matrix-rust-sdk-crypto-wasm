@@ -3,6 +3,7 @@
 use std::time::Duration;
 
 use matrix_sdk_common::deserialized_responses::ShieldState as RustShieldState;
+pub use matrix_sdk_common::deserialized_responses::ShieldStateCode;
 use wasm_bindgen::prelude::*;
 
 use crate::events;
@@ -119,50 +120,120 @@ impl From<matrix_sdk_crypto::types::EventEncryptionAlgorithm> for EncryptionAlgo
 /// Strategy to collect the devices that should receive room keys for the
 /// current discussion.
 #[wasm_bindgen()]
-#[derive(Debug, Clone, PartialEq, Eq)]
-pub enum CollectStrategy {
-    /// Device based sharing strategy, excluding devices that are not trusted.
-    /// A device is trusted if any of the following is true:
-    ///     - It was manually marked as trusted.
-    ///     - It was marked as verified via interactive verification.
-    ///     - It is signed by its owner identity, and this identity has been
-    ///       trusted via interactive verification.
-    ///     - It is the current own device of the user.
-    DeviceBasedStrategyOnlyTrustedDevices,
-    /// Device based sharing strategy, including all devices.
-    DeviceBasedStrategyAllDevices,
-    /// Share based on identity. Only distribute to devices signed by their
-    /// owner. If a user has no published identity he will not receive
-    /// any room keys.
-    IdentityBasedStrategy,
+#[derive(Debug, Clone, PartialEq)]
+pub struct CollectStrategy {
+    inner: matrix_sdk_crypto::CollectStrategy,
+}
+
+#[wasm_bindgen]
+impl CollectStrategy {
+    /// Tests for equality between two [`CollectStrategy`]s.
+    #[wasm_bindgen]
+    pub fn eq(&self, other: &CollectStrategy) -> bool {
+        self == other
+    }
 }
 
 impl From<CollectStrategy> for matrix_sdk_crypto::CollectStrategy {
     fn from(value: CollectStrategy) -> Self {
-        match value {
-            CollectStrategy::DeviceBasedStrategyOnlyTrustedDevices => {
-                Self::DeviceBasedStrategy { only_allow_trusted_devices: true }
-            }
-            CollectStrategy::DeviceBasedStrategyAllDevices => {
-                Self::DeviceBasedStrategy { only_allow_trusted_devices: false }
-            }
-            CollectStrategy::IdentityBasedStrategy => Self::IdentityBasedStrategy,
-        }
+        value.inner
     }
 }
 
 impl From<matrix_sdk_crypto::CollectStrategy> for CollectStrategy {
     fn from(value: matrix_sdk_crypto::CollectStrategy) -> Self {
+        Self { inner: value }
+    }
+}
+
+#[wasm_bindgen]
+impl CollectStrategy {
+    /// Device based sharing strategy.
+    ///
+    /// If `only_allow_trusted_devices` is `true`, devices that are not trusted
+    /// will be excluded from the conversation. A device is trusted if any of
+    /// the following is true:
+    ///     - It was manually marked as trusted.
+    ///     - It was marked as verified via interactive verification.
+    ///     - It is signed by its owner identity, and this identity has been
+    ///       trusted via interactive verification.
+    ///     - It is the current own device of the user.
+    ///
+    /// If `error_on_verified_user` is `true`, and a verified user has an
+    /// unsigned device, key sharing will fail with an error.
+    ///
+    /// If `error_on_verified_user` is `true`, and a verified user has replaced
+    /// their identity, key sharing will fail with an error.
+    ///
+    /// Otherwise, keys are shared with unsigned devices as normal.
+    ///
+    /// Once the problematic devices are blacklisted or whitelisted the
+    /// caller can retry to share a second time.
+    #[wasm_bindgen(js_name = "deviceBasedStrategy")]
+    pub fn device_based_strategy(
+        only_allow_trusted_devices: bool,
+        error_on_verified_user_problem: bool,
+    ) -> CollectStrategy {
+        Self {
+            inner: matrix_sdk_crypto::CollectStrategy::DeviceBasedStrategy {
+                only_allow_trusted_devices,
+                error_on_verified_user_problem,
+            },
+        }
+    }
+
+    /// Share based on identity. Only distribute to devices signed by their
+    /// owner. If a user has no published identity he will not receive
+    /// any room keys.
+    #[wasm_bindgen(js_name = "identityBasedStrategy")]
+    pub fn identity_based_strategy() -> CollectStrategy {
+        Self { inner: matrix_sdk_crypto::CollectStrategy::IdentityBasedStrategy }
+    }
+}
+
+/// The trust level required to decrypt an event
+#[wasm_bindgen]
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub enum TrustRequirement {
+    /// Decrypt events from everyone regardless of trust
+    Untrusted,
+    /// Only decrypt events from cross-signed or legacy devices
+    CrossSignedOrLegacy,
+    /// Only decrypt events from cross-signed devices
+    CrossSigned,
+}
+
+impl From<TrustRequirement> for matrix_sdk_crypto::TrustRequirement {
+    fn from(value: TrustRequirement) -> Self {
         match value {
-            matrix_sdk_crypto::CollectStrategy::DeviceBasedStrategy {
-                only_allow_trusted_devices: true,
-            } => Self::DeviceBasedStrategyOnlyTrustedDevices,
-            matrix_sdk_crypto::CollectStrategy::DeviceBasedStrategy {
-                only_allow_trusted_devices: false,
-            } => Self::DeviceBasedStrategyAllDevices,
-            matrix_sdk_crypto::CollectStrategy::IdentityBasedStrategy => {
-                Self::IdentityBasedStrategy
-            }
+            TrustRequirement::Untrusted => Self::Untrusted,
+            TrustRequirement::CrossSignedOrLegacy => Self::CrossSignedOrLegacy,
+            TrustRequirement::CrossSigned => Self::CrossSigned,
+        }
+    }
+}
+
+/// Settings for decrypting messages
+#[wasm_bindgen(getter_with_clone)]
+#[derive(Debug, Clone)]
+pub struct DecryptionSettings {
+    /// The trust level required to decrypt the event
+    pub sender_device_trust_requirement: TrustRequirement,
+}
+
+#[wasm_bindgen]
+impl DecryptionSettings {
+    /// Create a new `DecryptionSettings` with the given trust requirement.
+    #[wasm_bindgen(constructor)]
+    pub fn new(sender_device_trust_requirement: TrustRequirement) -> DecryptionSettings {
+        Self { sender_device_trust_requirement }
+    }
+}
+
+impl From<&DecryptionSettings> for matrix_sdk_crypto::DecryptionSettings {
+    fn from(value: &DecryptionSettings) -> Self {
+        Self {
+            sender_device_trust_requirement: value.sender_device_trust_requirement.clone().into(),
         }
     }
 }
@@ -187,6 +258,9 @@ pub enum ShieldColor {
 pub struct ShieldState {
     /// The shield color
     pub color: ShieldColor,
+    /// A machine-readable representation of the authenticity for a
+    /// `ShieldState`.
+    pub code: Option<ShieldStateCode>,
     message: Option<String>,
 }
 
@@ -202,13 +276,17 @@ impl ShieldState {
 impl From<RustShieldState> for ShieldState {
     fn from(value: RustShieldState) -> Self {
         match value {
-            RustShieldState::Red { message } => {
-                Self { color: ShieldColor::Red, message: Some(message.to_owned()) }
-            }
-            RustShieldState::Grey { message } => {
-                Self { color: ShieldColor::Grey, message: Some(message.to_owned()) }
-            }
-            RustShieldState::None => Self { color: ShieldColor::None, message: None },
+            RustShieldState::Red { message, code } => Self {
+                color: ShieldColor::Red,
+                code: Some(code),
+                message: Some(message.to_owned()),
+            },
+            RustShieldState::Grey { message, code } => Self {
+                color: ShieldColor::Grey,
+                code: Some(code),
+                message: Some(message.to_owned()),
+            },
+            RustShieldState::None => Self { color: ShieldColor::None, code: None, message: None },
         }
     }
 }

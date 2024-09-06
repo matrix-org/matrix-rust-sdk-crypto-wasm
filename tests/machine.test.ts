@@ -3,6 +3,7 @@ import {
     CrossSigningStatus,
     DecryptedRoomEvent,
     DecryptionErrorCode,
+    DecryptionSettings,
     DeviceId,
     DeviceKeyId,
     DeviceLists,
@@ -25,10 +26,12 @@ import {
     RoomMessageRequest,
     RoomSettings,
     ShieldColor,
+    ShieldStateCode,
     SignatureState,
     SignatureUploadRequest,
     StoreHandle,
     ToDeviceRequest,
+    TrustRequirement,
     UserId,
     UserIdentity,
     VerificationRequest,
@@ -103,7 +106,7 @@ describe(OlmMachine.name, () => {
         expect(databases).toHaveLength(2);
         expect(databases).toStrictEqual([
             { name: `${storeName}::matrix-sdk-crypto-meta`, version: 1 },
-            { name: `${storeName}::matrix-sdk-crypto`, version: 11 },
+            { name: `${storeName}::matrix-sdk-crypto`, version: 12 },
         ]);
 
         // Creating a new Olm machine, with the stored state.
@@ -222,7 +225,7 @@ describe(OlmMachine.name, () => {
         expect(databases).toHaveLength(2);
         expect(databases).toStrictEqual([
             { name: `${storeName}::matrix-sdk-crypto-meta`, version: 1 },
-            { name: `${storeName}::matrix-sdk-crypto`, version: 11 },
+            { name: `${storeName}::matrix-sdk-crypto`, version: 12 },
         ]);
 
         // Let's force to close the `OlmMachine`.
@@ -618,7 +621,8 @@ describe(OlmMachine.name, () => {
                 },
             });
 
-            const decrypted = await m.decryptRoomEvent(stringifiedEvent, room);
+            const decryptionSettings = new DecryptionSettings(TrustRequirement.Untrusted);
+            const decrypted = await m.decryptRoomEvent(stringifiedEvent, room, decryptionSettings);
             expect(decrypted).toBeInstanceOf(DecryptedRoomEvent);
 
             const event = JSON.parse(decrypted.event);
@@ -631,7 +635,9 @@ describe(OlmMachine.name, () => {
             expect(decrypted.senderClaimedEd25519Key).toBeDefined();
             expect(decrypted.forwardingCurve25519KeyChain).toHaveLength(0);
             expect(decrypted.shieldState(true).color).toStrictEqual(ShieldColor.Red);
+            expect(decrypted.shieldState(true).code).toStrictEqual(ShieldStateCode.UnverifiedIdentity);
             expect(decrypted.shieldState(false).color).toStrictEqual(ShieldColor.Red);
+            expect(decrypted.shieldState(false).code).toStrictEqual(ShieldStateCode.UnsignedDevice);
 
             const decryptionInfo = await m.getRoomEventEncryptionInfo(stringifiedEvent, room);
             expect(decryptionInfo.sender.toString()).toStrictEqual(user.toString());
@@ -639,7 +645,9 @@ describe(OlmMachine.name, () => {
             expect(decryptionInfo.senderCurve25519Key).toBeDefined();
             expect(decryptionInfo.senderClaimedEd25519Key).toBeDefined();
             expect(decryptionInfo.shieldState(true).color).toStrictEqual(ShieldColor.Red);
+            expect(decryptionInfo.shieldState(true).code).toStrictEqual(ShieldStateCode.UnverifiedIdentity);
             expect(decryptionInfo.shieldState(false).color).toStrictEqual(ShieldColor.Red);
+            expect(decryptionInfo.shieldState(false).code).toStrictEqual(ShieldStateCode.UnsignedDevice);
         });
     });
 
@@ -656,7 +664,8 @@ describe(OlmMachine.name, () => {
             },
         };
         try {
-            await m.decryptRoomEvent(JSON.stringify(evt), room);
+            const decryptionSettings = new DecryptionSettings(TrustRequirement.Untrusted);
+            await m.decryptRoomEvent(JSON.stringify(evt), room, decryptionSettings);
             fail("it should not reach here");
         } catch (err) {
             expect(err).toBeInstanceOf(MegolmDecryptionError);
@@ -721,6 +730,10 @@ describe(OlmMachine.name, () => {
         let _ = m.bootstrapCrossSigning(true);
 
         const identity = await m.getIdentity(user);
+
+        expect(identity.isVerified()).toStrictEqual(true);
+        expect(identity.wasPreviouslyVerified()).toStrictEqual(true);
+        expect(identity.hasVerificationViolation()).toStrictEqual(false);
 
         expect(identity).toBeInstanceOf(OwnUserIdentity);
         const masterKey = JSON.parse(identity.masterKey);
@@ -1046,6 +1059,9 @@ describe(OlmMachine.name, () => {
 
             expect(identity).toBeInstanceOf(UserIdentity);
             expect(identity.isVerified()).toStrictEqual(false);
+            expect(identity.wasPreviouslyVerified()).toStrictEqual(false);
+            expect(identity.hasVerificationViolation()).toStrictEqual(false);
+            expect(identity.identityNeedsUserApproval()).toStrictEqual(false);
 
             const eventId = new EventId("$Rqnc-F-dvnEYJTyHq_iKxU2bZ1CI92-kuZq3a5lr5Zg");
             const verificationRequest = await identity.requestVerification(room, eventId);

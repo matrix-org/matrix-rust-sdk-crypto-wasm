@@ -1,4 +1,5 @@
 import {
+    DecryptionSettings,
     DeviceId,
     DeviceLists,
     EncryptionSettings,
@@ -7,6 +8,7 @@ import {
     OlmMachine,
     RequestType,
     RoomId,
+    TrustRequirement,
     UserId,
 } from "../pkg/matrix_sdk_crypto_wasm";
 import "fake-indexeddb/auto";
@@ -131,7 +133,8 @@ describe("dehydrated devices", () => {
             },
         });
 
-        const decrypted = await machine2.decryptRoomEvent(encryptedEvent, room);
+        const decryptionSettings = new DecryptionSettings(TrustRequirement.Untrusted);
+        const decrypted = await machine2.decryptRoomEvent(encryptedEvent, room, decryptionSettings);
         const decryptedEvent = JSON.parse(decrypted.event);
         expect(decryptedEvent.content.body).toStrictEqual("Hello, World!");
     });

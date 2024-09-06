@@ -472,9 +472,11 @@ impl OlmMachine {
         &self,
         event: &str,
         room_id: &identifiers::RoomId,
+        decryption_settings: &encryption::DecryptionSettings,
     ) -> Result<Promise, JsError> {
         let event: Raw<_> = serde_json::from_str(event)?;
         let room_id = room_id.inner.clone();
+        let decryption_settings = decryption_settings.into();
         let me = self.inner.clone();
 
         Ok(future_to_promise_with_custom_error::<
@@ -483,7 +485,7 @@ impl OlmMachine {
             MegolmDecryptionError,
         >(async move {
             let room_event = me
-                .decrypt_room_event(&event, room_id.as_ref())
+                .decrypt_room_event(&event, room_id.as_ref(), &decryption_settings)
                 .await
                 .map_err(MegolmDecryptionError::from)?;
             Ok(responses::DecryptedRoomEvent::from(room_event))
