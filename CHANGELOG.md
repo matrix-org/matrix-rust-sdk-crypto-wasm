@@ -1,5 +1,17 @@
 # UNRELEASED
 
+**BREAKING CHANGES**
+
+-   The format for `EncryptionSettings.sharingStrategy` has changed. It must
+    now be created using the `CollectStrategy.deviceBasedStrategy(...)` or
+    `CollectStrategy.identityBasedStrategy()` functions.
+    ([#141](https://github.com/matrix-org/matrix-rust-sdk-crypto-wasm/pull/141))
+-   The `OlmMachine.decryptRoomEvent` has a new `DecryptionSettings` parameter
+    that allows specifying the required sender trust level. If the trust level
+    is not met, the decryption will fail. To replicate the old behaviour, use a
+    sender trust level of `TrustRequirement.Untrusted`.
+    ([#141](https://github.com/matrix-org/matrix-rust-sdk-crypto-wasm/pull/141))
+
 **Security Fixes**
 
 -   Fix `UserIdentity.isVerified` to take into account our own identity
@@ -7,9 +19,34 @@
 
 **Other changes**
 
+-   Add `(Own)UserIdentity.wasPreviouslyVerified()`,
+    `(Own)UserIdentity.withdrawVerification()`, and
+    `(Own)UserIdentity.hasVerificationViolation()` to check and manage the state
+    of users who were previously verified but are no longer verified.
+    ([#141](https://github.com/matrix-org/matrix-rust-sdk-crypto-wasm/pull/141))
+-   Add `UserIdentity.pinCurrentMasterKey()` and
+    `UserInfo.identityNeedsUserApproval()` to manage user identity changes.
+    ([#141](https://github.com/matrix-org/matrix-rust-sdk-crypto-wasm/pull/141))
+-   `ShieldState` has a new `code` property that is set when the shield state is
+    not `None`.
+    ([#141](https://github.com/matrix-org/matrix-rust-sdk-crypto-wasm/pull/141))
 -   Add a new API `Device.encryptToDeviceEvent` to encrypt a to-device message using
     Olm.
     ([#101](https://github.com/matrix-org/matrix-rust-sdk-crypto-wasm/pull/101))
+
+-   Update matrix-rust-sdk to `07aa6d7bc`, which includes:
+
+    -   **NOTE**: this version causes changes to the format of the serialised
+        data in the CryptoStore, meaning that, once upgraded, it will not be
+        possible to roll back applications to earlier versions without breaking
+        user sessions.
+
+    -   Miscellaneous improvements to logging for verification and
+        `OwnUserIdentity` updates.
+        ([#3949](https://github.com/matrix-org/matrix-rust-sdk/pull/3949))
+
+    -   Add message IDs to all outgoing encrypted to-device messages.
+        ([#3776](https://github.com/matrix-org/matrix-rust-sdk/pull/3776))
 
 # matrix-sdk-crypto-wasm v7.0.0
 
