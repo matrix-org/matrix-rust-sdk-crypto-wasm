@@ -1,5 +1,12 @@
 # UNRELEASED
 
+**Other changes**
+
+-   Add `OlmMachine.markAllTrackedUsersAsDirty` to invalidate the device lists
+    for all known users. This is required for [MSC4186](https://github.com/matrix-org/matrix-spec-proposals/pull/4186)
+    clients as the server may give up trying to persist device list updates for
+    the client at some point, after which the client must treat all devices as dirty.
+
 # matrix-sdk-crypto-wasm v8.0.0
 
 **BREAKING CHANGES**
