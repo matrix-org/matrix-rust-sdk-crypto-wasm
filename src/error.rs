@@ -1,6 +1,7 @@
 //! Errors related to room event decryption.
 
 use js_sys::JsString;
+use matrix_sdk_common::deserialized_responses::VerificationLevel;
 use matrix_sdk_crypto::{vodozemac, MegolmError};
 use wasm_bindgen::prelude::wasm_bindgen;
 
@@ -16,8 +17,12 @@ pub enum DecryptionErrorCode {
     /// device we received the room key from and the identity keys recorded in
     /// the plaintext of the room key to-device message.
     MismatchedIdentityKeys,
-    /// The sender does not satisfy the requested trust requirement.
-    SenderIdentityNotTrusted,
+    /// We weren't able to link the message back to any known device.
+    UnknownSenderDevice,
+    /// The sender device is not cross-signed.
+    UnsignedSenderDevice,
+    /// The sender's identity is unverified, but was previously verified.
+    SenderIdentityPreviouslyVerified,
     /// Other failure.
     UnableToDecrypt,
 }
@@ -70,11 +75,27 @@ impl From<MegolmError> for MegolmDecryptionError {
                 description: value.to_string().into(),
                 maybe_withheld: None,
             },
-            MegolmError::SenderIdentityNotTrusted(..) => MegolmDecryptionError {
-                code: DecryptionErrorCode::SenderIdentityNotTrusted,
-                description: value.to_string().into(),
-                maybe_withheld: None,
-            },
+            MegolmError::SenderIdentityNotTrusted(VerificationLevel::PreviouslyVerified) => {
+                MegolmDecryptionError {
+                    code: DecryptionErrorCode::SenderIdentityPreviouslyVerified,
+                    description: value.to_string().into(),
+                    maybe_withheld: None,
+                }
+            }
+            MegolmError::SenderIdentityNotTrusted(VerificationLevel::UnsignedDevice) => {
+                MegolmDecryptionError {
+                    code: DecryptionErrorCode::UnsignedSenderDevice,
+                    description: value.to_string().into(),
+                    maybe_withheld: None,
+                }
+            }
+            MegolmError::SenderIdentityNotTrusted(VerificationLevel::None(..)) => {
+                MegolmDecryptionError {
+                    code: DecryptionErrorCode::UnknownSenderDevice,
+                    description: value.to_string().into(),
+                    maybe_withheld: None,
+                }
+            }
             _ => MegolmDecryptionError {
                 code: DecryptionErrorCode::UnableToDecrypt,
                 description: value.to_string().into(),
