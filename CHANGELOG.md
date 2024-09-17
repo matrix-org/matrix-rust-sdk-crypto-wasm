@@ -1,5 +1,12 @@
 # UNRELEASED
 
+**BREAKING CHANGES**
+
+-   The `SenderIdentityNotTrusted` value in the `DecryptionErrorCode` was
+    replaced with `UnknownSenderDevice`, `UnsignedSenderDevice`, and
+    `SenderIdentityPreviouslyVerified` to allow the application to distinguish
+    between the different reasons that the sender identity is not trusted.
+
 **Other changes**
 
 -   Add `OlmMachine.markAllTrackedUsersAsDirty` to invalidate the device lists
