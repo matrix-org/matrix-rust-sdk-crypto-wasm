@@ -261,6 +261,16 @@ impl OlmMachine {
         })
     }
 
+    /// Mark all tracked users as dirty.
+    ///
+    /// All users *whose device lists we are tracking* are flagged as needing a
+    /// key query. Users whose devices we are not tracking are ignored.
+    #[wasm_bindgen(js_name = "markAllTrackedUsersAsDirty")]
+    pub async fn mark_all_tracked_users_as_dirty(&self) -> Result<(), JsError> {
+        self.inner.mark_all_tracked_users_as_dirty().await?;
+        Ok(())
+    }
+
     /// Handle to-device events and one-time key counts from a sync
     /// response.
     ///

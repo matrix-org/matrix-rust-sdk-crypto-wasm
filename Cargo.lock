@@ -360,20 +360,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "f55bf8e7b65898637379c1b74eb1551107c8294ed26d855ceb9fd1a09cfc9bc0"
 dependencies = [
  "const-oid",
- "der_derive",
- "flagset",
  "zeroize",
-]
-
-[[package]]
-name = "der_derive"
-version = "0.7.3"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "8034092389675178f570469e6c3b0465d3d30b4505c294a6550db47f3c17ad18"
-dependencies = [
- "proc-macro2",
- "quote",
- "syn",
 ]
 
 [[package]]
@@ -462,12 +449,6 @@ name = "fiat-crypto"
 version = "0.2.9"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "28dea519a9695b9977216879a3ebfddf92f1c08c05d984f8996aecd6ecdc811d"
-
-[[package]]
-name = "flagset"
-version = "0.4.6"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b3ea1ec5f8307826a5b71094dd91fc04d4ae75d5709b20ad351c7fb4815c86ec"
 
 [[package]]
 name = "fnv"
@@ -842,7 +823,7 @@ dependencies = [
 [[package]]
 name = "matrix-sdk-common"
 version = "0.7.0"
-source = "git+https://github.com/matrix-org/matrix-rust-sdk#07aa6d7bc7f8d40809226c01e68f3539c85372c9"
+source = "git+https://github.com/matrix-org/matrix-rust-sdk#2408df8bf55683821005112a0a9c01154750e597"
 dependencies = [
  "async-trait",
  "futures-core",
@@ -863,7 +844,7 @@ dependencies = [
 [[package]]
 name = "matrix-sdk-crypto"
 version = "0.7.2"
-source = "git+https://github.com/matrix-org/matrix-rust-sdk#07aa6d7bc7f8d40809226c01e68f3539c85372c9"
+source = "git+https://github.com/matrix-org/matrix-rust-sdk#2408df8bf55683821005112a0a9c01154750e597"
 dependencies = [
  "aes",
  "as_variant",
@@ -930,7 +911,7 @@ dependencies = [
 [[package]]
 name = "matrix-sdk-indexeddb"
 version = "0.7.0"
-source = "git+https://github.com/matrix-org/matrix-rust-sdk#07aa6d7bc7f8d40809226c01e68f3539c85372c9"
+source = "git+https://github.com/matrix-org/matrix-rust-sdk#2408df8bf55683821005112a0a9c01154750e597"
 dependencies = [
  "anyhow",
  "async-trait",
@@ -958,7 +939,7 @@ dependencies = [
 [[package]]
 name = "matrix-sdk-qrcode"
 version = "0.7.1"
-source = "git+https://github.com/matrix-org/matrix-rust-sdk#07aa6d7bc7f8d40809226c01e68f3539c85372c9"
+source = "git+https://github.com/matrix-org/matrix-rust-sdk#2408df8bf55683821005112a0a9c01154750e597"
 dependencies = [
  "byteorder",
  "qrcode",
@@ -970,7 +951,7 @@ dependencies = [
 [[package]]
 name = "matrix-sdk-store-encryption"
 version = "0.7.0"
-source = "git+https://github.com/matrix-org/matrix-rust-sdk#07aa6d7bc7f8d40809226c01e68f3539c85372c9"
+source = "git+https://github.com/matrix-org/matrix-rust-sdk#2408df8bf55683821005112a0a9c01154750e597"
 dependencies = [
  "base64",
  "blake3",
@@ -1095,17 +1076,6 @@ name = "pin-utils"
 version = "0.1.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "8b870d8c151b6f2fb93e84a13146138f05d02ed11c7e7c54f8826aaaf7c9f184"
-
-[[package]]
-name = "pkcs7"
-version = "0.4.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "d79178be066405e0602bf3035946edef6b11b3f9dde46dfe5f8bfd7dea4b77e7"
-dependencies = [
- "der",
- "spki",
- "x509-cert",
-]
 
 [[package]]
 name = "pkcs8"
@@ -1312,7 +1282,7 @@ dependencies = [
 [[package]]
 name = "ruma"
 version = "0.10.1"
-source = "git+https://github.com/matrix-org/ruma?rev=17f6e555528512319e706bb2cfe68a12ec5603b6#17f6e555528512319e706bb2cfe68a12ec5603b6"
+source = "git+https://github.com/matrix-org/ruma?rev=bb6d4c531aebb571fed4b1948df0118244762741#bb6d4c531aebb571fed4b1948df0118244762741"
 dependencies = [
  "assign",
  "js_int",
@@ -1326,7 +1296,7 @@ dependencies = [
 [[package]]
 name = "ruma-client-api"
 version = "0.18.0"
-source = "git+https://github.com/matrix-org/ruma?rev=17f6e555528512319e706bb2cfe68a12ec5603b6#17f6e555528512319e706bb2cfe68a12ec5603b6"
+source = "git+https://github.com/matrix-org/ruma?rev=bb6d4c531aebb571fed4b1948df0118244762741#bb6d4c531aebb571fed4b1948df0118244762741"
 dependencies = [
  "as_variant",
  "assign",
@@ -1349,7 +1319,7 @@ dependencies = [
 [[package]]
 name = "ruma-common"
 version = "0.13.0"
-source = "git+https://github.com/matrix-org/ruma?rev=17f6e555528512319e706bb2cfe68a12ec5603b6#17f6e555528512319e706bb2cfe68a12ec5603b6"
+source = "git+https://github.com/matrix-org/ruma?rev=bb6d4c531aebb571fed4b1948df0118244762741#bb6d4c531aebb571fed4b1948df0118244762741"
 dependencies = [
  "as_variant",
  "base64",
@@ -1381,7 +1351,7 @@ dependencies = [
 [[package]]
 name = "ruma-events"
 version = "0.28.1"
-source = "git+https://github.com/matrix-org/ruma?rev=17f6e555528512319e706bb2cfe68a12ec5603b6#17f6e555528512319e706bb2cfe68a12ec5603b6"
+source = "git+https://github.com/matrix-org/ruma?rev=bb6d4c531aebb571fed4b1948df0118244762741#bb6d4c531aebb571fed4b1948df0118244762741"
 dependencies = [
  "as_variant",
  "indexmap",
@@ -1404,7 +1374,7 @@ dependencies = [
 [[package]]
 name = "ruma-identifiers-validation"
 version = "0.9.5"
-source = "git+https://github.com/matrix-org/ruma?rev=17f6e555528512319e706bb2cfe68a12ec5603b6#17f6e555528512319e706bb2cfe68a12ec5603b6"
+source = "git+https://github.com/matrix-org/ruma?rev=bb6d4c531aebb571fed4b1948df0118244762741#bb6d4c531aebb571fed4b1948df0118244762741"
 dependencies = [
  "js_int",
  "thiserror",
@@ -1413,8 +1383,9 @@ dependencies = [
 [[package]]
 name = "ruma-macros"
 version = "0.13.0"
-source = "git+https://github.com/matrix-org/ruma?rev=17f6e555528512319e706bb2cfe68a12ec5603b6#17f6e555528512319e706bb2cfe68a12ec5603b6"
+source = "git+https://github.com/matrix-org/ruma?rev=bb6d4c531aebb571fed4b1948df0118244762741#bb6d4c531aebb571fed4b1948df0118244762741"
 dependencies = [
+ "cfg-if",
  "once_cell",
  "proc-macro-crate",
  "proc-macro2",
@@ -1947,8 +1918,7 @@ checksum = "0b928f33d975fc6ad9f86c8f283853ad26bdd5b10b7f1542aa2fa15e2289105a"
 [[package]]
 name = "vodozemac"
 version = "0.7.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "051d4af70b53b42adf2aac459a305851b8d754f210aaf11ab509e1065beff422"
+source = "git+https://github.com/matrix-org/vodozemac?rev=57cbf7e939d7b54d20207e8361b7135bd65c9cc2#57cbf7e939d7b54d20207e8361b7135bd65c9cc2"
 dependencies = [
  "aes",
  "arrayvec",
@@ -1962,7 +1932,6 @@ dependencies = [
  "hkdf",
  "hmac",
  "matrix-pickle",
- "pkcs7",
  "prost",
  "rand",
  "serde",
@@ -2148,17 +2117,6 @@ dependencies = [
  "rand_core",
  "serde",
  "zeroize",
-]
-
-[[package]]
-name = "x509-cert"
-version = "0.2.5"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "1301e935010a701ae5f8655edc0ad17c44bad3ac5ce8c39185f75453b720ae94"
-dependencies = [
- "const-oid",
- "der",
- "spki",
 ]
 
 [[package]]
