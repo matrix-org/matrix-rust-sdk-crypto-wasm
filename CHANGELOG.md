@@ -14,6 +14,8 @@
     clients as the server may give up trying to persist device list updates for
     the client at some point, after which the client must treat all devices as dirty.
 
+-   Update matrix-rust-sdk to `2408df8bf`. No changes relevant to these bindings.
+
 # matrix-sdk-crypto-wasm v8.0.0
 
 **BREAKING CHANGES**
