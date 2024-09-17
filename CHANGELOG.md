@@ -1,5 +1,7 @@
 # UNRELEASED
 
+# matrix-sdk-crypto-wasm v9.0.0
+
 **BREAKING CHANGES**
 
 -   The `SenderIdentityNotTrusted` value in the `DecryptionErrorCode` was
