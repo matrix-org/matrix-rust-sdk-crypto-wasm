@@ -178,20 +178,6 @@ impl OlmMachine {
         future_to_promise(async move { Ok(me.display_name().await?) })
     }
 
-    /// Mark all tracked users as dirty.
-    ///
-    /// All users *whose device lists we are tracking* are flagged as needing a
-    /// key query. Users whose devices we are not tracking are ignored.
-    #[wasm_bindgen(js_name = "markAllTrackedUsersAsDirty")]
-    pub fn mark_all_tracked_users_as_dirty(&self) -> Promise {
-        let machine = self.inner.clone();
-
-        future_to_promise(async move {
-            machine.mark_all_tracked_users_as_dirty().await?;
-            Ok(JsValue::UNDEFINED)
-        })
-    }
-
     /// Whether automatic transmission of room key requests is enabled.
     ///
     /// Room key requests allow the device to request room keys that it might
@@ -273,6 +259,16 @@ impl OlmMachine {
             me.update_tracked_users(users.iter().map(AsRef::as_ref)).await?;
             Ok(JsValue::UNDEFINED)
         })
+    }
+
+    /// Mark all tracked users as dirty.
+    ///
+    /// All users *whose device lists we are tracking* are flagged as needing a
+    /// key query. Users whose devices we are not tracking are ignored.
+    #[wasm_bindgen(js_name = "markAllTrackedUsersAsDirty")]
+    pub async fn mark_all_tracked_users_as_dirty(&self) -> Result<(), JsError> {
+        self.inner.mark_all_tracked_users_as_dirty().await?;
+        Ok(())
     }
 
     /// Handle to-device events and one-time key counts from a sync

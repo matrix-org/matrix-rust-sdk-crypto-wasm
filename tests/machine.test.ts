@@ -725,6 +725,11 @@ describe(OlmMachine.name, () => {
         }
     });
 
+    test("can mark all tracked users as dirty", async () => {
+        const m = await machine();
+        await m.markAllTrackedUsersAsDirty();
+    });
+
     test("can get own user identity", async () => {
         const m = await machine();
         let _ = m.bootstrapCrossSigning(true);
