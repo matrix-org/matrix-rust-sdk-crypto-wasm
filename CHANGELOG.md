@@ -1,5 +1,12 @@
 # UNRELEASED
 
+**BREAKING CHANGES**
+
+-   The `SenderIdentityNotTrusted` value in the `DecryptionErrorCode` was
+    replaced with `UnknownSenderDevice`, `UnsignedSenderDevice`, and
+    `SenderIdentityPreviouslyVerified` to allow the application to distinguish
+    between the different reasons that the sender identity is not trusted.
+
 # matrix-sdk-crypto-wasm v8.0.0
 
 **BREAKING CHANGES**
