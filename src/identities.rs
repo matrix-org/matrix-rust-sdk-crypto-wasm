@@ -109,8 +109,8 @@ impl OwnUserIdentity {
         Ok(serde_json::to_string(self_signing_key)?)
     }
 
-    /// Get the user-signing key of the identity, this is only present for our
-    /// own user identity..
+    /// Get the user-signing key of the identity. This is only present for our
+    /// own user identity.
     #[wasm_bindgen(getter, js_name = "userSigningKey")]
     pub fn user_signing_key(&self) -> Result<String, JsError> {
         let user_signing_key = self.inner.user_signing_key().as_ref();
@@ -119,8 +119,7 @@ impl OwnUserIdentity {
 
     /// True if we verified our own identity at some point in the past.
     ///
-    /// To reset this latch back to `false`, one must call
-    /// [`OwnUserIdentity::withdraw_verification()`].
+    /// To reset this latch back to `false`, call {@link withdrawVerification}.
     #[wasm_bindgen(js_name = wasPreviouslyVerified)]
     pub fn was_previously_verified(&self) -> bool {
         self.inner.was_previously_verified()
@@ -128,7 +127,7 @@ impl OwnUserIdentity {
 
     /// Remove the requirement for this identity to be verified.
     ///
-    /// If an identity was previously verified and is not any more it will be
+    /// If an identity was previously verified and is not any longer, it will be
     /// reported to the user. In order to remove this notice users have to
     /// verify again or to withdraw the verification requirement.
     #[wasm_bindgen(js_name = "withdrawVerification")]
@@ -146,10 +145,9 @@ impl OwnUserIdentity {
     /// Such a violation should be reported to the local user by the
     /// application, and resolved by
     ///
-    /// - Verifying the new identity with
-    ///   [`OwnUserIdentity::request_verification`]
-    /// - Or by withdrawing the verification requirement
-    ///   [`OwnUserIdentity::withdraw_verification`].
+    /// - Verifying the new identity with {@link requestVerification}, or:
+    /// - Withdrawing the verification requirement with {@link
+    ///   withdrawVerification}.
     #[wasm_bindgen(js_name = "hasVerificationViolation")]
     pub fn has_verification_violation(&self) -> bool {
         self.inner.has_verification_violation()
@@ -258,20 +256,17 @@ impl UserIdentity {
         })
     }
 
-    /// Did the identity change after an initial observation in a way that
-    /// requires approval from the user?
+    /// Has the identity changed in a way that requires approval from the user?
     ///
     /// A user identity needs approval if it changed after the crypto machine
-    /// has already observed ("pinned") a different identity for that user *and*
-    /// it is not an explicitly verified identity (using for example interactive
-    /// verification).
+    /// has already observed ("pinned") a different identity for that user,
+    /// unless it is an explicitly verified identity (using for example
+    /// interactive verification).
     ///
-    /// Such a change is to be considered a pinning violation which the
-    /// application should report to the local user, and can be resolved by:
+    /// This situation can be resolved by:
     ///
-    /// - Verifying the new identity with [`UserIdentity::request_verification`]
-    /// - Or by updating the pin to the new identity with
-    ///   [`UserIdentity::pin_current_master_key`].
+    /// - Verifying the new identity with {@link requestVerification}, or:
+    /// - Updating the pin to the new identity with {@link pinCurrentMasterKey}.
     #[wasm_bindgen(js_name = "identityNeedsUserApproval")]
     pub fn identity_needs_user_approval(&self) -> bool {
         self.inner.identity_needs_user_approval()
@@ -280,8 +275,7 @@ impl UserIdentity {
     /// True if we verified this identity (with any own identity, at any
     /// point).
     ///
-    /// To pass this latch back to false, one must call
-    /// [`UserIdentity::withdraw_verification()`].
+    /// To set this latch back to false, call {@link withdrawVerification}.
     #[wasm_bindgen(js_name = "wasPreviouslyVerified")]
     pub fn was_previously_verified(&self) -> bool {
         self.inner.was_previously_verified()
@@ -307,9 +301,9 @@ impl UserIdentity {
     /// Such a violation should be reported to the local user by the
     /// application, and resolved by
     ///
-    /// - Verifying the new identity with [`UserIdentity::request_verification`]
-    /// - Or by withdrawing the verification requirement
-    ///   [`UserIdentity::withdraw_verification`].
+    /// - Verifying the new identity with {@link requestVerification}, or:
+    /// - Withdrawing the verification requirement with {@link
+    ///   withdrawVerification}.
     #[wasm_bindgen(js_name = "hasVerificationViolation")]
     pub fn has_verification_violation(&self) -> bool {
         self.inner.has_verification_violation()
