@@ -183,16 +183,6 @@ impl CheckCode {
     ///
     /// The number should be displayed with a leading 0 in case the first digit
     /// is a 0.
-    ///
-    /// # Examples
-    ///
-    /// ```no_run
-    /// # use vodozemac::ecies::CheckCode;
-    /// # let check_code: CheckCode = unimplemented!();
-    /// let check_code = check_code.to_digit();
-    ///
-    /// println!("The check code of the IECS channel is: {check_code:02}");
-    /// ```
     pub fn to_digit(&self) -> u8 {
         self.inner.to_digit()
     }
