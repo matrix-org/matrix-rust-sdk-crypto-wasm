@@ -22,7 +22,7 @@ pub enum DecryptionErrorCode {
     /// The sender device is not cross-signed.
     UnsignedSenderDevice,
     /// The sender's identity is unverified, but was previously verified.
-    SenderIdentityPreviouslyVerified,
+    SenderIdentityVerificationViolation,
     /// Other failure.
     UnableToDecrypt,
 }
@@ -75,9 +75,9 @@ impl From<MegolmError> for MegolmDecryptionError {
                 description: value.to_string().into(),
                 maybe_withheld: None,
             },
-            MegolmError::SenderIdentityNotTrusted(VerificationLevel::PreviouslyVerified) => {
+            MegolmError::SenderIdentityNotTrusted(VerificationLevel::VerificationViolation) => {
                 MegolmDecryptionError {
-                    code: DecryptionErrorCode::SenderIdentityPreviouslyVerified,
+                    code: DecryptionErrorCode::SenderIdentityVerificationViolation,
                     description: value.to_string().into(),
                     maybe_withheld: None,
                 }

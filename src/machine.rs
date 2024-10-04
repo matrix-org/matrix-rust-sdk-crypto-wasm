@@ -10,9 +10,12 @@ use std::{
 
 use futures_util::{pin_mut, Stream, StreamExt};
 use js_sys::{Array, Function, JsString, Map, Promise, Set};
-use matrix_sdk_common::ruma::{
-    self, events::secret::request::SecretName, serde::Raw, DeviceKeyAlgorithm, OwnedDeviceId,
-    OwnedTransactionId, OwnedUserId, UInt,
+use matrix_sdk_common::{
+    deserialized_responses::TimelineEvent,
+    ruma::{
+        self, events::secret::request::SecretName, serde::Raw, DeviceKeyAlgorithm, OwnedDeviceId,
+        OwnedTransactionId, OwnedUserId, UInt,
+    },
 };
 use matrix_sdk_crypto::{
     backups::MegolmV1BackupKey,
@@ -494,10 +497,11 @@ impl OlmMachine {
             responses::DecryptedRoomEvent,
             MegolmDecryptionError,
         >(async move {
-            let room_event = me
+            let room_event: TimelineEvent = me
                 .decrypt_room_event(&event, room_id.as_ref(), &decryption_settings)
                 .await
-                .map_err(MegolmDecryptionError::from)?;
+                .map_err(MegolmDecryptionError::from)?
+                .into();
             Ok(responses::DecryptedRoomEvent::from(room_event))
         }))
     }
@@ -658,8 +662,8 @@ impl OlmMachine {
 
     /// Get the cross signing user identity of a user.
     ///
-    /// Returns a promise for an `OwnUserIdentity`, a `UserIdentity`, or
-    /// `undefined`.
+    /// Returns a promise for an {@link identities.OwnUserIdentity}, a
+    /// {@link identities.OtherUserIdentity}, or `undefined`.
     #[wasm_bindgen(js_name = "getIdentity")]
     pub fn get_identity(&self, user_id: &identifiers::UserId) -> Promise {
         let me = self.inner.clone();
@@ -671,7 +675,7 @@ impl OlmMachine {
             Ok(me
                 .get_identity(user_id.as_ref(), Some(Duration::from_secs(1)))
                 .await?
-                .map(identities::UserIdentities::from))
+                .map(identities::UserIdentity::from))
         })
     }
 
