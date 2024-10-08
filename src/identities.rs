@@ -9,19 +9,19 @@ use crate::{
     verification::{self, VerificationRequest},
 };
 
-pub(crate) struct UserIdentities {
-    inner: matrix_sdk_crypto::UserIdentities,
+pub(crate) struct UserIdentity {
+    inner: matrix_sdk_crypto::UserIdentity,
 }
 
-impl_from_to_inner!(matrix_sdk_crypto::UserIdentities => UserIdentities);
+impl_from_to_inner!(matrix_sdk_crypto::UserIdentity => UserIdentity);
 
-impl From<UserIdentities> for JsValue {
-    fn from(user_identities: UserIdentities) -> Self {
-        use matrix_sdk_crypto::UserIdentities::*;
+impl From<UserIdentity> for JsValue {
+    fn from(user_identities: UserIdentity) -> Self {
+        use matrix_sdk_crypto::UserIdentity::*;
 
         match user_identities.inner {
             Own(own) => JsValue::from(OwnUserIdentity::from(own)),
-            Other(other) => JsValue::from(UserIdentity::from(other)),
+            Other(other) => JsValue::from(OtherUserIdentity::from(other)),
         }
     }
 }
@@ -164,14 +164,14 @@ impl OwnUserIdentity {
 /// to be requested to verify our own device with the user identity.
 #[wasm_bindgen]
 #[derive(Debug)]
-pub struct UserIdentity {
-    inner: matrix_sdk_crypto::UserIdentity,
+pub struct OtherUserIdentity {
+    inner: matrix_sdk_crypto::OtherUserIdentity,
 }
 
-impl_from_to_inner!(matrix_sdk_crypto::UserIdentity => UserIdentity);
+impl_from_to_inner!(matrix_sdk_crypto::OtherUserIdentity => OtherUserIdentity);
 
 #[wasm_bindgen]
-impl UserIdentity {
+impl OtherUserIdentity {
     /// Is this user identity verified?
     #[wasm_bindgen(js_name = "isVerified")]
     pub fn is_verified(&self) -> bool {

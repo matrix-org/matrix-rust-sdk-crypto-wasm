@@ -33,7 +33,7 @@ import {
     ToDeviceRequest,
     TrustRequirement,
     UserId,
-    UserIdentity,
+    OtherUserIdentity,
     VerificationRequest,
     Versions,
 } from "../pkg";
@@ -1062,7 +1062,7 @@ describe(OlmMachine.name, () => {
             let _ = m.bootstrapCrossSigning(true);
             const identity = await m.getIdentity(new UserId("@example:morpheus.localhost"));
 
-            expect(identity).toBeInstanceOf(UserIdentity);
+            expect(identity).toBeInstanceOf(OtherUserIdentity);
             expect(identity.isVerified()).toStrictEqual(false);
             expect(identity.wasPreviouslyVerified()).toStrictEqual(false);
             expect(identity.hasVerificationViolation()).toStrictEqual(false);
