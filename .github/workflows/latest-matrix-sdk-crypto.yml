@@ -55,16 +55,15 @@ jobs:
       - name: Test the JavaScript binding
         run: yarn test
 
-  open-issue-on-failure:
-    if: failure()
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: JasonEtco/create-an-issue@1b14a70e4d8dc185e5cc76d3bec9eab20257b2c5 # v2.9.2
+      - name: Open an issue on failure
+        if: failure()
+        uses: JasonEtco/create-an-issue@1b14a70e4d8dc185e5cc76d3bec9eab20257b2c5 # v2.9.2
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           update_existing: true
           filename: .github/latest_matrix_sdk_failed_issue_template.md
         id: create-issue
+
       - run: 'echo Created/updated ${{ steps.create-issue.outputs.url }}'
+        if: failure()
