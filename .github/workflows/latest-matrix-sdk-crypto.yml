@@ -71,7 +71,7 @@ jobs:
         with:
           message: |
             Building matrix-rust-sdk-crypto-wasm against the latest matrix-sdk Rust is failing.
-            See https://github.com/{{env.GITHUB_REPOSITORY}}/actions/runs/{{env.GITHUB_RUN_ID}}
+            See https://github.com/${{env.GITHUB_REPOSITORY}}/actions/runs/${{env.GITHUB_RUN_ID}}
           pr-number: "${{ steps.create-issue.outputs.number }}"
 
       - run: 'echo Created/updated ${{ steps.create-issue.outputs.url }}'
