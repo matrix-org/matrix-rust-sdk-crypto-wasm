@@ -65,6 +65,9 @@ jobs:
           filename: .github/latest_matrix_sdk_failed_issue_template.md
         id: create-issue
 
+      - run: 'echo Created/updated ${{ steps.create-issue.outputs.url }}'
+        if: failure()
+
       - name: Comment on the issue
         if: failure()
         uses: thollander/actions-comment-pull-request@v3
@@ -74,14 +77,11 @@ jobs:
             See https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}/job/${{ github.job }}
           pr-number: "${{ steps.create-issue.outputs.number }}"
 
-      - run: 'echo Created/updated ${{ steps.create-issue.outputs.url }}'
+      - name: Ping matrix room on failure
         if: failure()
-
-          #      - name: Ping matrix room on failure
-          #        if: failure()
-          #        uses: fjogeleit/http-request-action@v1
-          #        with:
-          #          url: 'https://element.ems.host/hookshot/webhook/266e410d-0cb4-4f59-8f56-b063665d3ea0'
-          #          method: 'POST'
-          #          customHeaders: '{"Content-Type": "application/json"}'
-          #          data: '{"text": "matrix-rust-sdk-crypto-wasm is failing to build against the latest matrix-sdk Rust code. See ${{ steps.create-issue.outputs.url }}"}'
+        uses: fjogeleit/http-request-action@v1
+        with:
+          url: 'https://element.ems.host/hookshot/webhook/4bbf3b21-e94a-4a97-8a09-c0e03a6de173'
+          method: 'POST'
+          customHeaders: '{"Content-Type": "application/json"}'
+          data: '{"text": "matrix-rust-sdk-crypto-wasm is failing to build against the latest matrix-sdk Rust code. See ${{ steps.create-issue.outputs.url }}"}'
