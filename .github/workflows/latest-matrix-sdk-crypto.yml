@@ -74,7 +74,7 @@ jobs:
         with:
           message: |
             Building matrix-rust-sdk-crypto-wasm against the latest matrix-sdk Rust is failing.
-            See https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}/job/${{ github.job }}
+            See https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
           pr-number: "${{ steps.create-issue.outputs.number }}"
 
       - name: Ping matrix room on failure
