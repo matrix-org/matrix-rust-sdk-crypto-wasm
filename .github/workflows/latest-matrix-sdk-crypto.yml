@@ -1,8 +1,24 @@
 name: Build against latest matrix-sdk-crypto
 
+# Runs a nightly job that builds this project against the latest version of
+# matrix-sdk-crypto to find out whether some changes there have modified
+# interfaces we are relying on.
+#
+# It does this by effectively doing:
+#
+#     cargo update matrix-sdk-crypto
+#     yarn build
+#
+# If the build fails, this action:
+#
+# * creates an issue in this project's repo (or updates an existing open issue)
+# * adds a comment to the issue linking to the specific build failure
+# * sends a message to the Crypto team's Matrix room
+
 on:
   workflow_dispatch:
   schedule:
+    # Run this task every day at 01:22 UTC
     - cron:  '22 1 * * *'
 
 concurrency:
@@ -41,6 +57,9 @@ jobs:
       - name: Install Node.js
         uses: actions/setup-node@v3
         with:
+          # Keep this in sync with:
+          # .github/workflows/ci.yml
+          # .github/workflows/release.yml
           node-version: 20.0
 
       - name: Install yarn
@@ -81,7 +100,7 @@ jobs:
         if: failure()
         uses: fjogeleit/http-request-action@v1
         with:
-          url: 'https://element.ems.host/hookshot/webhook/4bbf3b21-e94a-4a97-8a09-c0e03a6de173'
+          url: ${{ secrets.CRYPTO_HOOK_URL }}
           method: 'POST'
           customHeaders: '{"Content-Type": "application/json"}'
           data: '{"text": "matrix-rust-sdk-crypto-wasm is failing to build against the latest matrix-sdk Rust code. See ${{ steps.create-issue.outputs.url }}"}'
