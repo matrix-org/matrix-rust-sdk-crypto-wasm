@@ -1,5 +1,7 @@
 # UNRELEASED
 
+# matrix-sdk-crypto-wasm v10.0.0
+
 **BREAKING CHANGES**
 
 -   Rename `DecryptionErrorCode.SenderIdentityPreviouslyVerified` to
@@ -9,7 +11,7 @@
 -   Rename `UserIdentity` to `OtherUserIdentity` (in line with changes
     to matrix-rust-sdk).
 
--   Update matrix-rust-sdk to `#5d46b35d`.
+-   Update matrix-rust-sdk to `#3558886b9`.
 
 # matrix-sdk-crypto-wasm v9.1.0
 
