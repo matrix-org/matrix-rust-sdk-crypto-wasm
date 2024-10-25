@@ -67,6 +67,9 @@ jobs:
         with:
           save-if: ${{ github.ref == 'refs/heads/main' }}
 
+        # Keep this in sync with:
+        # .github/workflows/latest-matrix-sdk-crypto.yml
+        # .github/workflows/release.yml
       - name: Install Node.js
         uses: actions/setup-node@v3
         with:
