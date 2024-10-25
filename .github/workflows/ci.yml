@@ -40,14 +40,17 @@ jobs:
       - name: Install Node.js
         uses: actions/setup-node@v3
 
-      - name: Install NPM dependencies
-        run: npm install
+      - name: Install yarn
+        run: npm install --global yarn
+
+      - name: Install dependencies
+        run: yarn install
 
       - name: Run eslint
-        run: npm run lint:eslint
+        run: yarn lint:eslint
 
       - name: Run prettier
-        run: npm run lint:prettier
+        run: yarn lint:prettier
 
   test:
     name: test
@@ -75,20 +78,23 @@ jobs:
         with:
           node-version: 20.0
 
-      - name: Install NPM dependencies
-        run: npm install
+      - name: Install yarn
+        run: npm install --global yarn
+
+      - name: Install dependencies
+        run: yarn install
 
       - name: Build the WebAssembly + JavaScript binding
-        run: npm run build
+        run: yarn build
 
       - name: Check typescript types
-        run: npm run lint:types
+        run: yarn lint:types
 
       - name: Test the JavaScript binding
-        run: npm run test
+        run: yarn test
 
       - name: Build the documentation
-        run: npm run doc
+        run: yarn doc
 
   docs:
     name: docs
@@ -121,10 +127,13 @@ jobs:
         with:
           save-if: ${{ github.ref == 'refs/heads/main' }}
 
+      - name: Install yarn
+        run: npm install --global yarn
+
       - name: Build `matrix-sdk-crypto-js` doc
         run: |
-          npm install
-          npm run build && npm run doc
+          yarn install
+          yarn build && yarn doc
 
       - name: Upload artifact
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'

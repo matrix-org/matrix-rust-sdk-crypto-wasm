@@ -39,8 +39,11 @@ jobs:
         with:
           node-version: 20.0
 
-      - name: Install NPM dependencies
-        run: npm install
+      - name: Install yarn
+        run: npm install --global yarn
+
+      - name: Install dependencies
+        run: yarn install
 
       - name: Publish the WebAssembly + JavaScript binding (imply building + testing)
         uses: JS-DevTools/npm-publish@v1
