@@ -1,5 +1,10 @@
 # UNRELEASED
 
+# matrix-sdk-crypto-wasm v10.1.0
+
+-   Update matrix-rust-sdk to `ce9dc73376b4ee`
+-   Update other dependencies
+
 # matrix-sdk-crypto-wasm v10.0.0
 
 **BREAKING CHANGES**
@@ -11,7 +16,7 @@
 -   Rename `UserIdentity` to `OtherUserIdentity` (in line with changes
     to matrix-rust-sdk).
 
--   Update matrix-rust-sdk to `#3558886b9`.
+-   Update matrix-rust-sdk to `3558886b9`.
 
 # matrix-sdk-crypto-wasm v9.1.0
 
