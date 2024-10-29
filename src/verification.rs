@@ -915,7 +915,8 @@ impl VerificationRequest {
     #[wasm_bindgen(js_name = "getVerification")]
     pub fn get_verification(&self) -> JsValue {
         let result: Option<JsValue> =
-            if let VerificationRequestState::Transitioned { verification } = self.inner.state() {
+            if let VerificationRequestState::Transitioned { verification, .. } = self.inner.state()
+            {
                 Verification(verification).try_into().ok()
             } else {
                 None
