@@ -163,17 +163,14 @@ impl DeviceKeyAlgorithm {
 #[derive(Debug)]
 pub enum DeviceKeyAlgorithmName {
     /// The Ed25519 signature algorithm.
-    Ed25519,
+    Ed25519 = 0,
 
     /// The Curve25519 ECDH algorithm.
-    Curve25519,
+    Curve25519 = 1,
 
-    /// The Curve25519 ECDH algorithm, but the key also contains
-    /// signatures.
-    SignedCurve25519,
-
+    // SignedCurve25519 = 2 used to exist but was removed from Ruma
     /// An unknown device key algorithm.
-    Unknown,
+    Unknown = 3,
 }
 
 impl TryFrom<DeviceKeyAlgorithmName> for ruma::DeviceKeyAlgorithm {
@@ -185,7 +182,6 @@ impl TryFrom<DeviceKeyAlgorithmName> for ruma::DeviceKeyAlgorithm {
         Ok(match value {
             Ed25519 => Self::Ed25519,
             Curve25519 => Self::Curve25519,
-            SignedCurve25519 => Self::SignedCurve25519,
             Unknown => {
                 return Err(JsError::new(
                     "The `DeviceKeyAlgorithmName.Unknown` variant cannot be converted",
@@ -202,7 +198,6 @@ impl From<ruma::DeviceKeyAlgorithm> for DeviceKeyAlgorithmName {
         match value {
             Ed25519 => Self::Ed25519,
             Curve25519 => Self::Curve25519,
-            SignedCurve25519 => Self::SignedCurve25519,
             _ => Self::Unknown,
         }
     }
