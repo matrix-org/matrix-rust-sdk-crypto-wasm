@@ -1,5 +1,11 @@
 # UNRELEASED
 
+-   Update matrix-rust-sdk to `75683d268fc2e`.
+
+**BREAKING CHANGES**
+
+-   Remove `SignedCurve25519` variant of `DeviceKeyAlgorithm`.
+
 # matrix-sdk-crypto-wasm v10.1.0
 
 -   Update matrix-rust-sdk to `ce9dc73376b4ee`
