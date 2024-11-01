@@ -712,7 +712,7 @@ pub(crate) mod tests {
             claim_keys::v3::Request as OriginalKeysClaimRequest,
             upload_keys::v3::Request as OriginalKeysUploadRequest,
         },
-        device_id, user_id, DeviceKeyAlgorithm,
+        device_id, user_id, OneTimeKeyAlgorithm,
     };
     use matrix_sdk_crypto::requests::KeysQueryRequest as OriginalKeysQueryRequest;
     use serde_json::Value;
@@ -727,7 +727,7 @@ pub(crate) mod tests {
             user_id!("@alice:localhost").to_owned(),
             BTreeMap::from([(
                 device_id!("ABCDEFG").to_owned(),
-                DeviceKeyAlgorithm::SignedCurve25519,
+                OneTimeKeyAlgorithm::SignedCurve25519,
             )]),
         )]));
         let request = KeysClaimRequest::try_from(("ID".to_string(), &rust_request)).unwrap();
@@ -743,7 +743,7 @@ pub(crate) mod tests {
             user_id!("@alice:localhost").to_owned(),
             BTreeMap::from([(
                 device_id!("ABCDEFG").to_owned(),
-                DeviceKeyAlgorithm::SignedCurve25519,
+                OneTimeKeyAlgorithm::SignedCurve25519,
             )]),
         )]));
         rust_request.timeout = None;

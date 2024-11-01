@@ -13,7 +13,7 @@ use js_sys::{Array, Function, JsString, Map, Promise, Set};
 use matrix_sdk_common::{
     deserialized_responses::TimelineEvent,
     ruma::{
-        self, events::secret::request::SecretName, serde::Raw, DeviceKeyAlgorithm, OwnedDeviceId,
+        self, events::secret::request::SecretName, serde::Raw, OneTimeKeyAlgorithm, OwnedDeviceId,
         OwnedTransactionId, OwnedUserId, UInt,
     },
 };
@@ -309,13 +309,13 @@ impl OlmMachine {
     ) -> Result<Promise, JsError> {
         let to_device_events = serde_json::from_str(to_device_events)?;
         let changed_devices = changed_devices.inner.clone();
-        let one_time_keys_counts: BTreeMap<DeviceKeyAlgorithm, UInt> = one_time_keys_counts
+        let one_time_keys_counts: BTreeMap<OneTimeKeyAlgorithm, UInt> = one_time_keys_counts
             .entries()
             .into_iter()
             .filter_map(|js_value| {
                 let pair = Array::from(&js_value.ok()?);
                 let (key, value) = (
-                    DeviceKeyAlgorithm::from(pair.at(0).as_string()?),
+                    OneTimeKeyAlgorithm::from(pair.at(0).as_string()?),
                     UInt::new(pair.at(1).as_f64()? as u64)?,
                 );
 
@@ -323,14 +323,14 @@ impl OlmMachine {
             })
             .collect();
 
-        // Convert the unused_fallback_keys JS Set to a `Vec<DeviceKeyAlgorithm>`
-        let unused_fallback_keys: Option<Vec<DeviceKeyAlgorithm>> =
+        // Convert the unused_fallback_keys JS Set to a `Vec<OneTimeKeyAlgorithm>`
+        let unused_fallback_keys: Option<Vec<OneTimeKeyAlgorithm>> =
             unused_fallback_keys.map(|fallback_keys| {
                 fallback_keys
                     .values()
                     .into_iter()
                     .filter_map(|js_value| {
-                        Some(DeviceKeyAlgorithm::from(js_value.ok()?.as_string()?))
+                        Some(OneTimeKeyAlgorithm::from(js_value.ok()?.as_string()?))
                     })
                     .collect()
             });
