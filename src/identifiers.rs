@@ -120,7 +120,16 @@ impl DeviceKeyId {
     /// Returns device ID of the device key ID.
     #[wasm_bindgen(getter, js_name = "deviceId")]
     pub fn device_id(&self) -> DeviceId {
-        self.inner.device_id().to_owned().into()
+        // TODO: when https://github.com/ruma/ruma/issues/1940 is fixed,
+        // this should just be:
+        //self.inner.key_name().to_owned().into()
+
+        let key_id = self.inner.to_string();
+
+        let colon_pos =
+            key_id.find(":").expect("Key should not have parsed if it did not contain ':'");
+
+        DeviceId::new(&key_id[(colon_pos + 1)..])
     }
 
     /// Return the device key ID as a string.
