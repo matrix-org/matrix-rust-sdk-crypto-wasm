@@ -120,7 +120,16 @@ impl DeviceKeyId {
     /// Returns device ID of the device key ID.
     #[wasm_bindgen(getter, js_name = "deviceId")]
     pub fn device_id(&self) -> DeviceId {
-        self.inner.device_id().to_owned().into()
+        // TODO: when https://github.com/ruma/ruma/issues/1940 is fixed,
+        // this should just be:
+        //self.inner.key_name().to_owned().into()
+
+        let key_id = self.inner.to_string();
+
+        let colon_pos =
+            key_id.find(":").expect("Key should not have parsed if it did not contain ':'");
+
+        DeviceId::new(&key_id[(colon_pos + 1)..])
     }
 
     /// Return the device key ID as a string.
@@ -163,17 +172,14 @@ impl DeviceKeyAlgorithm {
 #[derive(Debug)]
 pub enum DeviceKeyAlgorithmName {
     /// The Ed25519 signature algorithm.
-    Ed25519,
+    Ed25519 = 0,
 
     /// The Curve25519 ECDH algorithm.
-    Curve25519,
+    Curve25519 = 1,
 
-    /// The Curve25519 ECDH algorithm, but the key also contains
-    /// signatures.
-    SignedCurve25519,
-
+    // SignedCurve25519 = 2 used to exist but was removed from Ruma
     /// An unknown device key algorithm.
-    Unknown,
+    Unknown = 3,
 }
 
 impl TryFrom<DeviceKeyAlgorithmName> for ruma::DeviceKeyAlgorithm {
@@ -185,7 +191,6 @@ impl TryFrom<DeviceKeyAlgorithmName> for ruma::DeviceKeyAlgorithm {
         Ok(match value {
             Ed25519 => Self::Ed25519,
             Curve25519 => Self::Curve25519,
-            SignedCurve25519 => Self::SignedCurve25519,
             Unknown => {
                 return Err(JsError::new(
                     "The `DeviceKeyAlgorithmName.Unknown` variant cannot be converted",
@@ -202,7 +207,6 @@ impl From<ruma::DeviceKeyAlgorithm> for DeviceKeyAlgorithmName {
         match value {
             Ed25519 => Self::Ed25519,
             Curve25519 => Self::Curve25519,
-            SignedCurve25519 => Self::SignedCurve25519,
             _ => Self::Unknown,
         }
     }
