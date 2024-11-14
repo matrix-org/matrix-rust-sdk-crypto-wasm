@@ -20,18 +20,31 @@
     ],
     "exports": {
         ".": {
-            "types": "./pkg/index.d.ts",
-            "default": "./pkg/index.js"
+            "node": {
+                "require": "./node.js",
+                "import": "./node.mjs"
+            },
+            "require": "./index.js",
+            "import": "./index.mjs",
+            "types": "./index.d.ts"
         }
     },
     "files": [
-        "pkg/matrix_sdk_crypto_wasm_bg.wasm.js",
+        "index.mjs",
+        "index.js",
+        "index.d.ts",
+        "node.mjs",
+        "node.js",
+        "pkg/matrix_sdk_crypto_wasm.d.ts",
+        "pkg/matrix_sdk_crypto_wasm_bg.js",
+        "pkg/matrix_sdk_crypto_wasm_bg.cjs",
         "pkg/matrix_sdk_crypto_wasm_bg.wasm.d.ts",
-        "pkg/index.js",
-        "pkg/index.d.ts"
+        "pkg/matrix_sdk_crypto_wasm_bg.wasm"
     ],
     "devDependencies": {
+        "@babel/cli": "^7.23.5",
         "@babel/core": "^7.23.5",
+        "@babel/plugin-transform-modules-commonjs": "^7.25.9",
         "@babel/preset-env": "^7.23.5",
         "@babel/preset-typescript": "^7.23.3",
         "@tsconfig/node18": "^18.2.4",
@@ -60,5 +73,6 @@
         "test": "jest --verbose && yarn run wasm-pack test --node",
         "doc": "typedoc --tsconfig .",
         "prepack": "npm run build && npm run test"
-    }
+    },
+    "packageManager": "yarn@1.22.22+sha512.a6b2f7906b721bba3d67d4aff083df04dad64c399707841b7acf00f6b133b7ac24255f2652fa22ae3534329dc6180534e98d17432037ff6fd140556e2bb3137e"
 }

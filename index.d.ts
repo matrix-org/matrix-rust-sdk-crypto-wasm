@@ -1,3 +1,5 @@
+export * from "./pkg/matrix_sdk_crypto_wasm.d";
+
 /**
  * Load the WebAssembly module in the background, if it has not already been loaded.
  *
