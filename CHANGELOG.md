@@ -1,5 +1,7 @@
 # UNRELEASED
 
+-   Update matrix-rusk-sdk to `e99939db857ca`.
+
 # matrix-sdk-crypto-wasm v11.0.0
 
 -   Update matrix-rust-sdk to `70bcddfba5e19`.

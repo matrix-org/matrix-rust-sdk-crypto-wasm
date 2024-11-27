@@ -16,14 +16,14 @@ use matrix_sdk_common::ruma::{
     exports::serde::ser::Error,
 };
 use matrix_sdk_crypto::{
-    requests::{
-        KeysBackupRequest as OriginalKeysBackupRequest,
+    types::requests::{
+        AnyOutgoingRequest, KeysBackupRequest as OriginalKeysBackupRequest,
         KeysQueryRequest as OriginalKeysQueryRequest,
         RoomMessageRequest as OriginalRoomMessageRequest,
         ToDeviceRequest as OriginalToDeviceRequest,
         UploadSigningKeysRequest as OriginalUploadSigningKeysRequest,
     },
-    CrossSigningBootstrapRequests as OriginalCrossSigningBootstrapRequests, OutgoingRequests,
+    CrossSigningBootstrapRequests as OriginalCrossSigningBootstrapRequests,
 };
 use wasm_bindgen::prelude::*;
 
@@ -405,7 +405,7 @@ macro_rules! request {
     };
 }
 
-// Generate the methods needed to convert rust `OutgoingRequests` into the js
+// Generate the methods needed to convert rust `AnyOutgoingRequest` into the js
 // counterpart. Technically it's converting tuples `(String, &Original)`, where
 // the first member  is the request ID, into js requests. Used by
 // `TryFrom<OutgoingRequest> for JsValue`.
@@ -487,32 +487,32 @@ impl TryFrom<&OriginalToDeviceRequest> for ToDeviceRequest {
 /// different types, we have no choice that hiding everything behind a
 /// `JsValue`.
 pub fn outgoing_request_to_js_value(
-    outgoing_request: matrix_sdk_crypto::OutgoingRequest,
+    outgoing_request: matrix_sdk_crypto::types::requests::OutgoingRequest,
 ) -> Result<JsValue, serde_json::Error> {
     let request_id = outgoing_request.request_id().to_string();
 
     Ok(match outgoing_request.request() {
-        OutgoingRequests::KeysUpload(request) => {
+        AnyOutgoingRequest::KeysUpload(request) => {
             JsValue::from(KeysUploadRequest::try_from((request_id, request))?)
         }
 
-        OutgoingRequests::KeysQuery(request) => {
+        AnyOutgoingRequest::KeysQuery(request) => {
             JsValue::from(KeysQueryRequest::try_from((request_id, request))?)
         }
 
-        OutgoingRequests::KeysClaim(request) => {
+        AnyOutgoingRequest::KeysClaim(request) => {
             JsValue::from(KeysClaimRequest::try_from((request_id, request))?)
         }
 
-        OutgoingRequests::ToDeviceRequest(request) => {
+        AnyOutgoingRequest::ToDeviceRequest(request) => {
             JsValue::from(ToDeviceRequest::try_from((request_id, request))?)
         }
 
-        OutgoingRequests::SignatureUpload(request) => {
+        AnyOutgoingRequest::SignatureUpload(request) => {
             JsValue::from(SignatureUploadRequest::try_from((request_id, request))?)
         }
 
-        OutgoingRequests::RoomMessage(request) => {
+        AnyOutgoingRequest::RoomMessage(request) => {
             JsValue::from(RoomMessageRequest::try_from((request_id, request))?)
         }
     })
@@ -714,7 +714,7 @@ pub(crate) mod tests {
         },
         device_id, user_id, OneTimeKeyAlgorithm,
     };
-    use matrix_sdk_crypto::requests::KeysQueryRequest as OriginalKeysQueryRequest;
+    use matrix_sdk_crypto::types::requests::KeysQueryRequest as OriginalKeysQueryRequest;
     use serde_json::Value;
     use wasm_bindgen_test::wasm_bindgen_test;
 

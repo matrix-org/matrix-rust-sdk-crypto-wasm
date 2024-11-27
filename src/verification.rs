@@ -1075,16 +1075,16 @@ impl VerificationRequest {
 // different types, we have no choice that hiding everything behind a
 // `JsValue`.
 pub(crate) struct OutgoingVerificationRequest {
-    pub(crate) inner: matrix_sdk_crypto::OutgoingVerificationRequest,
+    pub(crate) inner: matrix_sdk_crypto::types::requests::OutgoingVerificationRequest,
 }
 
-impl_from_to_inner!(matrix_sdk_crypto::OutgoingVerificationRequest => OutgoingVerificationRequest);
+impl_from_to_inner!(matrix_sdk_crypto::types::requests::OutgoingVerificationRequest => OutgoingVerificationRequest);
 
 impl TryFrom<OutgoingVerificationRequest> for JsValue {
     type Error = serde_json::Error;
 
     fn try_from(outgoing_request: OutgoingVerificationRequest) -> Result<Self, Self::Error> {
-        use matrix_sdk_crypto::OutgoingVerificationRequest::*;
+        use matrix_sdk_crypto::types::requests::OutgoingVerificationRequest::*;
 
         let request_id = outgoing_request.inner.request_id().to_string();
 

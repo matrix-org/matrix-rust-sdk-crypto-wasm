@@ -15,7 +15,7 @@ use matrix_sdk_common::{
     deserialized_responses::AlgorithmInfo,
     ruma::{self, api::IncomingResponse as RumaIncomingResponse},
 };
-use matrix_sdk_crypto::IncomingResponse;
+use matrix_sdk_crypto::types::requests::AnyIncomingResponse;
 use wasm_bindgen::prelude::*;
 
 use crate::{encryption, identifiers, impl_from_to_inner, requests::RequestType};
@@ -127,20 +127,22 @@ impl TryFrom<(RequestType, http::Response<Vec<u8>>)> for OwnedResponse {
     }
 }
 
-// Make `OwnedResponse` implement `Into<IncomingResponse>`.
+// Make `OwnedResponse` implement `Into<AnyIncomingResponse>`.
 //
 // Required so that we can pass `OwnedResponse` into the real
 // `matrix_sdk_crypto_js::OlmMachine::mark_request_as_sent`.
-impl<'a> From<&'a OwnedResponse> for IncomingResponse<'a> {
+impl<'a> From<&'a OwnedResponse> for AnyIncomingResponse<'a> {
     fn from(response: &'a OwnedResponse) -> Self {
         match response {
-            OwnedResponse::KeysUpload(response) => IncomingResponse::KeysUpload(response),
-            OwnedResponse::KeysQuery(response) => IncomingResponse::KeysQuery(response),
-            OwnedResponse::KeysClaim(response) => IncomingResponse::KeysClaim(response),
-            OwnedResponse::ToDevice(response) => IncomingResponse::ToDevice(response),
-            OwnedResponse::SignatureUpload(response) => IncomingResponse::SignatureUpload(response),
-            OwnedResponse::RoomMessage(response) => IncomingResponse::RoomMessage(response),
-            OwnedResponse::KeysBackup(response) => IncomingResponse::KeysBackup(response),
+            OwnedResponse::KeysUpload(response) => AnyIncomingResponse::KeysUpload(response),
+            OwnedResponse::KeysQuery(response) => AnyIncomingResponse::KeysQuery(response),
+            OwnedResponse::KeysClaim(response) => AnyIncomingResponse::KeysClaim(response),
+            OwnedResponse::ToDevice(response) => AnyIncomingResponse::ToDevice(response),
+            OwnedResponse::SignatureUpload(response) => {
+                AnyIncomingResponse::SignatureUpload(response)
+            }
+            OwnedResponse::RoomMessage(response) => AnyIncomingResponse::RoomMessage(response),
+            OwnedResponse::KeysBackup(response) => AnyIncomingResponse::KeysBackup(response),
         }
     }
 }
