@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// This is the entrypoint on non-node ESM environments.
+// This is the entrypoint on non-node ESM environments (such as Element Web).
 // `asyncLoad` will load the WASM module using a `fetch` call.
 import * as bindings from "./pkg/matrix_sdk_crypto_wasm_bg.js";
 
