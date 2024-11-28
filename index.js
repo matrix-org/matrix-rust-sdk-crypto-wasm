@@ -61,7 +61,7 @@ async function initAsync() {
 }
 
 module.exports = {
-    // Re-export everything from the wasm module bindings
+    // Re-export everything from the generated javascript wrappers
     ...bindings,
     initAsync,
 };

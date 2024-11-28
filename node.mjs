@@ -18,7 +18,6 @@ import { fileURLToPath } from "node:url";
 import { readFileSync } from "node:fs";
 import { readFile } from "node:fs/promises";
 import * as bindings from "./pkg/matrix_sdk_crypto_wasm_bg.js";
-export * from "./pkg/matrix_sdk_crypto_wasm_bg.js";
 
 const filename = fileURLToPath(new URL("./pkg/matrix_sdk_crypto_wasm_bg.wasm", import.meta.url));
 
@@ -63,3 +62,6 @@ export async function initAsync() {
     await loadModule();
     initInstance();
 }
+
+// Re-export everything from the generated javascript wrappers
+export * from "./pkg/matrix_sdk_crypto_wasm_bg.js";

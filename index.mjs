@@ -14,7 +14,6 @@
 
 // This is the entrypoint on non-node ESM environments.
 // `asyncLoad` will load the WASM module using a `fetch` call.
-export * from "./pkg/matrix_sdk_crypto_wasm_bg.js";
 import * as bindings from "./pkg/matrix_sdk_crypto_wasm_bg.js";
 
 // We want to throw an error if the user tries to use the bindings before
@@ -61,3 +60,6 @@ export async function initAsync() {
     bindings.__wbg_set_wasm(instance.exports);
     instance.exports.__wbindgen_start();
 }
+
+// Re-export everything from the generated javascript wrappers
+export * from "./pkg/matrix_sdk_crypto_wasm_bg.js";
