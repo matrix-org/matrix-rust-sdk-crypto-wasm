@@ -12,6 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+// @ts-check
+
 // This is the entrypoint on non-node CommonJS environments.
 // `asyncLoad` will load the WASM module using a `fetch` call.
 const bindings = require("./pkg/matrix_sdk_crypto_wasm_bg.cjs");
@@ -32,13 +34,14 @@ bindings.__wbg_set_wasm(
     ),
 );
 
+/** @type {WebAssembly.Module} */
 let mod;
 async function loadModule() {
     if (mod) return mod;
 
     if (typeof WebAssembly.compileStreaming === "function") {
         mod = await WebAssembly.compileStreaming(fetch(moduleUrl));
-        return mod;
+        return;
     }
 
     // Fallback to fetch and compile
@@ -47,15 +50,19 @@ async function loadModule() {
         throw new Error(`Failed to fetch wasm module: ${moduleUrl}`);
     }
     const bytes = await response.arrayBuffer();
-    mod = await WebAssembly.compile(response);
-    return mod;
+    mod = await WebAssembly.compile(bytes);
 }
 
 async function initAsync() {
-    const module = await loadModule();
-    const instance = new WebAssembly.Instance(module, {
+    await loadModule();
+
+    /** @type {{exports: typeof import("./pkg/matrix_sdk_crypto_wasm_bg.wasm.d")}} */
+    // @ts-expect-error: Typescript doesn't know what the instance exports exactly
+    const instance = new WebAssembly.Instance(mod, {
+        // @ts-expect-error: The bindings don't exactly match the 'ExportValue' type
         "./matrix_sdk_crypto_wasm_bg.js": bindings,
     });
+
     bindings.__wbg_set_wasm(instance.exports);
     instance.exports.__wbindgen_start();
 }

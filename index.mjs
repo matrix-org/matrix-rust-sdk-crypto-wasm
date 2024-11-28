@@ -12,6 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+// @ts-check
+
 // This is the entrypoint on non-node ESM environments (such as Element Web).
 // `asyncLoad` will load the WASM module using a `fetch` call.
 import * as bindings from "./pkg/matrix_sdk_crypto_wasm_bg.js";
@@ -33,13 +35,14 @@ bindings.__wbg_set_wasm(
 
 const moduleUrl = new URL("./pkg/matrix_sdk_crypto_wasm_bg.wasm", import.meta.url);
 
+/** @type {WebAssembly.Module} */
 let mod;
 async function loadModule() {
     if (mod) return mod;
 
     if (typeof WebAssembly.compileStreaming === "function") {
         mod = await WebAssembly.compileStreaming(fetch(moduleUrl));
-        return mod;
+        return;
     }
 
     // Fallback to fetch and compile
@@ -49,14 +52,18 @@ async function loadModule() {
     }
     const bytes = await response.arrayBuffer();
     mod = await WebAssembly.compile(bytes);
-    return mod;
 }
 
 export async function initAsync() {
-    const mod = await loadModule();
+    await loadModule();
+
+    /** @type {{exports: typeof import("./pkg/matrix_sdk_crypto_wasm_bg.wasm.d")}} */
+    // @ts-expect-error: Typescript doesn't know what the instance exports exactly
     const instance = new WebAssembly.Instance(mod, {
+        // @ts-expect-error: The bindings don't exactly match the 'ExportValue' type
         "./matrix_sdk_crypto_wasm_bg.js": bindings,
     });
+
     bindings.__wbg_set_wasm(instance.exports);
     instance.exports.__wbindgen_start();
 }

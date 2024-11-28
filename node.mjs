@@ -12,6 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+// @ts-check
+
 // This is the entrypoint on node-compatible ESM environments.
 // `asyncLoad` will use `fs.readFile` to load the WASM module.
 import { fileURLToPath } from "node:url";
@@ -30,12 +32,13 @@ bindings.__wbg_set_wasm(
         {
             get(_target, prop) {
                 loadModuleSync();
-                return initInstance(mod)[prop];
+                return initInstance()[prop];
             },
         },
     ),
 );
 
+/** @type {WebAssembly.Module} */
 let mod;
 function loadModuleSync() {
     if (mod) return mod;
@@ -50,7 +53,10 @@ async function loadModule() {
 }
 
 function initInstance() {
+    /** @type {{exports: typeof import("./pkg/matrix_sdk_crypto_wasm_bg.wasm.d")}} */
+    // @ts-expect-error: Typescript doesn't know what the instance exports exactly
     const instance = new WebAssembly.Instance(mod, {
+        // @ts-expect-error: The bindings don't exactly match the 'ExportValue' type
         "./matrix_sdk_crypto_wasm_bg.js": bindings,
     });
     bindings.__wbg_set_wasm(instance.exports);
