@@ -34,10 +34,19 @@ bindings.__wbg_set_wasm(
     ),
 );
 
-/** @type {WebAssembly.Module} */
+/**
+ * Stores the compiled WebAssembly module
+ * @type {WebAssembly.Module}
+ */
 let mod;
+
+/**
+ * Loads the WASM module asynchronously if not loaded, filling the `mod` variable with it.
+ *
+ * @returns {Promise<void>}
+ */
 async function loadModule() {
-    if (mod) return mod;
+    if (mod) return;
 
     if (typeof WebAssembly.compileStreaming === "function") {
         mod = await WebAssembly.compileStreaming(fetch(moduleUrl));
@@ -53,6 +62,13 @@ async function loadModule() {
     mod = await WebAssembly.compile(bytes);
 }
 
+/**
+ * Load the WebAssembly module in the background, if it has not already been loaded.
+ *
+ * Returns a promise which will resolve once the other methods are ready.
+ *
+ * @returns {Promise<void>}
+ */
 async function initAsync() {
     await loadModule();
 

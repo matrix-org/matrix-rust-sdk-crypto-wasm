@@ -38,20 +38,39 @@ bindings.__wbg_set_wasm(
     ),
 );
 
-/** @type {WebAssembly.Module} */
+/**
+ * Stores the compiled WebAssembly module
+ * @type {WebAssembly.Module}
+ */
 let mod;
+
+/**
+ * Loads the WASM module synchronously if not loaded, filling the `mod` variable with it.
+ *
+ * @returns {void}
+ */
 function loadModuleSync() {
-    if (mod) return mod;
+    if (mod) return;
     const bytes = readFileSync(filename);
     mod = new WebAssembly.Module(bytes);
 }
 
+/**
+ * Loads the WASM module asynchronously if not loaded, filling the `mod` variable with it.
+ *
+ * @returns {Promise<void>}
+ */
 async function loadModule() {
-    if (mod) return mod;
+    if (mod) return;
     const bytes = await readFile(filename);
     mod = await WebAssembly.compile(bytes);
 }
 
+/**
+ * Initializes the WASM module and returns the exports from the WASM module.
+ *
+ * @returns {typeof import("./pkg/matrix_sdk_crypto_wasm_bg.wasm.d")}
+ */
 function initInstance() {
     /** @type {{exports: typeof import("./pkg/matrix_sdk_crypto_wasm_bg.wasm.d")}} */
     // @ts-expect-error: Typescript doesn't know what the instance exports exactly
@@ -65,6 +84,13 @@ function initInstance() {
     return instance.exports;
 }
 
+/**
+ * Load the WebAssembly module in the background, if it has not already been loaded.
+ *
+ * Returns a promise which will resolve once the other methods are ready.
+ *
+ * @returns {Promise<void>}
+ */
 async function initAsync() {
     await loadModule();
     initInstance();

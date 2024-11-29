@@ -35,10 +35,19 @@ bindings.__wbg_set_wasm(
 
 const moduleUrl = new URL("./pkg/matrix_sdk_crypto_wasm_bg.wasm", import.meta.url);
 
-/** @type {WebAssembly.Module} */
+/**
+ * Stores the compiled WebAssembly module
+ * @type {WebAssembly.Module}
+ */
 let mod;
+
+/**
+ * Loads the WASM module asynchronously if not loaded, filling the `mod` variable with it.
+ *
+ * @returns {Promise<void>}
+ */
 async function loadModule() {
-    if (mod) return mod;
+    if (mod) return;
 
     if (typeof WebAssembly.compileStreaming === "function") {
         mod = await WebAssembly.compileStreaming(fetch(moduleUrl));
@@ -54,6 +63,13 @@ async function loadModule() {
     mod = await WebAssembly.compile(bytes);
 }
 
+/**
+ * Load the WebAssembly module in the background, if it has not already been loaded.
+ *
+ * Returns a promise which will resolve once the other methods are ready.
+ *
+ * @returns {Promise<void>}
+ */
 export async function initAsync() {
     await loadModule();
 
