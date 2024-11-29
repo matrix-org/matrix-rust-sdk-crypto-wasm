@@ -36,7 +36,7 @@ import {
     OtherUserIdentity,
     VerificationRequest,
     Versions,
-} from "../pkg";
+} from "@matrix-org/matrix-sdk-crypto-wasm";
 import "fake-indexeddb/auto";
 import * as crypto from "node:crypto";
 

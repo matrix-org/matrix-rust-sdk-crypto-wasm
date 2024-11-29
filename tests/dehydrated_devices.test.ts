@@ -10,7 +10,7 @@ import {
     RoomId,
     TrustRequirement,
     UserId,
-} from "../pkg/matrix_sdk_crypto_wasm";
+} from "@matrix-org/matrix-sdk-crypto-wasm";
 import "fake-indexeddb/auto";
 
 afterEach(() => {

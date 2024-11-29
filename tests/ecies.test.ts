@@ -1,4 +1,11 @@
-const { Ecies, SecretsBundle, UserId, DeviceId, OlmMachine, RequestType } = require("../pkg/matrix_sdk_crypto_wasm");
+const {
+    Ecies,
+    SecretsBundle,
+    UserId,
+    DeviceId,
+    OlmMachine,
+    RequestType,
+} = require("@matrix-org/matrix-sdk-crypto-wasm");
 
 describe(Ecies.name, () => {
     test("can establish a channel and decrypt the initial message", () => {

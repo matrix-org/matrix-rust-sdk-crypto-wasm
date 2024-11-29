@@ -1,4 +1,4 @@
-const { QrCodeData, QrCodeMode, Curve25519PublicKey } = require("../pkg/matrix_sdk_crypto_wasm");
+const { QrCodeData, QrCodeMode, Curve25519PublicKey } = require("@matrix-org/matrix-sdk-crypto-wasm");
 
 describe(QrCodeData.name, () => {
     test("can parse the QR code bytes from the MSC", () => {

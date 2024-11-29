@@ -1,4 +1,4 @@
-const { Curve25519PublicKey } = require("../pkg");
+const { Curve25519PublicKey } = require("@matrix-org/matrix-sdk-crypto-wasm");
 
 describe(Curve25519PublicKey.name, () => {
     test("Can create a Curve25519PublicKey from a base64 string", async () => {

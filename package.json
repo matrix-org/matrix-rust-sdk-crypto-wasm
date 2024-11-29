@@ -18,8 +18,12 @@
         "ruma",
         "nio"
     ],
-    "main": "pkg/index.js",
-    "types": "pkg/index.d.ts",
+    "exports": {
+        ".": {
+            "types": "./pkg/index.d.ts",
+            "default": "./pkg/index.js"
+        }
+    },
     "files": [
         "pkg/matrix_sdk_crypto_wasm_bg.wasm.js",
         "pkg/matrix_sdk_crypto_wasm_bg.wasm.d.ts",
