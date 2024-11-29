@@ -4,7 +4,7 @@ const {
     EncryptionSettings,
     HistoryVisibility,
     VerificationState,
-} = require("../pkg");
+} = require("@matrix-org/matrix-sdk-crypto-wasm");
 
 describe("EncryptionAlgorithm", () => {
     test("has the correct variant values", () => {

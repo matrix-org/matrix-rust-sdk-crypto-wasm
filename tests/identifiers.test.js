@@ -7,7 +7,7 @@ const {
     RoomId,
     ServerName,
     UserId,
-} = require("../pkg");
+} = require("@matrix-org/matrix-sdk-crypto-wasm");
 
 describe(UserId.name, () => {
     test("cannot be invalid", () => {

@@ -25,12 +25,12 @@ const {
     Qr,
     QrCode,
     QrCodeScan,
-} = require("../pkg");
+} = require("@matrix-org/matrix-sdk-crypto-wasm");
 const { zip, addMachineToMachine } = require("./helper");
-const { VerificationRequestPhase, QrState } = require("../pkg");
+const { VerificationRequestPhase, QrState } = require("@matrix-org/matrix-sdk-crypto-wasm");
 
 // Uncomment to enable debug logging for tests
-//const { Tracing, LoggerLevel } = require("../pkg");
+//const { Tracing, LoggerLevel } = require("@matrix-org/matrix-sdk-crypto-wasm");
 //new Tracing(LoggerLevel.Trace).turnOn();
 
 describe("LocalTrust", () => {

@@ -1,4 +1,4 @@
-const { HistoryVisibility } = require("../pkg");
+const { HistoryVisibility } = require("@matrix-org/matrix-sdk-crypto-wasm");
 
 describe("HistoryVisibility", () => {
     test("has the correct variant values", () => {

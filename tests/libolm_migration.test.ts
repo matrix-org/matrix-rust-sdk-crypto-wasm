@@ -26,7 +26,7 @@ import {
     StoreHandle,
     Tracing,
     UserId,
-} from "../pkg";
+} from "@matrix-org/matrix-sdk-crypto-wasm";
 
 beforeAll(() => {
     new Tracing(LoggerLevel.Trace).turnOn();
