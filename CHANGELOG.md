@@ -6,10 +6,10 @@
 
 **BREAKING CHANGES**
 
- - The WebAssembly module is no longer synchronously loaded on Web platforms
-   when used. This means that the `initAsync` function **must** be called before any
-   other functions are used. The behaviour is unchanged and still available on
-   Node.js.
+-   The WebAssembly module is no longer synchronously loaded on Web platforms
+    when used. This means that the `initAsync` function **must** be called before any
+    other functions are used. The behaviour is unchanged and still available on
+    Node.js.
 
 # matrix-sdk-crypto-wasm v11.0.0
 
