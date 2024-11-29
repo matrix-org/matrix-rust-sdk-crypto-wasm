@@ -1,6 +1,15 @@
 # UNRELEASED
 
 -   Update matrix-rusk-sdk to `e99939db857ca`.
+-   The WebAssembly module is now loaded using `fetch` on Web platforms, reducing
+    the bundle size significantly, as well as the time it takes to compile it.
+
+**BREAKING CHANGES**
+
+ - The WebAssembly module is no longer synchronously loaded on Web platforms
+   when used. This means that the `initAsync` function **must** be called before any
+   other functions are used. The behaviour is unchanged and still available on
+   Node.js.
 
 # matrix-sdk-crypto-wasm v11.0.0
 
