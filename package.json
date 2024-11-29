@@ -42,8 +42,8 @@
         "fake-indexeddb": "^4.0",
         "jest": "^28.1.0",
         "prettier": "^2.8.3",
-        "typedoc": "^0.22.17",
-        "typescript": "4.7",
+        "typedoc": "^0.27.1",
+        "typescript": "5.7.2",
         "wasm-pack": "^0.12.1",
         "yargs-parser": "~21.0.1"
     },
