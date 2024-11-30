@@ -31,53 +31,62 @@ bindings.__wbg_set_wasm(
         {},
         {
             get(_target, prop) {
-                loadModuleSync();
-                return initInstance()[prop];
+                const mod = loadModuleSync();
+                return initInstance(mod)[prop];
             },
         },
     ),
 );
 
 /**
- * Stores the compiled WebAssembly module
- * @type {WebAssembly.Module}
+ * Stores a promise which resolves to the WebAssembly module
+ * @type {Promise<WebAssembly.Module> | null}
  */
-let mod;
+let modPromise = null;
 
 /**
- * Loads the WASM module synchronously if not loaded, filling the `mod` variable with it.
+ * Tracks whether the module has been instanciated or not
+ * @type {boolean}
+ */
+let initialised = false;
+
+/**
+ * Loads the WASM module synchronously
  *
- * @returns {void}
+ * It will throw if there is an attempt to laod the module asynchronously running
+ *
+ * @returns {WebAssembly.Module}
  */
 function loadModuleSync() {
-    if (mod) return;
+    if (modPromise) throw new Error("The WASM module is being loadded asynchronously but hasn't finished");
     const bytes = readFileSync(filename);
-    mod = new WebAssembly.Module(bytes);
+    return new WebAssembly.Module(bytes);
 }
 
 /**
- * Loads the WASM module asynchronously if not loaded, filling the `mod` variable with it.
+ * Loads the WASM module asynchronously
  *
- * @returns {Promise<void>}
+ * @returns {Promise<WebAssembly.Module>}
  */
 async function loadModule() {
-    if (mod) return;
     const bytes = await readFile(filename);
-    mod = await WebAssembly.compile(bytes);
+    return await WebAssembly.compile(bytes);
 }
 
 /**
  * Initializes the WASM module and returns the exports from the WASM module.
  *
+ * @param {WebAssembly.Module} mod
  * @returns {typeof import("./pkg/matrix_sdk_crypto_wasm_bg.wasm.d")}
  */
-function initInstance() {
+function initInstance(mod) {
     /** @type {{exports: typeof import("./pkg/matrix_sdk_crypto_wasm_bg.wasm.d")}} */
     // @ts-expect-error: Typescript doesn't know what the instance exports exactly
     const instance = new WebAssembly.Instance(mod, {
         // @ts-expect-error: The bindings don't exactly match the 'ExportValue' type
         "./matrix_sdk_crypto_wasm_bg.js": bindings,
     });
+
     bindings.__wbg_set_wasm(instance.exports);
     instance.exports.__wbindgen_start();
     return instance.exports;
@@ -91,8 +100,11 @@ function initInstance() {
  * @returns {Promise<void>}
  */
 export async function initAsync() {
-    await loadModule();
-    initInstance();
+    if (!modPromise) modPromise = loadModule();
+    const mod = await modPromise;
+    if (initialised) return;
+    initialised = true;
+    initInstance(mod);
 }
 
 // Re-export everything from the generated javascript wrappers

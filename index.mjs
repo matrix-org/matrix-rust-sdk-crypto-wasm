@@ -18,6 +18,8 @@
 // `asyncLoad` will load the WASM module using a `fetch` call.
 import * as bindings from "./pkg/matrix_sdk_crypto_wasm_bg.js";
 
+const moduleUrl = new URL("./pkg/matrix_sdk_crypto_wasm_bg.wasm", import.meta.url);
+
 // We want to throw an error if the user tries to use the bindings before
 // calling `initAsync`.
 bindings.__wbg_set_wasm(
@@ -33,25 +35,26 @@ bindings.__wbg_set_wasm(
     ),
 );
 
-const moduleUrl = new URL("./pkg/matrix_sdk_crypto_wasm_bg.wasm", import.meta.url);
-
 /**
- * Stores the compiled WebAssembly module
- * @type {WebAssembly.Module}
+ * Stores a promise which resolves to the WebAssembly module
+ * @type {Promise<WebAssembly.Module> | null}
  */
-let mod;
+let modPromise = null;
 
 /**
- * Loads the WASM module asynchronously if not loaded, filling the `mod` variable with it.
+ * Tracks whether the module has been instanciated or not
+ * @type {boolean}
+ */
+let initialised = false;
+
+/**
+ * Loads the WASM module asynchronously
  *
- * @returns {Promise<void>}
+ * @returns {Promise<WebAssembly.Module>}
  */
 async function loadModule() {
-    if (mod) return;
-
     if (typeof WebAssembly.compileStreaming === "function") {
-        mod = await WebAssembly.compileStreaming(fetch(moduleUrl));
-        return;
+        return await WebAssembly.compileStreaming(fetch(moduleUrl));
     }
 
     // Fallback to fetch and compile
@@ -60,7 +63,7 @@ async function loadModule() {
         throw new Error(`Failed to fetch wasm module: ${moduleUrl}`);
     }
     const bytes = await response.arrayBuffer();
-    mod = await WebAssembly.compile(bytes);
+    return await WebAssembly.compile(bytes);
 }
 
 /**
@@ -70,9 +73,12 @@ async function loadModule() {
  *
  * @returns {Promise<void>}
  */
-export async function initAsync() {
-    await loadModule();
+async function initAsync() {
+    if (!modPromise) modPromise = loadModule();
+    const mod = await modPromise;
 
+    if (initialised) return;
+    initialised = true;
     /** @type {{exports: typeof import("./pkg/matrix_sdk_crypto_wasm_bg.wasm.d")}} */
     // @ts-expect-error: Typescript doesn't know what the instance exports exactly
     const instance = new WebAssembly.Instance(mod, {
