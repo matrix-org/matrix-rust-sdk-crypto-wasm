@@ -1,6 +1,7 @@
 # UNRELEASED
 
 -   Update matrix-rusk-sdk to `e99939db857ca`.
+-   The published package is now a proper dual CommonJS/ESM package.
 -   The WebAssembly module is now loaded using `fetch` on Web platforms, reducing
     the bundle size significantly, as well as the time it takes to compile it.
 
