@@ -4,6 +4,7 @@
 -   The published package is now a proper dual CommonJS/ESM package.
 -   The WebAssembly module is now loaded using `fetch` on Web platforms, reducing
     the bundle size significantly, as well as the time it takes to compile it.
+    ([#167](https://github.com/matrix-org/matrix-rust-sdk-crypto-wasm/pull/167))
 
 **BREAKING CHANGES**
 
