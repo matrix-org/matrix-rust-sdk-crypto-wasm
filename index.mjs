@@ -73,7 +73,7 @@ async function loadModule() {
  *
  * @returns {Promise<void>}
  */
-async function initAsync() {
+export async function initAsync() {
     if (!modPromise) modPromise = loadModule();
     const mod = await modPromise;
 
