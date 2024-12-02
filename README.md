@@ -26,8 +26,11 @@ Encryption](https://en.wikipedia.org/wiki/End-to-end_encryption)) for
     ```
 
 2. Import the library into your project and initialise it.
-   The library must be initialised before it can be used, else it will throw an error.
-   On Web platforms, the library will use `fetch` to get the WebAssembly binary, which should be handled by most bundlers.
+
+    On Web platforms, the library must be initialised by calling `initAsync`
+    before it can be used, else it will throw an error. This is also recommended
+    on other platforms, as it allows the WebAssembly module to be loaded
+    asynchronously.
 
     ```javascript
     import { initAsync, Tracing, LoggerLevel, OlmMachine, UserId, DeviceId } from "@matrix-org/matrix-sdk-crypto-wasm";
