@@ -83,6 +83,8 @@ async function loadModule() {
  * @returns {typeof import("./pkg/matrix_sdk_crypto_wasm_bg.wasm.d")}
  */
 function initInstance(mod) {
+    if (initialised) throw new Error("initInstance called twice");
+
     /** @type {{exports: typeof import("./pkg/matrix_sdk_crypto_wasm_bg.wasm.d")}} */
     // @ts-expect-error: Typescript doesn't know what the instance exports exactly
     const instance = new WebAssembly.Instance(mod, {
@@ -92,6 +94,7 @@ function initInstance(mod) {
 
     bindings.__wbg_set_wasm(instance.exports);
     instance.exports.__wbindgen_start();
+    initialised = true;
     return instance.exports;
 }
 
@@ -103,11 +106,9 @@ function initInstance(mod) {
  * @returns {Promise<void>}
  */
 export async function initAsync() {
-    if (!modPromise) modPromise = loadModule();
-    const mod = await modPromise;
     if (initialised) return;
-    initialised = true;
-    initInstance(mod);
+    if (!modPromise) modPromise = loadModule().then(initInstance);
+    await modPromise;
 }
 
 // Re-export everything from the generated javascript wrappers
