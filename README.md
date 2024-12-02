@@ -27,26 +27,27 @@ Encryption](https://en.wikipedia.org/wiki/End-to-end_encryption)) for
 
 2. Import the library into your project and initialise it.
 
-    It is recommended that you use a dynamic import, particularly in a Web
-    environment, because the WASM artifiact is large:
+    On Web platforms, the library must be initialised by calling `initAsync`
+    before it can be used, else it will throw an error. This is also recommended
+    on other platforms, as it allows the WebAssembly module to be loaded
+    asynchronously.
 
     ```javascript
+    import { initAsync, Tracing, LoggerLevel, OlmMachine, UserId, DeviceId } from "@matrix-org/matrix-sdk-crypto-wasm";
+
     async function loadCrypto(userId, deviceId) {
-        const matrixSdkCrypto = await import("@matrix-org/matrix-sdk-crypto-wasm");
-        await matrixSdkCrypto.initAsync();
+        // Do this before any other calls to the library
+        await initAsync();
 
         // Optional: enable tracing in the rust-sdk
-        new matrixSdkCrypto.Tracing(matrixSdkCrypto.LoggerLevel.Trace).turnOn();
+        new Tracing(LoggerLevel.Trace).turnOn();
 
         // Create a new OlmMachine
         //
         // The following will use an in-memory store. It is recommended to use
         // indexedDB where that is available.
         // See https://matrix-org.github.io/matrix-rust-sdk-crypto-wasm/classes/OlmMachine.html#initialize
-        const olmMachine = await matrixSdkCrypto.OlmMachine.initialize(
-            new matrixSdkCrypto.UserId(userId),
-            new matrixSdkCrypto.DeviceId(deviceId),
-        );
+        const olmMachine = await OlmMachine.initialize(new UserId(userId), new DeviceId(deviceId));
 
         return olmMachine;
     }

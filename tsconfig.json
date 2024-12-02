@@ -4,7 +4,7 @@
         "lib": ["DOM"]
     },
     "typedocOptions": {
-        "entryPoints": ["pkg/matrix_sdk_crypto_wasm.d.ts"],
+        "entryPoints": ["index.d.ts"],
         "out": "docs",
         "readme": "README.md"
     }
