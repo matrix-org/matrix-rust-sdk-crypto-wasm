@@ -36,34 +36,39 @@ bindings.__wbg_set_wasm(
 );
 
 /**
- * Stores a promise which resolves to the WebAssembly module
- * @type {Promise<WebAssembly.Module> | null}
+ * Stores a promise of the `loadModule` call
+ * @type {Promise<void> | null}
  */
 let modPromise = null;
 
 /**
- * Tracks whether the module has been instanciated or not
- * @type {boolean}
- */
-let initialised = false;
-
-/**
  * Loads the WASM module asynchronously
  *
- * @returns {Promise<WebAssembly.Module>}
+ * @returns {Promise<void>}
  */
 async function loadModule() {
+    let mod;
     if (typeof WebAssembly.compileStreaming === "function") {
-        return await WebAssembly.compileStreaming(fetch(moduleUrl));
+        mod = await WebAssembly.compileStreaming(fetch(moduleUrl));
+    } else {
+        // Fallback to fetch and compile
+        const response = await fetch(moduleUrl);
+        if (!response.ok) {
+            throw new Error(`Failed to fetch wasm module: ${moduleUrl}`);
+        }
+        const bytes = await response.arrayBuffer();
+        mod = await WebAssembly.compile(bytes);
     }
 
-    // Fallback to fetch and compile
-    const response = await fetch(moduleUrl);
-    if (!response.ok) {
-        throw new Error(`Failed to fetch wasm module: ${moduleUrl}`);
-    }
-    const bytes = await response.arrayBuffer();
-    return await WebAssembly.compile(bytes);
+    /** @type {{exports: typeof import("./pkg/matrix_sdk_crypto_wasm_bg.wasm.d")}} */
+    // @ts-expect-error: Typescript doesn't know what the instance exports exactly
+    const instance = new WebAssembly.Instance(mod, {
+        // @ts-expect-error: The bindings don't exactly match the 'ExportValue' type
+        "./matrix_sdk_crypto_wasm_bg.js": bindings,
+    });
+
+    bindings.__wbg_set_wasm(instance.exports);
+    instance.exports.__wbindgen_start();
 }
 
 /**
@@ -75,19 +80,7 @@ async function loadModule() {
  */
 async function initAsync() {
     if (!modPromise) modPromise = loadModule();
-    const mod = await modPromise;
-
-    if (initialised) return;
-    initialised = true;
-    /** @type {{exports: typeof import("./pkg/matrix_sdk_crypto_wasm_bg.wasm.d")}} */
-    // @ts-expect-error: Typescript doesn't know what the instance exports exactly
-    const instance = new WebAssembly.Instance(mod, {
-        // @ts-expect-error: The bindings don't exactly match the 'ExportValue' type
-        "./matrix_sdk_crypto_wasm_bg.js": bindings,
-    });
-
-    bindings.__wbg_set_wasm(instance.exports);
-    instance.exports.__wbindgen_start();
+    await modPromise;
 }
 
 module.exports = {
