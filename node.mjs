@@ -14,8 +14,11 @@
 
 // @ts-check
 
-// This is the entrypoint on node-compatible ESM environments.
-// `asyncLoad` will use `fs.readFile` to load the WASM module.
+/**
+ * This is the entrypoint on node-compatible ESM environments.
+ * `asyncLoad` will use `fs.readFile` to load the WASM module.
+ */
+
 import { fileURLToPath } from "node:url";
 import { readFileSync } from "node:fs";
 import { readFile } from "node:fs/promises";
@@ -23,9 +26,9 @@ import * as bindings from "./pkg/matrix_sdk_crypto_wasm_bg.js";
 
 const filename = fileURLToPath(new URL("./pkg/matrix_sdk_crypto_wasm_bg.wasm", import.meta.url));
 
-// We want to automatically load the WASM module in Node environments
+// In node environments, we want to automatically load the WASM module
 // synchronously if the consumer did not call `initAsync`. To do so, we install
-// a `Proxy` that will intercept calls to the WASM module
+// a `Proxy` that will intercept calls to the WASM module.
 bindings.__wbg_set_wasm(
     new Proxy(
         {},
@@ -45,7 +48,7 @@ bindings.__wbg_set_wasm(
 let modPromise = null;
 
 /**
- * Tracks whether the module has been instanciated or not
+ * Tracks whether the module has been instantiated or not
  * @type {boolean}
  */
 let initialised = false;

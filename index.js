@@ -14,8 +14,11 @@
 
 // @ts-check
 
-// This is the entrypoint on non-node CommonJS environments.
-// `asyncLoad` will load the WASM module using a `fetch` call.
+/**
+ * This is the entrypoint on non-node CommonJS environments.
+ * `asyncLoad` will load the WASM module using a `fetch` call.
+ */
+
 const bindings = require("./pkg/matrix_sdk_crypto_wasm_bg.cjs");
 
 const moduleUrl = require.resolve("./pkg/matrix_sdk_crypto_wasm_bg.wasm");
