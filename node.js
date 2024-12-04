@@ -65,7 +65,16 @@ function loadModuleSync() {
     if (modPromise) throw new Error("The WASM module is being loaded asynchronously but hasn't finished");
     const bytes = readFileSync(filename);
     const mod = new WebAssembly.Module(bytes);
-    return initInstance(mod);
+
+    const instance = new WebAssembly.Instance(mod, {
+        // @ts-expect-error: The bindings don't exactly match the 'ExportValue' type
+        "./matrix_sdk_crypto_wasm_bg.js": bindings,
+    });
+
+    initInstance(instance);
+
+    // @ts-expect-error: Typescript doesn't know what the instance exports exactly
+    return instance.exports;
 }
 
 /**
@@ -75,30 +84,28 @@ function loadModuleSync() {
  */
 async function loadModuleAsync() {
     const bytes = await readFile(filename);
-    const mod = await WebAssembly.compile(bytes);
-    return initInstance(mod);
+    const { instance } = await WebAssembly.instantiate(bytes, {
+        // @ts-expect-error: The bindings don't exactly match the 'ExportValue' type
+        "./matrix_sdk_crypto_wasm_bg.js": bindings,
+    });
+
+    initInstance(instance);
+
+    // @ts-expect-error: Typescript doesn't know what the instance exports exactly
+    return instance.exports;
 }
 
 /**
  * Initializes the WASM module and returns the exports from the WASM module.
  *
- * @param {WebAssembly.Module} mod
- * @returns {typeof import("./pkg/matrix_sdk_crypto_wasm_bg.wasm.d")}
+ * @param {WebAssembly.Instance} instance
  */
-function initInstance(mod) {
+function initInstance(instance) {
     if (initialised) throw new Error("initInstance called twice");
-
-    /** @type {{exports: typeof import("./pkg/matrix_sdk_crypto_wasm_bg.wasm.d.ts")}} */
-    // @ts-expect-error: Typescript doesn't know what the instance exports exactly
-    const instance = new WebAssembly.Instance(mod, {
-        // @ts-expect-error: The bindings don't exactly match the 'ExportValue' type
-        "./matrix_sdk_crypto_wasm_bg.js": bindings,
-    });
-
     bindings.__wbg_set_wasm(instance.exports);
+    // @ts-expect-error: Typescript doesn't know what the instance exports exactly
     instance.exports.__wbindgen_start();
     initialised = true;
-    return instance.exports;
 }
 
 /**
