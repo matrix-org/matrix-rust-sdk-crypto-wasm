@@ -57,12 +57,12 @@ let initialised = false;
 /**
  * Loads the WASM module synchronously
  *
- * It will throw if there is an attempt to laod the module asynchronously running
+ * It will throw if there is an attempt to load the module asynchronously running
  *
  * @returns {WebAssembly.Module}
  */
 function loadModuleSync() {
-    if (modPromise) throw new Error("The WASM module is being loadded asynchronously but hasn't finished");
+    if (modPromise) throw new Error("The WASM module is being loaded asynchronously but hasn't finished");
     const bytes = readFileSync(filename);
     return new WebAssembly.Module(bytes);
 }
@@ -72,7 +72,7 @@ function loadModuleSync() {
  *
  * @returns {Promise<WebAssembly.Module>}
  */
-async function loadModule() {
+async function loadModuleAsync() {
     const bytes = await readFile(filename);
     return await WebAssembly.compile(bytes);
 }
@@ -108,7 +108,7 @@ function initInstance(mod) {
  */
 export async function initAsync() {
     if (initialised) return;
-    if (!modPromise) modPromise = loadModule().then(initInstance);
+    if (!modPromise) modPromise = loadModuleAsync().then(initInstance);
     await modPromise;
 }
 

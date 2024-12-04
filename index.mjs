@@ -45,11 +45,11 @@ bindings.__wbg_set_wasm(
 let modPromise = null;
 
 /**
- * Loads the WASM module asynchronously
+ * Loads and instantiates the WASM module asynchronously
  *
  * @returns {Promise<void>}
  */
-async function loadModule() {
+async function loadModuleAsync() {
     let mod;
     if (typeof WebAssembly.compileStreaming === "function") {
         mod = await WebAssembly.compileStreaming(fetch(moduleUrl));
@@ -82,7 +82,7 @@ async function loadModule() {
  * @returns {Promise<void>}
  */
 export async function initAsync() {
-    if (!modPromise) modPromise = loadModule();
+    if (!modPromise) modPromise = loadModuleAsync();
     await modPromise;
 }
 
