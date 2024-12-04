@@ -34,9 +34,9 @@ bindings.__wbg_set_wasm(
         {},
         {
             get(_target, prop) {
-                const mod = loadModuleSync();
-                // @ts-expect-error: This results to an `any` type, which is fine
-                return initInstance(mod)[prop];
+                const instance = loadModuleSync();
+                // @ts-expect-error: This results in an `any` type, which is fine
+                return instance[prop];
             },
         },
     ),
@@ -55,26 +55,28 @@ let modPromise = null;
 let initialised = false;
 
 /**
- * Loads the WASM module synchronously
+ * Loads and instantiates the WASM module synchronously
  *
  * It will throw if there is an attempt to load the module asynchronously running
  *
- * @returns {WebAssembly.Module}
+ * @returns {typeof import("./pkg/matrix_sdk_crypto_wasm_bg.wasm.d")}
  */
 function loadModuleSync() {
     if (modPromise) throw new Error("The WASM module is being loaded asynchronously but hasn't finished");
     const bytes = readFileSync(filename);
-    return new WebAssembly.Module(bytes);
+    const mod = new WebAssembly.Module(bytes);
+    return initInstance(mod);
 }
 
 /**
- * Loads the WASM module asynchronously
+ * Loads and instantiates the WASM module asynchronously
  *
- * @returns {Promise<WebAssembly.Module>}
+ * @returns {Promise<typeof import("./pkg/matrix_sdk_crypto_wasm_bg.wasm.d")>}
  */
 async function loadModuleAsync() {
     const bytes = await readFile(filename);
-    return await WebAssembly.compile(bytes);
+    const mod = await WebAssembly.compile(bytes);
+    return initInstance(mod);
 }
 
 /**
@@ -108,7 +110,7 @@ function initInstance(mod) {
  */
 async function initAsync() {
     if (initialised) return;
-    if (!modPromise) modPromise = loadModuleAsync().then(initInstance);
+    if (!modPromise) modPromise = loadModuleAsync();
     await modPromise;
 }
 
