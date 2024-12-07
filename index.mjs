@@ -50,7 +50,7 @@ let modPromise = null;
  * @returns {Promise<void>}
  */
 async function loadModuleAsync() {
-    const { instance } = await WebAssembly.instantiateStreaming(fetch(moduleUrl), {
+    const { instance } = await WebAssembly.instantiateStreaming(fetch(moduleUrl), {
         // @ts-expect-error: The bindings don't exactly match the 'ExportValue' type
         "./matrix_sdk_crypto_wasm_bg.js": bindings,
     });
