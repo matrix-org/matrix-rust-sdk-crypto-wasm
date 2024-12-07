@@ -9,8 +9,6 @@ cd "$(dirname "$0")"/..
 
 WASM_PACK_ARGS="${WASM_PACK_ARGS:-}"
 
-rm -rf pkg
-
 # Generate the JavaScript bindings
 # --no-pack disables generation of a `package.json` file, as we're managing it ourselves.
 wasm-pack build --no-pack --target bundler --scope matrix-org --out-dir pkg --weak-refs "${WASM_PACK_ARGS}"
