@@ -5,6 +5,7 @@
 -   The WebAssembly module is now loaded using `fetch` on Web platforms, reducing
     the bundle size significantly, as well as the time it takes to compile it.
     ([#167](https://github.com/matrix-org/matrix-rust-sdk-crypto-wasm/pull/167)),
+    ([#174](https://github.com/matrix-org/matrix-rust-sdk-crypto-wasm/pull/174)),
     ([#175](https://github.com/matrix-org/matrix-rust-sdk-crypto-wasm/pull/175))
 
 **BREAKING CHANGES**
