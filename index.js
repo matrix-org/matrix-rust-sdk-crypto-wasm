@@ -50,13 +50,13 @@ let modPromise = null;
  * @returns {Promise<void>}
  */
 async function loadModuleAsync() {
-    const instantiatedSource = await WebAssembly.instantiateStreaming(fetch(moduleUrl), {
+    const { instance } = await WebAssembly.instantiateStreaming(fetch(moduleUrl), {
         // @ts-expect-error: The bindings don't exactly match the 'ExportValue' type
         "./matrix_sdk_crypto_wasm_bg.js": bindings,
     });
 
-    const instance = instantiatedSource.instance;
     bindings.__wbg_set_wasm(instance.exports);
+    // @ts-expect-error: Typescript doesn't know what the module exports are
     instance.exports.__wbindgen_start();
 }
 

@@ -70,7 +70,6 @@ function loadModuleSync() {
         "./matrix_sdk_crypto_wasm_bg.js": bindings,
     });
 
-    // @ts-expect-error: Typescript doesn't know what the instance exports exactly
     return initInstance(instance);
 }
 
@@ -81,12 +80,11 @@ function loadModuleSync() {
  */
 async function loadModuleAsync() {
     const bytes = await readFile(filename);
-    const instance = await WebAssembly.instantiate(bytes, {
+    const { instance } = await WebAssembly.instantiate(bytes, {
         // @ts-expect-error: The bindings don't exactly match the 'ExportValue' type
         "./matrix_sdk_crypto_wasm_bg.js": bindings,
     });
 
-    // @ts-expect-error: Typescript doesn't know what the instance exports exactly
     return initInstance(instance);
 }
 
@@ -99,6 +97,7 @@ async function loadModuleAsync() {
 function initInstance(instance) {
     if (initialised) throw new Error("initInstance called twice");
     bindings.__wbg_set_wasm(instance.exports);
+    // @ts-expect-error: Typescript doesn't know what the module exports are
     instance.exports.__wbindgen_start();
     initialised = true;
     return instance.exports;
