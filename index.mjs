@@ -63,7 +63,7 @@ async function loadModule() {
         mod = await WebAssembly.compile(bytes);
     }
 
-    /** @type {{exports: typeof import("./pkg/matrix_sdk_crypto_wasm_bg.wasm.d")}} */
+    /** @type {{exports: typeof import("./pkg/matrix_sdk_crypto_wasm_bg.wasm.d.ts")}} */
     // @ts-expect-error: Typescript doesn't know what the instance exports exactly
     const instance = new WebAssembly.Instance(mod, {
         // @ts-expect-error: The bindings don't exactly match the 'ExportValue' type
