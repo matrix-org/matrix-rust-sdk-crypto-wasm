@@ -20,6 +20,10 @@
     ],
     "exports": {
         ".": {
+            "matrix-org:wasm-esm": {
+                "types": "./index.d.ts",
+                "default": "./index-wasm-esm.mjs"
+            },
             "require": {
                 "types": "./index.d.ts",
                 "node": "./node.js",

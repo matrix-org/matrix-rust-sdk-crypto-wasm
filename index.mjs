@@ -15,7 +15,7 @@
 // @ts-check
 
 /**
- * This is the entrypoint on non-node ESM environments (such as Element Web).
+ * This is the entrypoint on non-node ESM environments.
  * `asyncLoad` will load the WASM module using a `fetch` call.
  */
 

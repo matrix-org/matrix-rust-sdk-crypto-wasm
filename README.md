@@ -53,7 +53,28 @@ Encryption](https://en.wikipedia.org/wiki/End-to-end_encryption)) for
     }
     ```
 
-## Building
+    See the [API documentation](https://matrix-org.github.io/matrix-rust-sdk-crypto-wasm/) for more information.
+
+3. Build your project.
+
+    The packaging of this library aims to "just work" the same as any plain-javascript project would: it includes
+    separate entry points for Node.js-like environments (which read the WASM file via
+    [`fs.readFile()`](https://nodejs.org/api/fs.html#fsreadfilepath-options-callback)) and web-like environments (which
+    download the WASM file with [`fetch()`](https://developer.mozilla.org/en-US/docs/Web/API/Window/fetch)). There are
+    both CommonJS and ES Module entry points for each environment; an appropriate entrypoint should be selected
+    automatically.
+
+    If your environment supports the experimental [ES Module Integration Proposal for WebAssembly](https://github.com/WebAssembly/esm-integration),
+    you can instead use that, by setting the `matrix-org:wasm-esm` custom [export condition](https://nodejs.org/api/packages.html#conditional-exports).
+    This is only supported when the library is imported as an ES Module. For example:
+
+    - In Webpack, set [`experiments.asyncWebAssembly`](https://webpack.js.org/configuration/experiments/#experiments)
+      to `true` and [`resolve.conditionNames`](https://webpack.js.org/configuration/resolve/#resolveconditionnames)
+      to `["matrix-org:wasm-esm", "..."]` (the `"..."` preserves default condition names).
+    - In Node.js, invoke with commandline arguments [`--experimental-wasm-modules`](https://nodejs.org/api/esm.html#wasm-modules)
+      [`--conditions=wasm-esm`](https://nodejs.org/api/cli.html#-c-condition---conditionscondition).
+
+## Building matrix-sdk-crypto-wasm
 
 These WebAssembly bindings are written in [Rust]. To build them, you
 need to install the Rust compiler, see [the Install Rust
