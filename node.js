@@ -34,9 +34,9 @@ bindings.__wbg_set_wasm(
         {},
         {
             get(_target, prop) {
-                const mod = loadModuleSync();
-                // @ts-expect-error: This results to an `any` type, which is fine
-                return initInstance(mod)[prop];
+                const instance = loadModuleSync();
+                // @ts-expect-error: This results in an `any` type, which is fine
+                return instance[prop];
             },
         },
     ),
@@ -55,48 +55,57 @@ let modPromise = null;
 let initialised = false;
 
 /**
- * Loads the WASM module synchronously
+ * Loads and instantiates the WASM module synchronously
  *
- * It will throw if there is an attempt to laod the module asynchronously running
+ * It will throw if there is an attempt to load the module asynchronously running
  *
- * @returns {WebAssembly.Module}
- */
-function loadModuleSync() {
-    if (modPromise) throw new Error("The WASM module is being loadded asynchronously but hasn't finished");
-    const bytes = readFileSync(filename);
-    return new WebAssembly.Module(bytes);
-}
-
-/**
- * Loads the WASM module asynchronously
- *
- * @returns {Promise<WebAssembly.Module>}
- */
-async function loadModule() {
-    const bytes = await readFile(filename);
-    return await WebAssembly.compile(bytes);
-}
-
-/**
- * Initializes the WASM module and returns the exports from the WASM module.
- *
- * @param {WebAssembly.Module} mod
  * @returns {typeof import("./pkg/matrix_sdk_crypto_wasm_bg.wasm.d")}
  */
-function initInstance(mod) {
-    if (initialised) throw new Error("initInstance called twice");
+function loadModuleSync() {
+    if (modPromise) throw new Error("The WASM module is being loaded asynchronously but hasn't finished");
+    const bytes = readFileSync(filename);
+    const mod = new WebAssembly.Module(bytes);
 
-    /** @type {{exports: typeof import("./pkg/matrix_sdk_crypto_wasm_bg.wasm.d.ts")}} */
-    // @ts-expect-error: Typescript doesn't know what the instance exports exactly
     const instance = new WebAssembly.Instance(mod, {
         // @ts-expect-error: The bindings don't exactly match the 'ExportValue' type
         "./matrix_sdk_crypto_wasm_bg.js": bindings,
     });
 
+    initInstance(instance);
+
+    // @ts-expect-error: Typescript doesn't know what the instance exports exactly
+    return instance.exports;
+}
+
+/**
+ * Loads and instantiates the WASM module asynchronously
+ *
+ * @returns {Promise<typeof import("./pkg/matrix_sdk_crypto_wasm_bg.wasm.d")>}
+ */
+async function loadModuleAsync() {
+    const bytes = await readFile(filename);
+    const { instance } = await WebAssembly.instantiate(bytes, {
+        // @ts-expect-error: The bindings don't exactly match the 'ExportValue' type
+        "./matrix_sdk_crypto_wasm_bg.js": bindings,
+    });
+
+    initInstance(instance);
+
+    // @ts-expect-error: Typescript doesn't know what the instance exports exactly
+    return instance.exports;
+}
+
+/**
+ * Initializes the WASM module and returns the exports from the WASM module.
+ *
+ * @param {WebAssembly.Instance} instance
+ */
+function initInstance(instance) {
+    if (initialised) throw new Error("initInstance called twice");
     bindings.__wbg_set_wasm(instance.exports);
+    // @ts-expect-error: Typescript doesn't know what the instance exports exactly
     instance.exports.__wbindgen_start();
     initialised = true;
-    return instance.exports;
 }
 
 /**
@@ -108,7 +117,7 @@ function initInstance(mod) {
  */
 async function initAsync() {
     if (initialised) return;
-    if (!modPromise) modPromise = loadModule().then(initInstance);
+    if (!modPromise) modPromise = loadModuleAsync();
     await modPromise;
 }
 
