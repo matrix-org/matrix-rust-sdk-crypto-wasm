@@ -35,6 +35,7 @@ bindings.__wbg_set_wasm(
         {
             get(_target, prop) {
                 const mod = loadModuleSync();
+                // @ts-expect-error: This results to an `any` type, which is fine
                 return initInstance(mod)[prop];
             },
         },
@@ -85,7 +86,7 @@ async function loadModule() {
 function initInstance(mod) {
     if (initialised) throw new Error("initInstance called twice");
 
-    /** @type {{exports: typeof import("./pkg/matrix_sdk_crypto_wasm_bg.wasm.d")}} */
+    /** @type {{exports: typeof import("./pkg/matrix_sdk_crypto_wasm_bg.wasm.d.ts")}} */
     // @ts-expect-error: Typescript doesn't know what the instance exports exactly
     const instance = new WebAssembly.Instance(mod, {
         // @ts-expect-error: The bindings don't exactly match the 'ExportValue' type
