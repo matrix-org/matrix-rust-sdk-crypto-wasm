@@ -84,3 +84,8 @@ vergen = { version = "8.0.0", features = ["build", "git", "gitcl"] }
 git = "https://github.com/matrix-org/matrix-rust-sdk"
 default_features = false
 features = ["js", "automatic-room-key-forwarding"]
+
+[lints.rust]
+# Workaround for https://github.com/rustwasm/wasm-bindgen/issues/4283, while we work up the courage to upgrade
+# wasm-bindgen
+unexpected_cfgs = { level = "warn", check-cfg = ['cfg(wasm_bindgen_unstable_test_coverage)'] }
