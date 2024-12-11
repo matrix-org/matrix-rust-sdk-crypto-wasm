@@ -15,13 +15,12 @@
 // @ts-check
 
 /**
- * This is the entrypoint on non-node ESM environments.
- * `asyncLoad` will load the WASM module using a `fetch` call.
+ * This is the entry point for ESM environments which support the ES Module Integration Proposal for WebAssembly [1].
+ *
+ * [1]: https://github.com/webassembly/esm-integration
  */
 
 import * as bindings from "./pkg/matrix_sdk_crypto_wasm_bg.js";
-
-const moduleUrl = new URL("./pkg/matrix_sdk_crypto_wasm_bg.wasm", import.meta.url);
 
 // Although we could simply instantiate the WASM at import time with a top-level `await`,
 // we avoid that, to make it easier for callers to delay loading the WASM (and instead
@@ -55,14 +54,11 @@ let modPromise = null;
  * @returns {Promise<void>}
  */
 async function loadModuleAsync() {
-    const { instance } = await WebAssembly.instantiateStreaming(fetch(moduleUrl), {
-        // @ts-expect-error: The bindings don't exactly match the 'ExportValue' type
-        "./matrix_sdk_crypto_wasm_bg.js": bindings,
-    });
-
-    bindings.__wbg_set_wasm(instance.exports);
-    // @ts-expect-error: Typescript doesn't know what the module exports are
-    instance.exports.__wbindgen_start();
+    /** @type {typeof import("./pkg/matrix_sdk_crypto_wasm_bg.wasm.d.ts")} */
+    // @ts-expect-error TSC can't find the definitions file, for some reason.
+    const wasm = await import("./pkg/matrix_sdk_crypto_wasm_bg.wasm");
+    bindings.__wbg_set_wasm(wasm);
+    wasm.__wbindgen_start();
 }
 
 /**
