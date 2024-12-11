@@ -22,18 +22,56 @@
 
 import * as bindings from "./pkg/matrix_sdk_crypto_wasm_bg.js";
 
-/** @type {typeof import("./pkg/matrix_sdk_crypto_wasm_bg.wasm.d.ts")} */
-// @ts-expect-error TSC can't find the definitions file, for some reason.
-const wasm = await import("./pkg/matrix_sdk_crypto_wasm_bg.wasm");
-bindings.__wbg_set_wasm(wasm);
-wasm.__wbindgen_start();
+// Although we could simply instantiate the WASM at import time with a top-level `await`,
+// we avoid that, to make it easier for callers to delay loading the WASM (and instead
+// wait until `initAsync` is called). (Also, Safari 14 doesn't support top-level `await`.)
+//
+// However, having done so, there is no way to synchronously load the WASM if the user ends
+// up using the bindings before calling `initAsync` (unlike under Node.js), so we just throw
+// an error.
+bindings.__wbg_set_wasm(
+    new Proxy(
+        {},
+        {
+            get() {
+                throw new Error(
+                    "@matrix-org/matrix-sdk-crypto-wasm was used before it was initialized. Call `initAsync` first.",
+                );
+            },
+        },
+    ),
+);
 
 /**
- * A no-op, for compatibility with other entry points.
+ * Stores a promise of the `loadModuleAsync` call
+ * @type {Promise<void> | null}
+ */
+let modPromise = null;
+
+/**
+ * Loads and instantiates the WASM module asynchronously
  *
  * @returns {Promise<void>}
  */
-export async function initAsync() {}
+async function loadModuleAsync() {
+    /** @type {typeof import("./pkg/matrix_sdk_crypto_wasm_bg.wasm.d.ts")} */
+    // @ts-expect-error TSC can't find the definitions file, for some reason.
+    const wasm = await import("./pkg/matrix_sdk_crypto_wasm_bg.wasm");
+    bindings.__wbg_set_wasm(wasm);
+    wasm.__wbindgen_start();
+}
+
+/**
+ * Load the WebAssembly module in the background, if it has not already been loaded.
+ *
+ * Returns a promise which will resolve once the other methods are ready.
+ *
+ * @returns {Promise<void>}
+ */
+export async function initAsync() {
+    if (!modPromise) modPromise = loadModuleAsync();
+    await modPromise;
+}
 
 // Re-export everything from the generated javascript wrappers
 export * from "./pkg/matrix_sdk_crypto_wasm_bg.js";

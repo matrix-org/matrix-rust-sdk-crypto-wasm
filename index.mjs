@@ -23,8 +23,13 @@ import * as bindings from "./pkg/matrix_sdk_crypto_wasm_bg.js";
 
 const moduleUrl = new URL("./pkg/matrix_sdk_crypto_wasm_bg.wasm", import.meta.url);
 
-// We want to throw an error if the user tries to use the bindings before
-// calling `initAsync`.
+// Although we could simply instantiate the WASM at import time with a top-level `await`,
+// we avoid that, to make it easier for callers to delay loading the WASM (and instead
+// wait until `initAsync` is called). (Also, Safari 14 doesn't support top-level `await`.)
+//
+// However, having done so, there is no way to synchronously load the WASM if the user ends
+// up using the bindings before calling `initAsync` (unlike under Node.js), so we just throw
+// an error.
 bindings.__wbg_set_wasm(
     new Proxy(
         {},
@@ -39,7 +44,7 @@ bindings.__wbg_set_wasm(
 );
 
 /**
- * Stores a promise of the `loadModule` call
+ * Stores a promise of the `loadModuleAsync` call
  * @type {Promise<void> | null}
  */
 let modPromise = null;
