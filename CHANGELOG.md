@@ -15,6 +15,13 @@
     other functions are used. The behaviour is unchanged and still available on
     Node.js.
 
+-   Expose new API `DehydratedDevices.getDehydratedDeviceKey`, `DehydratedDevices.saveDehydratedDeviceKey`
+    and `DehydratedDevices.deleteDehydratedDeviceKey` to store/load the dehydrated device pickle key.
+    This allows client to automatically rotate the dehydrated device to avoid one-time-keys exhaustion and
+    to_device accumulation. `DehydratedDevices.keysForUpload` and `DehydratedDevices.rehydrate` now use the
+    `DehydratedDeviceKey` as parameter instead of a raw UInt8Array.
+    Use `DehydratedDeviceKey::createKeyFromArray` to migrate.
+
 # matrix-sdk-crypto-wasm v11.0.0
 
 -   Update matrix-rust-sdk to `70bcddfba5e19`.
