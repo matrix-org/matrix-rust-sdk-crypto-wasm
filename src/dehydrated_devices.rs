@@ -3,7 +3,9 @@
 //! WASM wrapper for `matrix_sdk_crypto::dehydrated_devices`.
 
 use js_sys::{Array, JsString, Uint8Array};
-use matrix_sdk_crypto::{dehydrated_devices, store::DehydratedDeviceKey as SdkDehydratedDeviceKey};
+use matrix_sdk_crypto::{
+    dehydrated_devices, store::DehydratedDeviceKey as InnerDehydratedDeviceKey,
+};
 use wasm_bindgen::prelude::*;
 
 use crate::{identifiers::DeviceId, requests::PutDehydratedDeviceRequest, store::RoomKeyInfo};
@@ -25,44 +27,35 @@ impl From<dehydrated_devices::DehydratedDevices> for DehydratedDevices {
 #[wasm_bindgen]
 #[derive(Debug)]
 pub struct DehydratedDeviceKey {
-    pub(crate) inner: Uint8Array,
+    inner: InnerDehydratedDeviceKey,
 }
 
 #[wasm_bindgen]
 impl DehydratedDeviceKey {
-    /// Generates a new random pickle key.
+    /// Generates a new random dehydrated device key.
     #[wasm_bindgen(js_name = "createRandomKey")]
     pub fn create_random_key() -> Result<DehydratedDeviceKey, JsError> {
-        Ok(SdkDehydratedDeviceKey::new()?.into())
+        Ok(DehydratedDeviceKey { inner: InnerDehydratedDeviceKey::new()? })
     }
 
-    /// Generates a new random pickle key.
+    /// Generates a dehydrated device key from a given array.
     #[wasm_bindgen(js_name = "createKeyFromArray")]
     pub fn create_key_from_array(array: Uint8Array) -> Result<DehydratedDeviceKey, JsError> {
-        Ok(SdkDehydratedDeviceKey::from_slice(array.to_vec().as_slice())?.into())
+        Ok(DehydratedDeviceKey {
+            inner: InnerDehydratedDeviceKey::from_slice(array.to_vec().as_slice())?,
+        })
     }
 
-    /// Convert the pickle key to a base 64 encoded string.
+    /// Convert the dehydrated device key to a base64-encoded string.
     #[wasm_bindgen(js_name = "toBase64")]
     pub fn to_base64(&self) -> JsString {
-        let binding = self.inner.to_vec();
-        let inner: &[u8; 32] = binding.as_slice().try_into().expect("Expected 32 byte array");
-
-        SdkDehydratedDeviceKey::from(inner).to_base64().into()
+        self.inner.to_base64().into()
     }
 }
 
-// Zero out on drop
-impl Drop for DehydratedDeviceKey {
-    fn drop(&mut self) {
-        self.inner.fill(0, 0, 32);
-    }
-}
-
-impl From<matrix_sdk_crypto::store::DehydratedDeviceKey> for DehydratedDeviceKey {
-    fn from(pickle_key: matrix_sdk_crypto::store::DehydratedDeviceKey) -> Self {
-        let vec: Vec<u8> = pickle_key.into();
-        DehydratedDeviceKey { inner: vec.as_slice().into() }
+impl From<InnerDehydratedDeviceKey> for DehydratedDeviceKey {
+    fn from(inner: InnerDehydratedDeviceKey) -> Self {
+        DehydratedDeviceKey { inner }
     }
 }
 
@@ -78,24 +71,25 @@ impl DehydratedDevices {
     #[wasm_bindgen]
     pub async fn rehydrate(
         &self,
-        pickle_key: &DehydratedDeviceKey,
+        dehydrated_device_key: &DehydratedDeviceKey,
         device_id: &DeviceId,
         device_data: &str,
     ) -> Result<RehydratedDevice, JsError> {
-        let sdk_pickle_key =
-            SdkDehydratedDeviceKey::from_slice(pickle_key.inner.to_vec().as_slice())?;
-
         Ok(self
             .inner
-            .rehydrate(&sdk_pickle_key, &device_id.inner, serde_json::from_str(device_data)?)
+            .rehydrate(
+                &dehydrated_device_key.inner,
+                &device_id.inner,
+                serde_json::from_str(device_data)?,
+            )
             .await?
             .into())
     }
 
-    /// Get the cached dehydrated device pickle key if any.
+    /// Get the cached dehydrated device key if any.
     ///
-    /// None if the key was not previously cached (via
-    /// [`Self::save_dehydrated_device_pickle_key`]).
+    /// `None` if the key was not previously cached (via
+    /// [`DehydratedDevices::save_dehydrated_device_key`]).
     ///
     /// Should be used to periodically rotate the dehydrated device to avoid
     /// OTK exhaustion and accumulation of to_device messages.
@@ -105,22 +99,20 @@ impl DehydratedDevices {
         Ok(key.map(DehydratedDeviceKey::from))
     }
 
-    /// Store the dehydrated device pickle key in the crypto store.
+    /// Store the dehydrated device key in the crypto store.
     ///
     /// This is useful if the client wants to periodically rotate dehydrated
     /// devices to avoid OTK exhaustion and accumulated to_device problems.
     #[wasm_bindgen(js_name = "saveDehydratedDeviceKey")]
     pub async fn save_dehydrated_device_key(
         &self,
-        pickle_key: &DehydratedDeviceKey,
+        dehydrated_device_key: &DehydratedDeviceKey,
     ) -> Result<(), JsError> {
-        let sdk_pickle_key =
-            SdkDehydratedDeviceKey::from_slice(pickle_key.inner.to_vec().as_slice())?;
-        self.inner.save_dehydrated_device_pickle_key(&sdk_pickle_key).await?;
+        self.inner.save_dehydrated_device_pickle_key(&dehydrated_device_key.inner).await?;
         Ok(())
     }
 
-    /// Clear the dehydrated device pickle key saved in the crypto store.
+    /// Clear the dehydrated device key saved in the crypto store.
     #[wasm_bindgen(js_name = "deleteDehydratedDeviceKey")]
     pub async fn delete_dehydrated_device_key(&self) -> Result<(), JsError> {
         self.inner.delete_dehydrated_device_pickle_key().await?;
@@ -185,13 +177,11 @@ impl DehydratedDevice {
     pub async fn keys_for_upload(
         &self,
         initial_device_display_name: JsString,
-        pickle_key: &DehydratedDeviceKey,
+        dehydrated_device_key: &DehydratedDeviceKey,
     ) -> Result<PutDehydratedDeviceRequest, JsError> {
-        let pickle_key = SdkDehydratedDeviceKey::from_slice(pickle_key.inner.to_vec().as_slice())?;
-
         Ok(self
             .inner
-            .keys_for_upload(initial_device_display_name.into(), &pickle_key)
+            .keys_for_upload(initial_device_display_name.into(), &dehydrated_device_key.inner)
             .await?
             .try_into()?)
     }

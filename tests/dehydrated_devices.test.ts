@@ -37,7 +37,7 @@ describe("dehydrated devices", () => {
         expect(key.toBase64()).toEqual(loaded_key.toBase64());
     });
 
-    test("can delete a previously saved pickle key", async () => {
+    test("can delete a previously saved dehydrated device key", async () => {
         const user = new UserId("@alice:example.org");
         // set up OlmMachine to dehydrated device
         const machine = await OlmMachine.initialize(user, new DeviceId("ABCDEFG"));
