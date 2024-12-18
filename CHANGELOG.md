@@ -1,5 +1,11 @@
 # UNRELEASED
 
+# matrix-sdk-crypto-wasm v11.1.0
+
+-   Update matrix-rust-sdk to `b18e7d71edc13`, which includes:
+
+    * Fix error loading older serialized data from storage ([#4430](https://github.com/matrix-org/matrix-rust-sdk/pull/4430))
+
 # matrix-sdk-crypto-wasm v11.0.0
 
 -   Update matrix-rust-sdk to `70bcddfba5e19`.
