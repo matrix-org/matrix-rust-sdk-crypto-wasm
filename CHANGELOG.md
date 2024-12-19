@@ -1,6 +1,21 @@
 # UNRELEASED
 
--   Update matrix-rusk-sdk to `512a2d2662f9d`.
+**BREAKING CHANGES**
+
+-   Update matrix-rusk-sdk to `0.9.0`.
+-   Expose new API `DehydratedDevices.getDehydratedDeviceKey`, `DehydratedDevices.saveDehydratedDeviceKey`
+    and `DehydratedDevices.deleteDehydratedDeviceKey` to store/load the dehydrated device pickle key.
+    `DehydratedDevices.keysForUpload` and `DehydratedDevices.rehydrate` now use the `DehydratedDeviceKey` as parameter
+    instead of a raw UInt8Array.Use `DehydratedDeviceKey::createKeyFromArray` to migrate.
+
+
+# matrix-sdk-crypto-wasm v12.1.0
+
+-   Update matrix-rusk-sdk to `37c17cf854a70f` for the fix for
+    https://github.com/matrix-org/matrix-rust-sdk/issues/4424
+
+# matrix-sdk-crypto-wasm v12.0.0
+
 -   Update matrix-rusk-sdk to `e99939db857ca`.
 -   The published package is now a proper dual CommonJS/ESM package.
 -   The WebAssembly module is now loaded using `fetch` on Web platforms, reducing
@@ -15,11 +30,6 @@
     when used. This means that the `initAsync` function **must** be called before any
     other functions are used. The behaviour is unchanged and still available on
     Node.js.
-
--   Expose new API `DehydratedDevices.getDehydratedDeviceKey`, `DehydratedDevices.saveDehydratedDeviceKey`
-    and `DehydratedDevices.deleteDehydratedDeviceKey` to store/load the dehydrated device pickle key.
-    `DehydratedDevices.keysForUpload` and `DehydratedDevices.rehydrate` now use the `DehydratedDeviceKey` as parameter
-    instead of a raw UInt8Array.Use `DehydratedDeviceKey::createKeyFromArray` to migrate.
 
 # matrix-sdk-crypto-wasm v11.0.0
 
