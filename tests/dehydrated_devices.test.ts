@@ -1,4 +1,5 @@
 import {
+    DehydratedDeviceKey,
     DecryptionSettings,
     DeviceId,
     DeviceLists,
@@ -21,6 +22,41 @@ afterEach(() => {
 });
 
 describe("dehydrated devices", () => {
+    test("can save and restore dehydrated device pickle key", async () => {
+        const user = new UserId("@alice:example.org");
+        // set up OlmMachine to dehydrated device
+        const machine = await OlmMachine.initialize(user, new DeviceId("ABCDEFG"));
+
+        const dehydratedDevices = machine.dehydratedDevices();
+        const key = DehydratedDeviceKey.createRandomKey();
+
+        await dehydratedDevices.saveDehydratedDeviceKey(key);
+
+        const loaded_key: DehydratedDeviceKey = await dehydratedDevices.getDehydratedDeviceKey();
+
+        expect(key.toBase64()).toEqual(loaded_key.toBase64());
+    });
+
+    test("can delete a previously saved dehydrated device key", async () => {
+        const user = new UserId("@alice:example.org");
+        // set up OlmMachine to dehydrated device
+        const machine = await OlmMachine.initialize(user, new DeviceId("ABCDEFG"));
+        const dehydratedDevices = machine.dehydratedDevices();
+
+        const key = DehydratedDeviceKey.createRandomKey();
+
+        await dehydratedDevices.saveDehydratedDeviceKey(key);
+
+        const loaded_key = await dehydratedDevices.getDehydratedDeviceKey();
+
+        expect(loaded_key).toBeDefined();
+
+        await dehydratedDevices.deleteDehydratedDeviceKey();
+
+        const loaded_key_after = await dehydratedDevices.getDehydratedDeviceKey();
+        expect(loaded_key_after).toBeUndefined();
+    });
+
     test("can dehydrate and rehydrate a device", async () => {
         const room = new RoomId("!test:localhost");
         const user = new UserId("@alice:example.org");
@@ -52,7 +88,8 @@ describe("dehydrated devices", () => {
         // create dehydrated device
         const dehydratedDevices = machine.dehydratedDevices();
         const device = await dehydratedDevices.create();
-        const key = new Uint8Array(32);
+
+        const key = DehydratedDeviceKey.createKeyFromArray(new Uint8Array(32));
         const dehydrationRequest = await device.keysForUpload("Dehydrated device", key);
         const dehydrationBody = JSON.parse(dehydrationRequest.body);
 
