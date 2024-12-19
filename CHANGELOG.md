@@ -8,7 +8,6 @@
     `DehydratedDevices.keysForUpload` and `DehydratedDevices.rehydrate` now use the `DehydratedDeviceKey` as parameter
     instead of a raw UInt8Array.Use `DehydratedDeviceKey::createKeyFromArray` to migrate.
 
-
 # matrix-sdk-crypto-wasm v12.1.0
 
 -   Update matrix-rusk-sdk to `37c17cf854a70f` for the fix for
