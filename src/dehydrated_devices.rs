@@ -61,7 +61,7 @@ impl From<InnerDehydratedDeviceKey> for DehydratedDeviceKey {
 
 #[wasm_bindgen]
 impl DehydratedDevices {
-    /// Create a new [`DehydratedDevice`] which can be uploaded to the server.
+    /// Create a new {@link DehydratedDevice} which can be uploaded to the server.
     #[wasm_bindgen]
     pub async fn create(&self) -> Result<DehydratedDevice, JsError> {
         Ok(self.inner.create().await?.into())
@@ -89,10 +89,8 @@ impl DehydratedDevices {
     /// Get the cached dehydrated device key if any.
     ///
     /// `None` if the key was not previously cached (via
-    /// [`DehydratedDevices::save_dehydrated_device_key`]).
+    /// {@link DehydratedDevices.saveDehydratedDeviceKey}).
     ///
-    /// Should be used to periodically rotate the dehydrated device to avoid
-    /// OTK exhaustion and accumulation of to_device messages.
     #[wasm_bindgen(js_name = "getDehydratedDeviceKey")]
     pub async fn get_dehydrated_device_key(&self) -> Result<Option<DehydratedDeviceKey>, JsError> {
         let key = self.inner.get_dehydrated_device_pickle_key().await?;
@@ -100,9 +98,6 @@ impl DehydratedDevices {
     }
 
     /// Store the dehydrated device key in the crypto store.
-    ///
-    /// This is useful if the client wants to periodically rotate dehydrated
-    /// devices to avoid OTK exhaustion and accumulated to_device problems.
     #[wasm_bindgen(js_name = "saveDehydratedDeviceKey")]
     pub async fn save_dehydrated_device_key(
         &self,
