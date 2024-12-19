@@ -61,7 +61,8 @@ impl From<InnerDehydratedDeviceKey> for DehydratedDeviceKey {
 
 #[wasm_bindgen]
 impl DehydratedDevices {
-    /// Create a new {@link DehydratedDevice} which can be uploaded to the server.
+    /// Create a new {@link DehydratedDevice} which can be uploaded to the
+    /// server.
     #[wasm_bindgen]
     pub async fn create(&self) -> Result<DehydratedDevice, JsError> {
         Ok(self.inner.create().await?.into())
@@ -90,7 +91,6 @@ impl DehydratedDevices {
     ///
     /// `None` if the key was not previously cached (via
     /// {@link DehydratedDevices.saveDehydratedDeviceKey}).
-    ///
     #[wasm_bindgen(js_name = "getDehydratedDeviceKey")]
     pub async fn get_dehydrated_device_key(&self) -> Result<Option<DehydratedDeviceKey>, JsError> {
         let key = self.inner.get_dehydrated_device_pickle_key().await?;
