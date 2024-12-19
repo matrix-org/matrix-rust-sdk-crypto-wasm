@@ -1,5 +1,10 @@
 # UNRELEASED
 
+# matrix-sdk-crypto-wasm v12.1.0
+
+-   Update matrix-rusk-sdk to `37c17cf854a70f` for the fix for
+    https://github.com/matrix-org/matrix-rust-sdk/issues/4424
+
 # matrix-sdk-crypto-wasm v12.0.0
 
 -   Update matrix-rusk-sdk to `e99939db857ca`.
