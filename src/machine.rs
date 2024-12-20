@@ -1324,10 +1324,14 @@ impl OlmMachine {
 
         copy_stream_to_callback(
             stream,
-            |input| {
-                iter::once(
-                    input.into_iter().map(RoomKeyInfo::from).map(JsValue::from).collect::<Array>(),
-                )
+            |input| match input {
+                Ok(keys) => iter::once(
+                    keys.into_iter().map(RoomKeyInfo::from).map(JsValue::from).collect::<Array>(),
+                ),
+                Err(e) => {
+                    warn!("Error reading  room_keys_received_stream {:?}", e);
+                    iter::once(Array::new())
+                }
             },
             callback,
             "room-key-received",
