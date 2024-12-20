@@ -8,6 +8,12 @@
     `DehydratedDevices.keysForUpload` and `DehydratedDevices.rehydrate` now use the `DehydratedDeviceKey` as parameter
     instead of a raw UInt8Array.Use `DehydratedDeviceKey::createKeyFromArray` to migrate.
 
+**Other changes**
+
+-   Add `OlmMachine.registerRoomKeysWithheldCallbacks` that supports now a success and error callback.
+    An error will occur when the stream missed some updates; in that case decryption could be retried
+    for all current failures.
+
 # matrix-sdk-crypto-wasm v12.1.0
 
 -   Update matrix-rusk-sdk to `37c17cf854a70f` for the fix for
