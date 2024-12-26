@@ -1,5 +1,7 @@
 # UNRELEASED
 
+# matrix-sdk-crypto-wasm v12.2.0
+
 **BREAKING CHANGES**
 
 -   Update matrix-rusk-sdk to `0.9.0`.
