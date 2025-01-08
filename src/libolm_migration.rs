@@ -103,7 +103,8 @@ impl Migration {
     /// Populates the user credentials, Olm account, backup data, etc. This is
     /// the first step in the migration process. Once this base data is
     /// imported, further data can be imported with {@link
-    /// migrateOlmSessions}, {@link migrateMegolmSessions}, and TODO room settings.
+    /// migrateOlmSessions}, {@link migrateMegolmSessions}, and TODO room
+    /// settings.
     ///
     /// # Arguments
     ///
