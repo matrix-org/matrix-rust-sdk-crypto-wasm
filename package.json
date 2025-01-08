@@ -38,12 +38,12 @@
         }
     },
     "files": [
-        "index.mjs",
         "index.js",
-        "index-wasm-esm.mjs",
+        "index.cjs",
+        "index-wasm-esm.js",
         "index.d.ts",
-        "node.mjs",
         "node.js",
+        "node.cjs",
         "pkg/matrix_sdk_crypto_wasm.d.ts",
         "pkg/matrix_sdk_crypto_wasm_bg.js",
         "pkg/matrix_sdk_crypto_wasm_bg.cjs",
