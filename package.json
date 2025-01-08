@@ -23,7 +23,7 @@
         ".": {
             "matrix-org:wasm-esm": {
                 "types": "./index.d.ts",
-                "default": "./index-wasm-esm.js"
+                "default": "./index-wasm-esm.mjs"
             },
             "require": {
                 "types": "./index.d.ts",
@@ -32,17 +32,17 @@
             },
             "import": {
                 "types": "./index.d.ts",
-                "node": "./node.js",
-                "default": "./index.js"
+                "node": "./node.mjs",
+                "default": "./index.mjs"
             }
         }
     },
     "files": [
-        "index.js",
+        "index.mjs",
         "index.cjs",
-        "index-wasm-esm.js",
+        "index-wasm-esm.mjs",
         "index.d.ts",
-        "node.js",
+        "node.mjs",
         "node.cjs",
         "pkg/matrix_sdk_crypto_wasm.d.ts",
         "pkg/matrix_sdk_crypto_wasm_bg.js",
