@@ -580,7 +580,7 @@ impl OlmMachine {
     /// keys will create a {@link OwnUserIdentity} and mark it as verified.
     ///
     /// The backup key will be persisted in the store and can be enabled using
-    /// the {@link BackupMachine}.
+    /// the BackupMachine.
     ///
     /// The provided `SecretsBundle` is freed by this method; be careful not to
     /// use it once this method has been called.
@@ -662,8 +662,8 @@ impl OlmMachine {
 
     /// Get the cross signing user identity of a user.
     ///
-    /// Returns a promise for an {@link identities.OwnUserIdentity}, a
-    /// {@link identities.OtherUserIdentity}, or `undefined`.
+    /// Returns a promise for an {@link OwnUserIdentity}, a
+    /// {@link OtherUserIdentity}, or `undefined`.
     #[wasm_bindgen(js_name = "getIdentity")]
     pub fn get_identity(&self, user_id: &identifiers::UserId) -> Promise {
         let me = self.inner.clone();
@@ -1191,7 +1191,7 @@ impl OlmMachine {
     /// trusted, otherwise we might be encrypting room keys that a malicious
     /// party could decrypt.
     ///
-    /// The {@link #verifyBackup} method can be used to do so.
+    /// The {@link verifyBackup} method can be used to do so.
     ///
     /// Returns `Promise<void>`.
     #[wasm_bindgen(js_name = "enableBackupV1")]
@@ -1513,7 +1513,7 @@ impl OlmMachine {
     /// This method will cause the sdk to generated outgoing secret requests
     /// (`m.secret.request`) to get the missing secrets. These requests will
     /// then be returned by a future call to {@link
-    /// OlmMachine#outgoing_requests}.
+    /// OlmMachine#outgoingRequests}.
     ///
     /// # Returns
     ///
@@ -1531,7 +1531,7 @@ impl OlmMachine {
     /// Get the stored room settings, such as the encryption algorithm or
     /// whether to encrypt only for trusted devices.
     ///
-    /// These settings can be modified via {@link #setRoomSettings}.
+    /// These settings can be modified via {@link setRoomSettings}.
     ///
     /// # Returns
     ///
@@ -1553,7 +1553,7 @@ impl OlmMachine {
     ///
     /// If the settings are valid, they will be persisted to the crypto store.
     /// These settings are not used directly by this library, but the saved
-    /// settings can be retrieved via {@link #getRoomSettings}.
+    /// settings can be retrieved via {@link getRoomSettings}.
     #[wasm_bindgen(js_name = "setRoomSettings")]
     pub async fn set_room_settings(
         &self,

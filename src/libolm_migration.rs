@@ -48,7 +48,7 @@ pub struct Migration {}
 
 /// The base dataset that is important to migrate to the Rust SDK.
 ///
-/// Can be imported into the rust store with {@link #migrateBaseData}.
+/// Can be imported into the rust store with {@link Migration::migrateBaseData}.
 #[wasm_bindgen(getter_with_clone)]
 #[derive(Debug, Default)]
 pub struct BaseMigrationData {
@@ -103,7 +103,7 @@ impl Migration {
     /// Populates the user credentials, Olm account, backup data, etc. This is
     /// the first step in the migration process. Once this base data is
     /// imported, further data can be imported with {@link
-    /// #migrateOlmSessions}, {@link #migrateMegolmSessions}, and TODO room settings.
+    /// migrateOlmSessions}, {@link migrateMegolmSessions}, and TODO room settings.
     ///
     /// # Arguments
     ///
@@ -188,7 +188,7 @@ async fn migrate_base_data_to_store(
 ///
 /// Holds all the information that needs to be stored in a database to restore
 /// an Olm Session. Can be imported into the rust store with {@link
-/// #migrateOlmSessions}.
+/// Migration::migrateOlmSessions}.
 #[wasm_bindgen(getter_with_clone)]
 #[derive(Debug)]
 pub struct PickledSession {
@@ -224,7 +224,7 @@ impl Migration {
     /// Migrate Olm sessions of a libolm-based setup to a vodozemac-based setup
     /// stored in an indexedDB crypto store.
     ///
-    /// Before this method can be used, {@link #migrateBaseData} must be used to
+    /// Before this method can be used, {@link migrateBaseData} must be used to
     /// import the base data into the crypto store.
     ///
     /// This method should be called a number of times, with separate batches of
@@ -378,7 +378,7 @@ impl Migration {
     /// Migrate Megolm sessions of a libolm-based setup to a vodozemac-based
     /// setup stored in an indexedDB crypto store.
     ///
-    /// Before this method can be used, {@link #migrateBaseData} must be used to
+    /// Before this method can be used, {@link migrateBaseData} must be used to
     /// import the base data into the crypto store.
     ///
     /// This method should be called a number of times, with separate batches of
