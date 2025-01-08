@@ -18,21 +18,22 @@
         "ruma",
         "nio"
     ],
+    "type": "module",
     "exports": {
         ".": {
             "matrix-org:wasm-esm": {
                 "types": "./index.d.ts",
-                "default": "./index-wasm-esm.mjs"
+                "default": "./index-wasm-esm.js"
             },
             "require": {
                 "types": "./index.d.ts",
-                "node": "./node.js",
-                "default": "./index.js"
+                "node": "./node.cjs",
+                "default": "./index.cjs"
             },
             "import": {
                 "types": "./index.d.ts",
-                "node": "./node.mjs",
-                "default": "./index.mjs"
+                "node": "./node.js",
+                "default": "./index.js"
             }
         }
     },

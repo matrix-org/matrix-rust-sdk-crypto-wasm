@@ -15,16 +15,16 @@
 // @ts-check
 
 /**
- * This is the entrypoint on node-compatible CommonJS environments.
+ * This is the entrypoint on node-compatible ESM environments.
  * `asyncLoad` will use `fs.readFile` to load the WASM module.
  */
 
-const { readFileSync } = require("node:fs");
-const { readFile } = require("node:fs/promises");
-const path = require("node:path");
-const bindings = require("./pkg/matrix_sdk_crypto_wasm_bg.cjs");
+import { fileURLToPath } from "node:url";
+import { readFileSync } from "node:fs";
+import { readFile } from "node:fs/promises";
+import * as bindings from "./pkg/matrix_sdk_crypto_wasm_bg.js";
 
-const filename = path.join(__dirname, "pkg/matrix_sdk_crypto_wasm_bg.wasm");
+const filename = fileURLToPath(new URL("./pkg/matrix_sdk_crypto_wasm_bg.wasm", import.meta.url));
 
 // In node environments, we want to automatically load the WASM module
 // synchronously if the consumer did not call `initAsync`. To do so, we install
@@ -59,7 +59,7 @@ let initialised = false;
  *
  * It will throw if there is an attempt to load the module asynchronously running
  *
- * @returns {typeof import("./pkg/matrix_sdk_crypto_wasm_bg.wasm.d")}
+ * @returns {typeof import("./pkg/matrix_sdk_crypto_wasm_bg.wasm.d.ts")}
  */
 function loadModuleSync() {
     if (modPromise) throw new Error("The WASM module is being loaded asynchronously but hasn't finished");
@@ -73,14 +73,14 @@ function loadModuleSync() {
 
     initInstance(instance);
 
-    // @ts-expect-error: Typescript doesn't know what the instance exports exactly
+    // @ts-expect-error: Typescript doesn't know what the module exports are
     return instance.exports;
 }
 
 /**
  * Loads and instantiates the WASM module asynchronously
  *
- * @returns {Promise<typeof import("./pkg/matrix_sdk_crypto_wasm_bg.wasm.d")>}
+ * @returns {Promise<typeof import("./pkg/matrix_sdk_crypto_wasm_bg.wasm.d.ts")>}
  */
 async function loadModuleAsync() {
     const bytes = await readFile(filename);
@@ -91,7 +91,7 @@ async function loadModuleAsync() {
 
     initInstance(instance);
 
-    // @ts-expect-error: Typescript doesn't know what the instance exports exactly
+    // @ts-expect-error: Typescript doesn't know what the module exports are
     return instance.exports;
 }
 
@@ -103,7 +103,7 @@ async function loadModuleAsync() {
 function initInstance(instance) {
     if (initialised) throw new Error("initInstance called twice");
     bindings.__wbg_set_wasm(instance.exports);
-    // @ts-expect-error: Typescript doesn't know what the instance exports exactly
+    // @ts-expect-error: Typescript doesn't know what the module exports are
     instance.exports.__wbindgen_start();
     initialised = true;
 }
@@ -115,14 +115,11 @@ function initInstance(instance) {
  *
  * @returns {Promise<void>}
  */
-async function initAsync() {
+export async function initAsync() {
     if (initialised) return;
     if (!modPromise) modPromise = loadModuleAsync();
     await modPromise;
 }
 
-module.exports = {
-    // Re-export everything from the generated javascript wrappers
-    ...bindings,
-    initAsync,
-};
+// Re-export everything from the generated javascript wrappers
+export * from "./pkg/matrix_sdk_crypto_wasm_bg.js";
