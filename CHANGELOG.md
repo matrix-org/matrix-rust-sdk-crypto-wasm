@@ -1,12 +1,17 @@
 # UNRELEASED
 
-**BREAKING CHANGES**
+# matrix-sdk-crypto-wasm v13.0.0
 
 -   Update matrix-rusk-sdk to `0.9.0`.
 -   Expose new API `DehydratedDevices.getDehydratedDeviceKey`, `DehydratedDevices.saveDehydratedDeviceKey`
     and `DehydratedDevices.deleteDehydratedDeviceKey` to store/load the dehydrated device pickle key.
-    `DehydratedDevices.keysForUpload` and `DehydratedDevices.rehydrate` now use the `DehydratedDeviceKey` as parameter
-    instead of a raw UInt8Array.Use `DehydratedDeviceKey::createKeyFromArray` to migrate.
+    ([#179](https://github.com/matrix-org/matrix-rust-sdk-crypto-wasm/pull/179))
+
+**BREAKING CHANGES**
+
+-   `DehydratedDevices.keysForUpload` and `DehydratedDevices.rehydrate` now use a `DehydratedDeviceKey` as parameter
+    instead of a raw `UInt8Array`. Use `DehydratedDeviceKey.createKeyFromArray` to migrate.
+    ([#179](https://github.com/matrix-org/matrix-rust-sdk-crypto-wasm/pull/179))
 
 # matrix-sdk-crypto-wasm v12.1.0
 
