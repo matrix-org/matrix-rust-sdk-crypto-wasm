@@ -1,5 +1,7 @@
 # UNRELEASED
 
+-   The published package now uses type=module which defaults js/ts files to ESM.
+
 **BREAKING CHANGES**
 
 -   Update matrix-rusk-sdk to `0.9.0`.
