@@ -1,6 +1,7 @@
 # UNRELEASED
 
--   The published package now uses type=module which defaults js/ts files to ESM.
+-   Fix a problem, introduced in v12.0.0, when importing the published package as an ESM module, in which some files could be incorrectly interpreted as CommonJS, leading to syntax errors.
+    ([#189](https://github.com/matrix-org/matrix-rust-sdk-crypto-wasm/pull/189))
 
 **BREAKING CHANGES**
 
