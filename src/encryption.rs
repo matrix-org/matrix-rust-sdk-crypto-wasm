@@ -294,6 +294,7 @@ impl From<RustShieldState> for ShieldState {
 #[cfg(test)]
 pub(crate) mod tests {
     use wasm_bindgen_test::wasm_bindgen_test;
+    wasm_bindgen_test::wasm_bindgen_test_configure!(run_in_node_experimental);
 
     use super::EncryptionAlgorithm;
 

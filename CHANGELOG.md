@@ -1,5 +1,8 @@
 # UNRELEASED
 
+-   Fix a problem, introduced in v12.0.0, when importing the published package as an ESM module, in which some files could be incorrectly interpreted as CommonJS, leading to syntax errors.
+    ([#189](https://github.com/matrix-org/matrix-rust-sdk-crypto-wasm/pull/189))
+
 # matrix-sdk-crypto-wasm v13.0.0
 
 -   Update matrix-rusk-sdk to `0.9.0`.

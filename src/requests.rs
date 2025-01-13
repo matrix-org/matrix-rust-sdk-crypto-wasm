@@ -717,6 +717,7 @@ pub(crate) mod tests {
     use matrix_sdk_crypto::types::requests::KeysQueryRequest as OriginalKeysQueryRequest;
     use serde_json::Value;
     use wasm_bindgen_test::wasm_bindgen_test;
+    wasm_bindgen_test::wasm_bindgen_test_configure!(run_in_node_experimental);
 
     use super::{KeysClaimRequest, KeysQueryRequest, KeysUploadRequest};
 

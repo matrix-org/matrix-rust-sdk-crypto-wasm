@@ -18,6 +18,7 @@
         "ruma",
         "nio"
     ],
+    "type": "module",
     "exports": {
         ".": {
             "matrix-org:wasm-esm": {
@@ -26,8 +27,8 @@
             },
             "require": {
                 "types": "./index.d.ts",
-                "node": "./node.js",
-                "default": "./index.js"
+                "node": "./node.cjs",
+                "default": "./index.cjs"
             },
             "import": {
                 "types": "./index.d.ts",
@@ -38,11 +39,11 @@
     },
     "files": [
         "index.mjs",
-        "index.js",
+        "index.cjs",
         "index-wasm-esm.mjs",
         "index.d.ts",
         "node.mjs",
-        "node.js",
+        "node.cjs",
         "pkg/matrix_sdk_crypto_wasm.d.ts",
         "pkg/matrix_sdk_crypto_wasm_bg.js",
         "pkg/matrix_sdk_crypto_wasm_bg.cjs",
