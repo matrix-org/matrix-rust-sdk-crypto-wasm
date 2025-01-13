@@ -1,6 +1,6 @@
 {
     "name": "@matrix-org/matrix-sdk-crypto-wasm",
-    "version": "12.1.0",
+    "version": "13.0.0",
     "homepage": "https://github.com/matrix-org/matrix-rust-sdk-wasm",
     "description": "WebAssembly bindings of the matrix-sdk-crypto encryption library",
     "license": "Apache-2.0",
@@ -80,7 +80,7 @@
         "build": "WASM_PACK_ARGS=--release ./scripts/build.sh",
         "build:dev": "WASM_PACK_ARGS=--dev ./scripts/build.sh",
         "test": "jest --verbose && yarn run wasm-pack test --node",
-        "doc": "typedoc --tsconfig .",
+        "doc": "typedoc --treatWarningsAsErrors --tsconfig .",
         "prepack": "npm run build && npm run test"
     }
 }
