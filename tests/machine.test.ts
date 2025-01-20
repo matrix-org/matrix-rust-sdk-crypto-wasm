@@ -623,7 +623,7 @@ describe(OlmMachine.name, () => {
 
             const decryptionSettings = new DecryptionSettings(TrustRequirement.Untrusted);
             const decrypted = await m.decryptRoomEvent(stringifiedEvent, room, decryptionSettings)!;
-            expect(decrypted).toBeInstanceOf(DecryptedRoomEvent)
+            expect(decrypted).toBeInstanceOf(DecryptedRoomEvent);
 
             const event = JSON.parse(decrypted.event);
             expect(event.content.msgtype).toStrictEqual("m.text");
