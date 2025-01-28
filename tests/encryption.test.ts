@@ -1,10 +1,9 @@
-const {
+import {
     CollectStrategy,
     EncryptionAlgorithm,
     EncryptionSettings,
     HistoryVisibility,
-    VerificationState,
-} = require("@matrix-org/matrix-sdk-crypto-wasm");
+} from "@matrix-org/matrix-sdk-crypto-wasm";
 
 describe("EncryptionAlgorithm", () => {
     test("has the correct variant values", () => {
@@ -30,6 +29,7 @@ describe(EncryptionSettings.name, () => {
 
         expect(es.historyVisibility).toStrictEqual(HistoryVisibility.Invited);
         expect(() => {
+            // @ts-ignore
             es.historyVisibility = 42;
         }).toThrow();
     });
@@ -41,6 +41,7 @@ describe(EncryptionSettings.name, () => {
 
         expect(es.sharingStrategy.eq(CollectStrategy.deviceBasedStrategy(false, false))).toBe(true);
         expect(() => {
+            // @ts-ignore
             es.historyVisibility = 42;
         }).toThrow();
     });
