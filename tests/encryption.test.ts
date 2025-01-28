@@ -20,6 +20,7 @@ describe(EncryptionSettings.name, () => {
         expect(es.rotationPeriod).toStrictEqual(604800000000n);
         expect(es.rotationPeriodMessages).toStrictEqual(100n);
         expect(es.historyVisibility).toStrictEqual(HistoryVisibility.Shared);
+        expect(es.sharingStrategy.eq(CollectStrategy.allDevices())).toBe(true);
     });
 
     test("checks the history visibility values", () => {
@@ -40,9 +41,12 @@ describe(EncryptionSettings.name, () => {
         es.sharingStrategy = CollectStrategy.deviceBasedStrategy(false, false);
 
         expect(es.sharingStrategy.eq(CollectStrategy.deviceBasedStrategy(false, false))).toBe(true);
+        expect(es.sharingStrategy.eq(CollectStrategy.allDevices())).toBe(true);
+        expect(es.sharingStrategy.eq(CollectStrategy.errorOnUnverifiedUserProblem())).toBe(false);
+
         expect(() => {
             // @ts-ignore
-            es.historyVisibility = 42;
+            es.sharingStrategy = 42;
         }).toThrow();
     });
 });
