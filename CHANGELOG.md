@@ -3,6 +3,15 @@
 -   Fix a problem, introduced in v12.0.0, when importing the published package as an ESM module, in which some files could be incorrectly interpreted as CommonJS, leading to syntax errors.
     ([#189](https://github.com/matrix-org/matrix-rust-sdk-crypto-wasm/pull/189))
 
+-   `CollectStrategy.deviceBasedStrategy` is deprecated, and replaced by other methods in `CollectStrategy`.
+    ([#194](https://github.com/matrix-org/matrix-rust-sdk-crypto-wasm/pull/194))
+
+-   Update matrix-rust-sdk to `8d530ef2`, which includes:
+
+    -   Accept stable identifier `sender_device_keys` for MSC4147 (Including device
+        keys with Olm-encrypted events).
+        ([#4420](https://github.com/matrix-org/matrix-rust-sdk/pull/4420))
+
 # matrix-sdk-crypto-wasm v13.0.0
 
 -   Update matrix-rusk-sdk to `0.9.0`.

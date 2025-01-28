@@ -150,36 +150,42 @@ impl From<matrix_sdk_crypto::CollectStrategy> for CollectStrategy {
 impl CollectStrategy {
     /// Device based sharing strategy.
     ///
-    /// If `only_allow_trusted_devices` is `true`, devices that are not trusted
-    /// will be excluded from the conversation. A device is trusted if any of
-    /// the following is true:
-    ///     - It was manually marked as trusted.
-    ///     - It was marked as verified via interactive verification.
-    ///     - It is signed by its owner identity, and this identity has been
-    ///       trusted via interactive verification.
-    ///     - It is the current own device of the user.
-    ///
-    /// If `error_on_verified_user` is `true`, and a verified user has an
-    /// unsigned device, key sharing will fail with an error.
-    ///
-    /// If `error_on_verified_user` is `true`, and a verified user has replaced
-    /// their identity, key sharing will fail with an error.
-    ///
-    /// Otherwise, keys are shared with unsigned devices as normal.
-    ///
-    /// Once the problematic devices are blacklisted or whitelisted the
-    /// caller can retry to share a second time.
+    /// @deprecated: use one of {@link allDevices}, {@link
+    /// errorOnUnverifiedUserProblem} or {@link onlyTrustedDevices}.
     #[wasm_bindgen(js_name = "deviceBasedStrategy")]
     pub fn device_based_strategy(
         only_allow_trusted_devices: bool,
         error_on_verified_user_problem: bool,
     ) -> CollectStrategy {
-        Self {
-            inner: matrix_sdk_crypto::CollectStrategy::DeviceBasedStrategy {
-                only_allow_trusted_devices,
-                error_on_verified_user_problem,
-            },
+        if only_allow_trusted_devices {
+            Self::only_trusted_devices()
+        } else if error_on_verified_user_problem {
+            Self::error_on_verified_user_problem()
+        } else {
+            Self::all_devices()
         }
+    }
+
+    /// Share with all (unblacklisted) devices.
+    #[wasm_bindgen(js_name = "allDevices")]
+    pub fn all_devices() -> CollectStrategy {
+        Self { inner: matrix_sdk_crypto::CollectStrategy::AllDevices }
+    }
+
+    /// Share with all devices, except that errors for *verified* users cause
+    /// sharing to fail with an error.
+    ///
+    /// In this strategy, if a verified user has an unsigned device, or
+    /// a verified user has replaced their identity, key
+    /// sharing will fail with an error.
+    ///
+    /// Otherwise, keys are shared with unsigned devices as normal.
+    ///
+    /// Once the problematic devices are blacklisted or whitelisted the
+    /// caller can try sharing a second time.
+    #[wasm_bindgen(js_name = "errorOnUnverifiedUserProblem")]
+    pub fn error_on_verified_user_problem() -> CollectStrategy {
+        Self { inner: matrix_sdk_crypto::CollectStrategy::ErrorOnVerifiedUserProblem }
     }
 
     /// Share based on identity. Only distribute to devices signed by their
@@ -188,6 +194,18 @@ impl CollectStrategy {
     #[wasm_bindgen(js_name = "identityBasedStrategy")]
     pub fn identity_based_strategy() -> CollectStrategy {
         Self { inner: matrix_sdk_crypto::CollectStrategy::IdentityBasedStrategy }
+    }
+
+    /// Only share keys with devices that we "trust". A device is trusted if any
+    /// of the following is true:
+    ///     - It was manually marked as trusted.
+    ///     - It was marked as verified via interactive verification.
+    ///     - It is signed by its owner identity, and this identity has been
+    ///       trusted via interactive verification.
+    ///     - It is the current own device of the user.
+    #[wasm_bindgen(js_name = "onlyTrustedDevices")]
+    pub fn only_trusted_devices() -> CollectStrategy {
+        Self { inner: matrix_sdk_crypto::CollectStrategy::OnlyTrustedDevices }
     }
 }
 
