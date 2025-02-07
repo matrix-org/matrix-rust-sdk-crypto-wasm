@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-export * from "./pkg/matrix_sdk_crypto_wasm.d";
+export * from "./pkg/matrix_sdk_crypto_wasm.d.ts";
 
 /**
  * Load the WebAssembly module in the background, if it has not already been loaded.

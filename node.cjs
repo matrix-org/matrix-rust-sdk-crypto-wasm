@@ -59,7 +59,7 @@ let initialised = false;
  *
  * It will throw if there is an attempt to load the module asynchronously running
  *
- * @returns {typeof import("./pkg/matrix_sdk_crypto_wasm_bg.wasm.d")}
+ * @returns {typeof import("./pkg/matrix_sdk_crypto_wasm_bg.wasm.d", { with: { "resolution-mode": "require" } })}
  */
 function loadModuleSync() {
     if (modPromise) throw new Error("The WASM module is being loaded asynchronously but hasn't finished");
@@ -80,7 +80,7 @@ function loadModuleSync() {
 /**
  * Loads and instantiates the WASM module asynchronously
  *
- * @returns {Promise<typeof import("./pkg/matrix_sdk_crypto_wasm_bg.wasm.d")>}
+ * @returns {Promise<typeof import("./pkg/matrix_sdk_crypto_wasm_bg.wasm.d", { with: { "resolution-mode": "require" } })>}
  */
 async function loadModuleAsync() {
     const bytes = await readFile(filename);

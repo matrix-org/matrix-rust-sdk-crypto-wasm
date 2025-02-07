@@ -1,10 +1,9 @@
-const {
+import {
     CollectStrategy,
     EncryptionAlgorithm,
     EncryptionSettings,
     HistoryVisibility,
-    VerificationState,
-} = require("@matrix-org/matrix-sdk-crypto-wasm");
+} from "@matrix-org/matrix-sdk-crypto-wasm";
 
 describe("EncryptionAlgorithm", () => {
     test("has the correct variant values", () => {
@@ -21,6 +20,7 @@ describe(EncryptionSettings.name, () => {
         expect(es.rotationPeriod).toStrictEqual(604800000000n);
         expect(es.rotationPeriodMessages).toStrictEqual(100n);
         expect(es.historyVisibility).toStrictEqual(HistoryVisibility.Shared);
+        expect(es.sharingStrategy.eq(CollectStrategy.allDevices())).toBe(true);
     });
 
     test("checks the history visibility values", () => {
@@ -30,6 +30,7 @@ describe(EncryptionSettings.name, () => {
 
         expect(es.historyVisibility).toStrictEqual(HistoryVisibility.Invited);
         expect(() => {
+            // @ts-ignore
             es.historyVisibility = 42;
         }).toThrow();
     });
@@ -40,8 +41,12 @@ describe(EncryptionSettings.name, () => {
         es.sharingStrategy = CollectStrategy.deviceBasedStrategy(false, false);
 
         expect(es.sharingStrategy.eq(CollectStrategy.deviceBasedStrategy(false, false))).toBe(true);
+        expect(es.sharingStrategy.eq(CollectStrategy.allDevices())).toBe(true);
+        expect(es.sharingStrategy.eq(CollectStrategy.errorOnUnverifiedUserProblem())).toBe(false);
+
         expect(() => {
-            es.historyVisibility = 42;
+            // @ts-ignore
+            es.sharingStrategy = 42;
         }).toThrow();
     });
 });
