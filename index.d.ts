@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-export * from "./pkg/matrix_sdk_crypto_wasm.d.ts";
+export * from "./pkg/matrix_sdk_crypto_wasm";
 
 /**
  * Load the WebAssembly module in the background, if it has not already been loaded.
@@ -21,4 +21,4 @@ export * from "./pkg/matrix_sdk_crypto_wasm.d.ts";
  *
  * @returns {Promise<void>}
  */
-export function initAsync(): Promise<void>;
+export declare function initAsync(): Promise<void>;
