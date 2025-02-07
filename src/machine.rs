@@ -1271,7 +1271,7 @@ impl OlmMachine {
     /// `error_callback` should be a function that takes a single argument (the
     /// error) and returns a Promise. When such an error happens that means
     /// that update stream lost track and that all current decryption failures
-    /// can be retried as the key might as been imported without notice.
+    /// should be retried as the key may have been imported without notice..
     #[wasm_bindgen(js_name = "registerRoomKeyUpdatedCallbacks")]
     pub async fn register_room_key_updated_callbacks(
         &self,
