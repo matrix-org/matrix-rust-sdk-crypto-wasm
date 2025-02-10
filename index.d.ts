@@ -21,4 +21,4 @@ export * from "./pkg/matrix_sdk_crypto_wasm.d.ts";
  *
  * @returns {Promise<void>}
  */
-export function initAsync(): Promise<void>;
+export declare function initAsync(): Promise<void>;
