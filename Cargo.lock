@@ -890,6 +890,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "itertools"
+version = "0.14.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "2b192c782037fadd9cfa75548310488aabdbf3d2da73885b31bd0abd03351285"
+dependencies = [
+ "either",
+]
+
+[[package]]
 name = "itoa"
 version = "1.0.14"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1045,8 +1054,9 @@ dependencies = [
 
 [[package]]
 name = "matrix-sdk-common"
-version = "0.9.0"
-source = "git+https://github.com/matrix-org/matrix-rust-sdk#8d530ef22033b490b7971102aa37dcbbc7f74fe2"
+version = "0.10.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "072d77e461933834e12810d63906409f37a039acad31a16dda62b63e1f4c31cf"
 dependencies = [
  "async-trait",
  "eyeball-im",
@@ -1068,8 +1078,9 @@ dependencies = [
 
 [[package]]
 name = "matrix-sdk-crypto"
-version = "0.9.0"
-source = "git+https://github.com/matrix-org/matrix-rust-sdk#8d530ef22033b490b7971102aa37dcbbc7f74fe2"
+version = "0.10.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "ed1ec9d645eb86630b2ed71e5890565ca023f569d9d0ebdcb25bfca8a088c2f3"
 dependencies = [
  "aes",
  "aquamarine",
@@ -1084,7 +1095,7 @@ dependencies = [
  "futures-util",
  "hkdf",
  "hmac",
- "itertools 0.13.0",
+ "itertools 0.14.0",
  "js_option",
  "matrix-sdk-common",
  "matrix-sdk-qrcode",
@@ -1135,8 +1146,9 @@ dependencies = [
 
 [[package]]
 name = "matrix-sdk-indexeddb"
-version = "0.9.0"
-source = "git+https://github.com/matrix-org/matrix-rust-sdk#8d530ef22033b490b7971102aa37dcbbc7f74fe2"
+version = "0.10.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "da30f51dbfcd03297a04f49f92c365a41cb2b012ad3338c0fc5d4efafcbff88b"
 dependencies = [
  "anyhow",
  "async-trait",
@@ -1163,8 +1175,9 @@ dependencies = [
 
 [[package]]
 name = "matrix-sdk-qrcode"
-version = "0.9.0"
-source = "git+https://github.com/matrix-org/matrix-rust-sdk#8d530ef22033b490b7971102aa37dcbbc7f74fe2"
+version = "0.10.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "c8f4e04831155ac4cbc85413b3b729509ff82c472c98c586ce0dfb58f2486adf"
 dependencies = [
  "byteorder",
  "qrcode",
@@ -1175,8 +1188,9 @@ dependencies = [
 
 [[package]]
 name = "matrix-sdk-store-encryption"
-version = "0.9.0"
-source = "git+https://github.com/matrix-org/matrix-rust-sdk#8d530ef22033b490b7971102aa37dcbbc7f74fe2"
+version = "0.10.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "dcc8b6650757f953664e5f906988690cef05c09d83081946adce446c45810a2d"
 dependencies = [
  "base64",
  "blake3",
@@ -1523,8 +1537,9 @@ dependencies = [
 
 [[package]]
 name = "ruma"
-version = "0.12.0"
-source = "git+https://github.com/ruma/ruma?rev=b868438f5d91918e97d2c3f64d7c82a0d86d29d4#b868438f5d91918e97d2c3f64d7c82a0d86d29d4"
+version = "0.12.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "7d6fea33e3d17b9e009fefb3f175ca7fd40b1e7d1e72444478fd1b28611eb50a"
 dependencies = [
  "assign",
  "js_int",
@@ -1537,8 +1552,9 @@ dependencies = [
 
 [[package]]
 name = "ruma-client-api"
-version = "0.20.0"
-source = "git+https://github.com/ruma/ruma?rev=b868438f5d91918e97d2c3f64d7c82a0d86d29d4#b868438f5d91918e97d2c3f64d7c82a0d86d29d4"
+version = "0.20.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "23989b539eceeaad01ba089ad307788f90a29bac2e5f730ff0a523eeae3fa1d7"
 dependencies = [
  "as_variant",
  "assign",
@@ -1560,8 +1576,9 @@ dependencies = [
 
 [[package]]
 name = "ruma-common"
-version = "0.15.0"
-source = "git+https://github.com/ruma/ruma?rev=b868438f5d91918e97d2c3f64d7c82a0d86d29d4#b868438f5d91918e97d2c3f64d7c82a0d86d29d4"
+version = "0.15.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "1058c04b8dd62f4fba71c9f65112fb79bc332438d11aefe1e8edf67b7fb58a98"
 dependencies = [
  "as_variant",
  "base64",
@@ -1592,8 +1609,9 @@ dependencies = [
 
 [[package]]
 name = "ruma-events"
-version = "0.30.0"
-source = "git+https://github.com/ruma/ruma?rev=b868438f5d91918e97d2c3f64d7c82a0d86d29d4#b868438f5d91918e97d2c3f64d7c82a0d86d29d4"
+version = "0.30.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "ff1b8e15942e35ba56004429bc0845f481281f903e86957973a08ec08f8d06f0"
 dependencies = [
  "as_variant",
  "indexmap",
@@ -1616,7 +1634,8 @@ dependencies = [
 [[package]]
 name = "ruma-identifiers-validation"
 version = "0.10.1"
-source = "git+https://github.com/ruma/ruma?rev=b868438f5d91918e97d2c3f64d7c82a0d86d29d4#b868438f5d91918e97d2c3f64d7c82a0d86d29d4"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "6ad674b5e5368c53a2c90fde7dac7e30747004aaf7b1827b72874a25fc06d4d8"
 dependencies = [
  "js_int",
  "thiserror 2.0.11",
@@ -1624,8 +1643,9 @@ dependencies = [
 
 [[package]]
 name = "ruma-macros"
-version = "0.15.0"
-source = "git+https://github.com/ruma/ruma?rev=b868438f5d91918e97d2c3f64d7c82a0d86d29d4#b868438f5d91918e97d2c3f64d7c82a0d86d29d4"
+version = "0.15.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "c1182e83ee5cd10121974f163337b16af68a93eedfc7cdbdbd52307ac7e1d743"
 dependencies = [
  "cfg-if",
  "proc-macro-crate",
@@ -1745,9 +1765,9 @@ dependencies = [
 
 [[package]]
 name = "serde_json"
-version = "1.0.137"
+version = "1.0.138"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "930cfb6e6abf99298aaad7d29abbef7a9999a9a8806a40088f55f0dcec03146b"
+checksum = "d434192e7da787e94a6ea7e9670b26a036d0ca41e0b7efb2676dd32bae872949"
 dependencies = [
  "itoa",
  "memchr",
@@ -2211,8 +2231,9 @@ checksum = "0b928f33d975fc6ad9f86c8f283853ad26bdd5b10b7f1542aa2fa15e2289105a"
 
 [[package]]
 name = "vodozemac"
-version = "0.8.1"
-source = "git+https://github.com/matrix-org/vodozemac?rev=3d655add09992d17fdb2b55c60f532658090487d#3d655add09992d17fdb2b55c60f532658090487d"
+version = "0.9.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "c022a277687e4e8685d72b95a7ca3ccfec907daa946678e715f8badaa650883d"
 dependencies = [
  "aes",
  "arrayvec",
