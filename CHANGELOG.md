@@ -1,10 +1,16 @@
 # UNRELEASED
 
--   Fix a problem, introduced in v12.0.0, when importing the published package as an ESM module, in which some files could be incorrectly interpreted as CommonJS, leading to syntax errors.
-    ([#189](https://github.com/matrix-org/matrix-rust-sdk-crypto-wasm/pull/189))
+# matrix-sdk-crypto-wasm v14.0.0
 
 -   `CollectStrategy.deviceBasedStrategy` is deprecated, and replaced by other methods in `CollectStrategy`.
     ([#194](https://github.com/matrix-org/matrix-rust-sdk-crypto-wasm/pull/194))
+
+-   **BREAKING**: Improve generated typescript types (`Promise<T>` instead of
+    `Promise<any>`, etc).
+    ([#193](https://github.com/matrix-org/matrix-rust-sdk-crypto-wasm/pull/193))
+
+-   Fix a problem, introduced in v12.0.0, when importing the published package as an ESM module, in which some files could be incorrectly interpreted as CommonJS, leading to syntax errors.
+    ([#189](https://github.com/matrix-org/matrix-rust-sdk-crypto-wasm/pull/189))
 
 -   Update matrix-rust-sdk to `0.10.0`, which includes:
 
