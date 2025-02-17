@@ -622,32 +622,32 @@ describe(OlmMachine.name, () => {
             });
 
             const decryptionSettings = new DecryptionSettings(TrustRequirement.Untrusted);
-            const decrypted = await m.decryptRoomEvent(stringifiedEvent, room, decryptionSettings)!;
+            const decrypted = await m.decryptRoomEvent(stringifiedEvent, room, decryptionSettings);
             expect(decrypted).toBeInstanceOf(DecryptedRoomEvent);
 
             const event = JSON.parse(decrypted.event);
             expect(event.content.msgtype).toStrictEqual("m.text");
             expect(event.content.body).toStrictEqual("Hello, World!");
 
-            expect(decrypted.sender?.toString()).toStrictEqual(user.toString());
-            expect(decrypted.senderDevice?.toString()).toStrictEqual(device.toString());
+            expect(decrypted.sender.toString()).toStrictEqual(user.toString());
+            expect(decrypted.senderDevice.toString()).toStrictEqual(device.toString());
             expect(decrypted.senderCurve25519Key).toBeDefined();
             expect(decrypted.senderClaimedEd25519Key).toBeDefined();
             expect(decrypted.forwardingCurve25519KeyChain).toHaveLength(0);
-            expect(decrypted.shieldState(true)?.color).toStrictEqual(ShieldColor.Red);
-            expect(decrypted.shieldState(true)?.code).toStrictEqual(ShieldStateCode.UnverifiedIdentity);
-            expect(decrypted.shieldState(false)?.color).toStrictEqual(ShieldColor.Red);
-            expect(decrypted.shieldState(false)?.code).toStrictEqual(ShieldStateCode.UnsignedDevice);
+            expect(decrypted.shieldState(true).color).toStrictEqual(ShieldColor.Red);
+            expect(decrypted.shieldState(true).code).toStrictEqual(ShieldStateCode.UnverifiedIdentity);
+            expect(decrypted.shieldState(false).color).toStrictEqual(ShieldColor.Red);
+            expect(decrypted.shieldState(false).code).toStrictEqual(ShieldStateCode.UnsignedDevice);
 
             const decryptionInfo = await m.getRoomEventEncryptionInfo(stringifiedEvent, room);
-            expect(decryptionInfo.sender?.toString()).toStrictEqual(user.toString());
-            expect(decryptionInfo.senderDevice?.toString()).toStrictEqual(device.toString());
+            expect(decryptionInfo.sender.toString()).toStrictEqual(user.toString());
+            expect(decryptionInfo.senderDevice.toString()).toStrictEqual(device.toString());
             expect(decryptionInfo.senderCurve25519Key).toBeDefined();
             expect(decryptionInfo.senderClaimedEd25519Key).toBeDefined();
-            expect(decryptionInfo.shieldState(true)?.color).toStrictEqual(ShieldColor.Red);
-            expect(decryptionInfo.shieldState(true)?.code).toStrictEqual(ShieldStateCode.UnverifiedIdentity);
-            expect(decryptionInfo.shieldState(false)?.color).toStrictEqual(ShieldColor.Red);
-            expect(decryptionInfo.shieldState(false)?.code).toStrictEqual(ShieldStateCode.UnsignedDevice);
+            expect(decryptionInfo.shieldState(true).color).toStrictEqual(ShieldColor.Red);
+            expect(decryptionInfo.shieldState(true).code).toStrictEqual(ShieldStateCode.UnverifiedIdentity);
+            expect(decryptionInfo.shieldState(false).color).toStrictEqual(ShieldColor.Red);
+            expect(decryptionInfo.shieldState(false).code).toStrictEqual(ShieldStateCode.UnsignedDevice);
         });
     });
 
@@ -696,9 +696,9 @@ describe(OlmMachine.name, () => {
         {
             const signature = signatures.get(user);
 
-            expect(signature?.has("ed25519:foobar")).toStrictEqual(true);
+            expect(signature.has("ed25519:foobar")).toStrictEqual(true);
 
-            const s = signature?.get("ed25519:foobar");
+            const s = signature.get("ed25519:foobar");
 
             expect(s).toBeInstanceOf(MaybeSignature);
 
@@ -715,7 +715,7 @@ describe(OlmMachine.name, () => {
         // `getSignature`
         {
             const signature = signatures.getSignature(user, new DeviceKeyId("ed25519:foobar"));
-            expect(signature?.toBase64()).toStrictEqual(base64);
+            expect(signature.toBase64()).toStrictEqual(base64);
         }
 
         // Unknown signatures.
@@ -1235,7 +1235,7 @@ describe(OlmMachine.name, () => {
 
             expect(await m.isBackupEnabled()).toStrictEqual(true);
 
-            let outgoing = (await m.backupRoomKeys())!;
+            let outgoing = await m.backupRoomKeys();
 
             expect(outgoing.id).toBeDefined();
             expect(outgoing.body).toBeDefined();
@@ -1271,7 +1271,7 @@ describe(OlmMachine.name, () => {
 
             let savedKey = await m.getBackupKeys();
 
-            expect(savedKey.decryptionKey?.toBase64()).toStrictEqual(keyBackupKey.toBase64());
+            expect(savedKey.decryptionKey.toBase64()).toStrictEqual(keyBackupKey.toBase64());
             expect(savedKey.decryptionKeyBase64).toStrictEqual(keyBackupKey.toBase64());
             expect(savedKey.backupVersion).toStrictEqual("3");
         });
@@ -1282,7 +1282,7 @@ describe(OlmMachine.name, () => {
             await m.shareRoomKey(room, [new UserId("@bob:example.org")], new EncryptionSettings());
             const keyBackupKey = BackupDecryptionKey.createRandomKey();
             await m.enableBackupV1(keyBackupKey.megolmV1PublicKey.publicKeyBase64, "1");
-            const outgoing = (await m.backupRoomKeys())!;
+            const outgoing = await m.backupRoomKeys();
             expect(outgoing.type).toStrictEqual(RequestType.KeysBackup);
 
             // Map from room ID, to map from session ID to the backup data.
