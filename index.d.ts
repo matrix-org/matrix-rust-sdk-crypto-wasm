@@ -51,11 +51,26 @@ export declare function initAsync(): Promise<void>;
 // The auto-generated typescript definitions are a good start, but could do with tightening up in a lot of areas.
 // The following is a manually-curated set of typescript definitions.
 declare module "./pkg/matrix_sdk_crypto_wasm.js" {
+    /** The types returned by {@link OlmMachine.outgoingRequests}. */
+    type OutgoingRequest =
+        | KeysUploadRequest
+        | KeysQueryRequest
+        | KeysClaimRequest
+        | ToDeviceRequest
+        | SignatureUploadRequest
+        | RoomMessageRequest
+        | KeysBackupRequest;
+
     interface OlmMachine {
-        trackedUsers(): Promise<Set<any>>;
+        trackedUsers(): Promise<Set<UserId>>;
         updateTrackedUsers(users: UserId[]): Promise<void>;
-        receiveSyncChanges(to_device_events: string, changed_devices: DeviceLists, one_time_keys_counts: Map<any, any>, unused_fallback_keys?: Set<any> | null): Promise<string>;
-        outgoingRequests(): Promise<Array<any>>;
+        receiveSyncChanges(
+            to_device_events: string,
+            changed_devices: DeviceLists,
+            one_time_keys_counts: Map<string, number>,
+            unused_fallback_keys?: Set<string> | null,
+        ): Promise<string>;
+        outgoingRequests(): Promise<Array<OutgoingRequest>>;
         markRequestAsSent(request_id: string, request_type: RequestType, response: string): Promise<boolean>;
         encryptRoomEvent(room_id: RoomId, event_type: string, content: string): Promise<string>;
         decryptRoomEvent(
