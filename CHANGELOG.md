@@ -1,5 +1,9 @@
 # UNRELEASED
 
+-   Revert updates to generated typescript types, which could cause runtime
+    errors.
+    ([#205](https://github.com/matrix-org/matrix-rust-sdk-crypto-wasm/pull/205))
+
 # matrix-sdk-crypto-wasm v14.0.0
 
 -   `CollectStrategy.deviceBasedStrategy` is deprecated, and replaced by other methods in `CollectStrategy`.
