@@ -1,8 +1,11 @@
 # UNRELEASED
 
--   Revert updates to generated typescript types, which could cause runtime
-    errors.
-    ([#205](https://github.com/matrix-org/matrix-rust-sdk-crypto-wasm/pull/205))
+# matrix-sdk-crypto-wasm v14.0.1
+
+-   Fix a problem, introduced in v14.0.0, which could cause WASM runtime errors
+    if the `OlmMachine` was freed while an operation was in flight.
+    ([#205](https://github.com/matrix-org/matrix-rust-sdk-crypto-wasm/pull/205)),
+    ([#206](https://github.com/matrix-org/matrix-rust-sdk-crypto-wasm/pull/206))
 
 # matrix-sdk-crypto-wasm v14.0.0
 
