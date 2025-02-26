@@ -1,7 +1,8 @@
 //! Vodozemac types.
 
-use matrix_sdk_crypto::vodozemac;
+use matrix_sdk_crypto::vodozemac::{self, base64_decode, base64_encode};
 use wasm_bindgen::prelude::*;
+use zeroize::{Zeroize, Zeroizing};
 
 use crate::impl_from_to_inner;
 
@@ -91,6 +92,76 @@ impl Curve25519PublicKey {
 }
 
 impl_from_to_inner!(vodozemac::Curve25519PublicKey => Curve25519PublicKey);
+
+/// A Curve25519 secret key.
+#[wasm_bindgen]
+#[allow(missing_debug_implementations)]
+pub struct Curve25519SecretKey {
+    inner: vodozemac::Curve25519SecretKey,
+}
+
+#[wasm_bindgen]
+impl Curve25519SecretKey {
+    /// Generates a new random Curve25519 secret key.
+    pub fn new() -> Self {
+        Self { inner: vodozemac::Curve25519SecretKey::new() }
+    }
+
+    /// Creates a `Curve25519SecretKey` from a base64-encoded representation of
+    /// the key.
+    #[wasm_bindgen(js_name = "fromBase64")]
+    pub fn from_base64(string: &str) -> Result<Self, JsError> {
+        let mut key = base64_decode(&string)?;
+        let result = Self::from_slice(&key);
+
+        key.zeroize();
+
+        result
+    }
+
+    /// Encodes the secret key into a base64 string.
+    #[wasm_bindgen(js_name = "toBase64")]
+    pub fn to_base64(&self) -> String {
+        let mut bytes = self.inner.to_bytes();
+        let string = base64_encode(bytes.as_ref());
+
+        bytes.zeroize();
+
+        string
+    }
+
+    /// Converts the secret key into a raw byte vector.
+    #[wasm_bindgen(js_name = "toUint8Array")]
+    pub fn to_vec(&self) -> Vec<u8> {
+        let mut bytes = self.inner.to_bytes();
+        let vec = bytes.to_vec();
+
+        bytes.zeroize();
+
+        vec
+    }
+
+    /// Creates a `Curve25519SecretKey` from a raw byte slice.
+    #[wasm_bindgen(js_name = "fromUint8Array")]
+    pub fn from_slice(slice: &[u8]) -> Result<Self, JsError> {
+        let length = slice.len();
+
+        if length == 32 {
+            let mut key = Zeroizing::new([0u8; 32]);
+            key.copy_from_slice(slice);
+
+            let inner = vodozemac::Curve25519SecretKey::from_slice(&key);
+
+            Ok(Self { inner })
+        } else {
+            Err(JsError::new(&format!(
+                "invalid key size for a Curve25519 key, expected 32 bytes, got {length}"
+            )))
+        }
+    }
+}
+
+impl_from_to_inner!(vodozemac::Curve25519SecretKey => Curve25519SecretKey);
 
 /// Struct holding the two public identity keys of an account.
 #[wasm_bindgen(getter_with_clone)]
