@@ -1,5 +1,11 @@
 # UNRELEASED
 
+-   Add the `PkEncryption`, `PkDecryption`, `Curve25519SecretKey`, `PkMessage`,
+    and `Base64EncodedPkMessage` classes. These types implement the
+    `m.megolm_backup.v1.curve25519-aes-sha2` algorithm described in the Matrix
+    [spec](https://spec.matrix.org/v1.11/client-server-api/#backup-algorithm-mmegolm_backupv1curve25519-aes-sha2).
+    ([#209](https://github.com/matrix-org/matrix-rust-sdk-crypto-wasm/pull/209))
+
 # matrix-sdk-crypto-wasm v14.0.1
 
 -   Fix a problem, introduced in v14.0.0, which could cause WASM runtime errors
