@@ -82,7 +82,7 @@ vergen = { version = "8.0.0", features = ["build", "git", "gitcl"] }
 
 [dependencies.matrix-sdk-crypto]
 version = "0.10.0"
-default_features = false
+default-features = false
 features = ["js", "automatic-room-key-forwarding"]
 
 [lints.rust]
