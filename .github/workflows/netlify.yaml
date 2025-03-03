@@ -33,7 +33,12 @@ jobs:
                   github-token: ${{ secrets.GITHUB_TOKEN }}
                   run-id: ${{ github.event.workflow_run.id }}
                   name: docs
-                  path: docs
+                  path: .
+
+            - name: 📦 Unwrap tarball
+              run:
+                  mkdir docs
+                  tar -xvf artifact.tar -C docs
 
             - name: 📤 Deploy to Netlify
               uses: matrix-org/netlify-pr-preview@v3
