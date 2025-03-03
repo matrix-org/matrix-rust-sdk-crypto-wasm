@@ -36,7 +36,7 @@ jobs:
                   path: .
 
             - name: 📦 Unwrap tarball
-              run:
+              run: |
                   mkdir docs
                   tar -xvf artifact.tar -C docs
 
