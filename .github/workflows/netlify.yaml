@@ -1,0 +1,54 @@
+# GHA workflow which publishes previews of the docs to Netlify.
+#
+# We keep this in a separate workflow to the main build, because it
+# requires access to the Netlify secret. By having it run on `workflow_run`, we
+# will only use the workflow definition file on the default branch, so we can
+# ensure that the secret can't be exfiltrated.
+
+name: Deploy documentation PR preview
+
+on:
+    workflow_run:
+        workflows: ["CI"]
+        types:
+            - completed
+
+permissions: {}
+
+jobs:
+    netlify:
+        if: github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.event == 'pull_request'
+        runs-on: ubuntu-24.04
+        permissions:
+            actions: read
+            deployments: write
+            
+        # Tell github to share the right secrets
+        environment: PR Documentation Preview
+
+        steps:
+            - name: 📥 Download artifact
+              uses: actions/download-artifact@v4
+              with:
+                  github-token: ${{ secrets.GITHUB_TOKEN }}
+                  run-id: ${{ github.event.workflow_run.id }}
+                  name: docs
+                  path: docs
+
+            - name: 📤 Deploy to Netlify
+              uses: matrix-org/netlify-pr-preview@v3
+              with:
+                  path: docs
+
+                  # Pass the details of the workflow run that just completed into the action.
+                  # This allows it to figure out the PR number.
+                  owner: ${{ github.event.workflow_run.head_repository.owner.login }}
+                  branch: ${{ github.event.workflow_run.head_branch }}
+                  revision: ${{ github.event.workflow_run.head_sha }}
+
+                  token: ${{ secrets.NETLIFY_AUTH_TOKEN }}
+                  site_id: dcaf4b8b-3a2d-4498-ad8f-ca73f36a43e0
+
+                  desc: Documentation preview
+                  deployment_env: PR Documentation Preview
+

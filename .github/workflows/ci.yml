@@ -135,13 +135,17 @@ jobs:
           yarn install
           yarn build && yarn doc
 
+      # Upload the docs as a build artifiact, so they can be used in the
+      # deployment step below, or a subsequent workflow which uploads to netlify.
       - name: Upload artifact
-        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
         uses: actions/upload-pages-artifact@v3
         with:
+          name: docs
           path: './docs/'
 
       - name: Deploy to GitHub Pages
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'
         id: deployment
         uses: actions/deploy-pages@v4
+        with:
+          artifact_name: docs
