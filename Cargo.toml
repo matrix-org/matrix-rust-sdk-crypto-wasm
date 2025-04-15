@@ -80,7 +80,7 @@ zeroize = "1.6.0"
 wasm-bindgen-test = "0.3.37"
 
 [build-dependencies]
-vergen = { version = "8.0.0", features = ["build", "git", "gitcl"] }
+vergen-gitcl = { version = "1.0.0", features = ["build"] }
 
 [dependencies.matrix-sdk-crypto]
 version = "0.10.0"
