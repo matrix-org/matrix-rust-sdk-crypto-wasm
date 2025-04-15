@@ -448,6 +448,7 @@ fn libolm_pickled_megolm_session_to_rust_pickled_session(
         backed_up: libolm_session.backed_up,
         history_visibility: None,
         algorithm: EventEncryptionAlgorithm::MegolmV1AesSha2,
+        shared_history: false,
     })
 }
 
