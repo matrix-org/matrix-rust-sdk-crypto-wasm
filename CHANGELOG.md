@@ -1,5 +1,7 @@
 # UNRELEASED
 
+# matrix-sdk-crypto-wasm v14.1.0
+
 -   Update matrix-rusk-sdk to `0.11.0`, which includees:
 
     -   Add support for the shared history flag defined in
