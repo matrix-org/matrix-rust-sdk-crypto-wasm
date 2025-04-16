@@ -1,5 +1,14 @@
 # UNRELEASED
 
+-   Update matrix-rusk-sdk to `0.11.0`, which includees:
+
+    -   Add support for the shared history flag defined in
+        [MSC3061](https://github.com/matrix-org/matrix-spec-proposals/pull/3061).
+        The shared history flag is now respected when room keys are received as an
+        `m.room_key` event as well as when they are imported from a backup or a file
+        export.
+        ([#4700](https://github.com/matrix-org/matrix-rust-sdk/pull/4700))
+
 -   Add the `PkEncryption`, `PkDecryption`, `Curve25519SecretKey`, `PkMessage`,
     and `Base64EncodedPkMessage` classes. These types implement the
     `m.megolm_backup.v1.curve25519-aes-sha2` algorithm described in the Matrix
