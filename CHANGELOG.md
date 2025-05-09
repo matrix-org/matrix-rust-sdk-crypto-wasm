@@ -1,8 +1,17 @@
 # UNRELEASED
 
+-   Update matrix-rusk-sdk to `35a2ce9`, which includes:
+
+    -   Add variants for plain text and encrypted to-device events ([#4935](https://github.com/matrix-org/matrix-rust-sdk/pull/4935))
+
+-   **BREAKING**: `OlmMachine.receiveSyncChanges` now returns a list of
+    `ProcessedToDeviceEvent` instead of a json encoded list of json encoded events.
+    This allows to make the difference between an event that was sent in clear and
+    the same event successfully decrypted.
+
 # matrix-sdk-crypto-wasm v14.1.0
 
--   Update matrix-rusk-sdk to `0.11.0`, which includees:
+-   Update matrix-rusk-sdk to `0.11.0`, which includes:
 
     -   Add support for the shared history flag defined in
         [MSC3061](https://github.com/matrix-org/matrix-spec-proposals/pull/3061).

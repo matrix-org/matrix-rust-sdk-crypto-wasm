@@ -1145,8 +1145,7 @@ dependencies = [
 [[package]]
 name = "matrix-sdk-common"
 version = "0.11.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "75aa988a96e4a85e2b854f4f6487d31f1833e8abf3eebc1b8c13274a68dacf45"
+source = "git+https://github.com/matrix-org/matrix-rust-sdk?rev=35a2ce97d84af8cea6b9e1850a8ff4ff5c66d712#35a2ce97d84af8cea6b9e1850a8ff4ff5c66d712"
 dependencies = [
  "async-trait",
  "eyeball-im",
@@ -1169,8 +1168,7 @@ dependencies = [
 [[package]]
 name = "matrix-sdk-crypto"
 version = "0.11.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "fe2a8a811f9809f37c360f7005350e76661cb2bed2624b87b8d772c444bf572a"
+source = "git+https://github.com/matrix-org/matrix-rust-sdk?rev=35a2ce97d84af8cea6b9e1850a8ff4ff5c66d712#35a2ce97d84af8cea6b9e1850a8ff4ff5c66d712"
 dependencies = [
  "aes",
  "aquamarine",
@@ -1238,8 +1236,7 @@ dependencies = [
 [[package]]
 name = "matrix-sdk-indexeddb"
 version = "0.11.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "63da8893fc9062f4b7874f766fd5dcf048f8ea456b08ba89320cc68926b1112e"
+source = "git+https://github.com/matrix-org/matrix-rust-sdk?rev=35a2ce97d84af8cea6b9e1850a8ff4ff5c66d712#35a2ce97d84af8cea6b9e1850a8ff4ff5c66d712"
 dependencies = [
  "anyhow",
  "async-trait",
@@ -1267,8 +1264,7 @@ dependencies = [
 [[package]]
 name = "matrix-sdk-qrcode"
 version = "0.11.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "d5fc0b2a90a9c986d53fb772e49ec1f135748e2b4a7d38b253ee45f97ecb818e"
+source = "git+https://github.com/matrix-org/matrix-rust-sdk?rev=35a2ce97d84af8cea6b9e1850a8ff4ff5c66d712#35a2ce97d84af8cea6b9e1850a8ff4ff5c66d712"
 dependencies = [
  "byteorder",
  "qrcode",
@@ -1280,8 +1276,7 @@ dependencies = [
 [[package]]
 name = "matrix-sdk-store-encryption"
 version = "0.11.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "0b14e1db0b31db81c5d20c20d24c84421893491da30e8e0218e991c3a350188e"
+source = "git+https://github.com/matrix-org/matrix-rust-sdk?rev=35a2ce97d84af8cea6b9e1850a8ff4ff5c66d712#35a2ce97d84af8cea6b9e1850a8ff4ff5c66d712"
 dependencies = [
  "base64",
  "blake3",
