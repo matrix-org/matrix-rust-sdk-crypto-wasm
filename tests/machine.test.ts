@@ -1607,4 +1607,184 @@ describe(OlmMachine.name, () => {
             await m.setRoomSettings(new RoomId("!test:room"), settings2);
         });
     });
+
+    describe("Receiving to device messages", () => {
+        test("Should return plain text to device objects as they are received", async () => {
+            const m = await machine();
+
+            const someClearEvent = {
+                sender: "@alice:example.com",
+                type: "custom.type",
+                content: {
+                    value: "foo",
+                },
+            };
+
+            let toDeviceEvents = [someClearEvent];
+
+            const received = await m.receiveSyncChanges(
+                JSON.stringify(toDeviceEvents),
+                new DeviceLists(),
+                new Map<string, number>(),
+                undefined,
+            );
+
+            const receivedToDevices = JSON.parse(received);
+            expect(receivedToDevices).toBeInstanceOf(Array);
+            const receivedToDeviceArray: Array<any> = receivedToDevices;
+            expect(receivedToDeviceArray.length).toBe(1);
+            const toDeviceEvent = receivedToDeviceArray[0];
+
+            expect(toDeviceEvent.sender).toEqual("@alice:example.com");
+            expect(toDeviceEvent.type).toEqual("custom.type");
+            expect(toDeviceEvent.content.value).toEqual("foo");
+        });
+
+        test("Should return unable to decrypt to device untouched", async () => {
+            const m = await machine();
+
+            const aliceCurve = m.identityKeys.curve25519.toBase64();
+
+            const utdEvent = {
+                content: {
+                    "algorithm": "m.olm.v1.curve25519-aes-sha2",
+                    "ciphertext": {
+                        aliceCurve: {
+                            // this payload is just captured from a sync of some other element web with other users
+                            body: "Awogjvpx458CGhuo77HX/+tp1sxgRoCi7iAlzMvfrpbWoREQAiKACysX/p+ojr5QitCi9WRXNyamW2v2LTvoyWKtVaA2oHnYGR5s5RYhDfnIgh5MMSqqKlAbfqLvrbLovTYcKagCBbFnbA43f6zYM44buGgy8q70hMVH5WP6aK1E9Z3DVZ+8PnXQGpsrxvz2IsL6w0Nzl/qUyBEQFcgkjoDPawbsZRCllMgq2LQUyqlun6IgDTCozqsfxhDWpdfYGde4z16m34Ang7f5pH+BmPrFs6E1AO5+UbhhhS6NwWlfEtA6/9yfMxWLz1d2OrLh+QG7lYFAU9/CzIoPxaHKKr4JxgL9CjsmUPyDymWOWHP0jLi1NwpOv6hGpx0FgM7jJIMk6gWGgC5rEgEeTIwdrJh3F9OKTNSva5hvD9LomGk6tZgzQG6oap1e3wiOUyTt6S7BlyMppIu3RlIiNihZ9e17JEGiGDXOXzMJ6ISAgvGVgTP7+EvyEt2Wt4du7uBo/UvljRvVNu3I8tfItizPAOlvz460+aBDxk+sflJWt7OnhiyPnOCfopb+1RzqKVCnnPyVaP2f4BPf8qpn/f5YZk+5jJgBrGPiHzzmb3sQ5pC470s6+U3MpVFlFTG/xPBtMRMwPsbKoHfnRPqIqGu5dQ1Sw7T6taDXWjP450TvjxgHK5t2z1rLA2SXzAB1P8xbi6YXqQwxL6PvMNHn/TM0jiIQHYuqg5/RKLyhHybfP8JAjgNBw9z16wfKR/YoYFr7c+S4McQaMNa8v2SxGzhpCC3duAoK2qCWLEkYRO5cMCsGm/9bf8Q+//OykygBU/hdkT1eHUbexgALPLdfhzduutU7pbChg4T7SH7euh/3NLmS/SQvkmPfm3ckbh/Vlcj9CsXws/7MX/VJbhpbyzgBNtMnbG6tAeAofMa6Go/yMgiNBZIhLpAm31iUbUhaGm2IIlF/lsmSYEiBPoSVfFU44tetX2I/PBDGiBlzyU+yC2TOEBwMGxBE3WHbIe5/7sKW8xJF9t+HBfxIyW1QRtY3EKdEcuVOTyMxYzq3L5OKOOtPDHObYiiXg00mAgdQqgfkEAIfoRCOa2NYfTedwwo0S77eQ1sPvW5Hhf+Cm+bLibkWzaYHEZF+vyE9/Tn0tZGtH07RXfUyhp1vtTH49OBZHGkb/r+L8OjYJTST1dDCGqeGXO3uwYjoWHXtezLVHYgL+UOwcLJfMF5s9DQiqcfYXzp2kEWGsaetBFXcUWqq4RMHqlr6QfbxyuYLlQzc/AYA/MrT3J6nDpNLcvozH3RcIs8NcKcjdtjvgL0QGThy3RcecJQEDx3STrkkePL3dlyFCtVsmtQ0vjBBCxUgdySfxiobGGnpezZYi7q+Xz61GOZ9QqYmkcZOPzfNWeqtmzB7gqlH1gkFsK2yMAzKq2XCDFHvA7YAT3yMGiY06FcQ+2jyg7Bk2Q+AvjTG8hlPlmt6BZfW5cz1qx1apQn1qHXHrgfWcI52rApYQlNPOU1Uc8kZ8Ee6XUhhXBGY1rvZiKjKFG0PPuS8xo4/P7/u+gH5gItmEVDFL6giYPFsPpqAQkUN7hFoGiVZEjO4PwrLOmydsEcNOfACqrnUs08FQtvPg0sjHnxh6nh6FUQv93ukKl6+c9d+pCsN2xukrQ7Dog3nrjFZ6PrS5J0k9rDAOwTB55sfGXPZ2rATOK1WS4XcpsCtqwnYm4sGNc8ALMQkQ97zCnw8TcQwLvdUMlfbqQ5ykDQpQD68fITEDDHmBAeTCjpC713E6AhvOMwTJvjhd7hSkeOTRTmn9zXIVGNo1jSr8u0xO9uLGeWsV0+UlRLgp7/nsgfermjwNN8wj6MW3DHGS8UzzYfe9TGCeywqqIUTqgfXY48leGgB7twh4cl4jcOQniLATTvigIAQIvq/Uv8L45BGnkpKTdQ5F73gehXdVA",
+                            type: 1,
+                        },
+                    },
+                    "org.matrix.msgid": "93ee0170aa7740d0ac9ee137e820302d",
+                    "sender_key": "WJ6Ce7U67a6jqkHYHd8o0+5H4bqdi9hInZdk0+swuXs",
+                },
+                type: "m.room.encrypted",
+                sender: "@bob:example.org",
+            };
+
+            let toDeviceEvents = [utdEvent];
+
+            const received = await m.receiveSyncChanges(
+                JSON.stringify(toDeviceEvents),
+                new DeviceLists(),
+                new Map<string, number>(),
+                undefined,
+            );
+
+            const receivedToDevices = JSON.parse(received);
+            expect(receivedToDevices).toBeInstanceOf(Array);
+            const receivedToDeviceArray: Array<any> = receivedToDevices;
+            expect(receivedToDeviceArray.length).toBe(1);
+            const toDeviceEvent = receivedToDeviceArray[0];
+
+            expect(toDeviceEvent.sender).toEqual("@bob:example.org");
+            expect(toDeviceEvent.type).toEqual("m.room.encrypted");
+            expect(toDeviceEvent.content.ciphertext).toBeDefined();
+        });
+
+        test("Should return the clear text version of decrypted events", async () => {
+            const aliceUserId = new UserId("@alice:example.org");
+            const aliceDeviceId = new DeviceId("ALICE_DEV");
+
+            const bobUserId = new UserId("@bob:example.org");
+            const bobDeviceId = new DeviceId("BOB_DEV");
+
+            const alice = await machine(aliceUserId, aliceDeviceId);
+            const bob = await machine(bobUserId, bobDeviceId);
+
+            const [keysUploadRequest, keysQueryRequest] = await bob.outgoingRequests();
+            expect(keysUploadRequest).toBeInstanceOf(KeysUploadRequest);
+            expect(keysQueryRequest).toBeInstanceOf(KeysQueryRequest);
+            const keysUploadBody = JSON.parse(keysUploadRequest.body);
+            const otks = Object.values(keysUploadBody.one_time_keys);
+            await bob.markRequestAsSent(
+                keysUploadRequest.id!,
+                keysUploadRequest.type,
+                JSON.stringify({
+                    one_time_key_counts: {
+                        signed_curve25519: otks.length,
+                    },
+                }),
+            );
+
+            // Let Alice know about bob keys
+            await alice.markRequestAsSent(
+                "SomeUniqueId",
+                RequestType.KeysQuery,
+                JSON.stringify({
+                    device_keys: {
+                        "@bob:example.org": {
+                            BOB_DEV: keysUploadBody.device_keys,
+                        },
+                    },
+                    failures: {},
+                }),
+            );
+
+            // Let Alice claim one otk for bob to establish the olm session
+            const [otkId, otk] = Object.entries(keysUploadBody.one_time_keys)[0];
+            await alice.markRequestAsSent(
+                "foo",
+                RequestType.KeysClaim,
+                JSON.stringify({
+                    one_time_keys: {
+                        "@bob:example.org": {
+                            BOB_DEV: {
+                                [otkId]: otk,
+                            },
+                        },
+                    },
+                }),
+            );
+
+            {
+                // Let bob be aware of alice device
+                // If not olm decryption will fail because of MissingSigningKeys
+                const [keysUploadRequest, keysQueryRequest] = await alice.outgoingRequests();
+                const keysUploadBody = JSON.parse(keysUploadRequest.body);
+                await bob.markRequestAsSent(
+                    "SomeUniqueId",
+                    RequestType.KeysQuery,
+                    JSON.stringify({
+                        device_keys: {
+                            "@alice:example.org": {
+                                ALICE_DEV: keysUploadBody.device_keys,
+                            },
+                        },
+                        failures: {},
+                    }),
+                );
+            }
+
+            const aliceBobDevice = (await alice.getDevice(bobUserId, bobDeviceId))!;
+            const encryptedContent = await aliceBobDevice.encryptToDeviceEvent("custom.type", {
+                foo: "bar",
+            });
+
+            const encryptedToDevice = {
+                type: "m.room.encrypted",
+                content: JSON.parse(encryptedContent),
+                sender: "@alice:example.org",
+            };
+
+            // Bob should be able to decrypt this
+
+            const received = await bob.receiveSyncChanges(
+                JSON.stringify([encryptedToDevice]),
+                new DeviceLists(),
+                new Map<string, number>(),
+                undefined,
+            );
+
+            const receivedToDevices = JSON.parse(received);
+            expect(receivedToDevices).toBeInstanceOf(Array);
+            const receivedToDeviceArray: Array<any> = receivedToDevices;
+            expect(receivedToDeviceArray.length).toBe(1);
+            const toDeviceEvent = receivedToDeviceArray[0];
+
+            expect(toDeviceEvent.sender).toEqual("@alice:example.org");
+            expect(toDeviceEvent.type).toEqual("custom.type");
+            expect(toDeviceEvent.content.foo).toEqual("bar");
+        });
+    });
 });
