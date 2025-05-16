@@ -52,7 +52,7 @@ let modPromise = null;
 /**
  * Loads and instantiates the WASM module asynchronously
  *
- * @param {URL} url - The URL to fetch the WebAssembly module from
+ * @param {URL | string} url - The URL to fetch the WebAssembly module from
  * @returns {Promise<void>}
  */
 async function loadModuleAsync(url) {
@@ -71,7 +71,7 @@ async function loadModuleAsync(url) {
  *
  * Returns a promise which will resolve once the other methods are ready.
  *
- * @param {URL} [url] - The URL to fetch the WebAssembly module from. If not provided, a default URL will be used.
+ * @param {URL | string} [url] - The URL to fetch the WebAssembly module from. If not provided, a default URL will be used.
  * @returns {Promise<void>}
  */
 export async function initAsync(url = defaultURL) {
