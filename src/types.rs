@@ -362,3 +362,70 @@ impl From<&RoomSettings> for matrix_sdk_crypto::store::RoomSettings {
         }
     }
 }
+
+/// Represent the type of {@link ProcessedToDeviceEvent}.
+#[wasm_bindgen]
+#[derive(Debug, Clone)]
+pub enum ProcessedToDeviceEventType {
+    /// A successfully-decrypted encrypted event.
+    Decrypted,
+
+    /// An encrypted event which could not be decrypted.
+    UnableToDecrypt,
+
+    /// An unencrypted event (sent in clear).
+    PlainText,
+
+    /// An invalid to device event that was ignored because it is missing some
+    /// required information to be processed (like no event `type` for
+    /// example)
+    Invalid,
+}
+
+/// Represent a ToDevice event after it has been processed by {@link
+/// OlmMachine#receiveSyncChanges}.
+#[wasm_bindgen(getter_with_clone)]
+#[derive(Debug, Clone)]
+pub struct ProcessedToDeviceEvent {
+    /// The type of processed event
+    #[wasm_bindgen(getter_with_clone, js_name = "type")]
+    pub processed_type: ProcessedToDeviceEventType,
+
+    /// A JSON-encoded string containing the processed event.
+    /// For the `Decrypted` type this will be the decrypted event as if it was
+    /// sent in clear (For room keys or secrets some part of the content might
+    /// have been zeroize'd).
+    #[wasm_bindgen(readonly, js_name = "wireEvent")]
+    pub wire_event: JsString,
+}
+
+impl From<matrix_sdk_crypto::types::ProcessedToDeviceEvent> for ProcessedToDeviceEvent {
+    fn from(value: matrix_sdk_crypto::types::ProcessedToDeviceEvent) -> Self {
+        match value {
+            matrix_sdk_crypto::types::ProcessedToDeviceEvent::Decrypted(decrypted_event) => {
+                ProcessedToDeviceEvent {
+                    processed_type: ProcessedToDeviceEventType::Decrypted,
+                    wire_event: decrypted_event.json().get().to_owned().into(),
+                }
+            }
+            matrix_sdk_crypto::types::ProcessedToDeviceEvent::UnableToDecrypt(utd) => {
+                ProcessedToDeviceEvent {
+                    processed_type: ProcessedToDeviceEventType::UnableToDecrypt,
+                    wire_event: utd.json().get().to_owned().into(),
+                }
+            }
+            matrix_sdk_crypto::types::ProcessedToDeviceEvent::PlainText(plain) => {
+                ProcessedToDeviceEvent {
+                    processed_type: ProcessedToDeviceEventType::PlainText,
+                    wire_event: plain.json().get().to_owned().into(),
+                }
+            }
+            matrix_sdk_crypto::types::ProcessedToDeviceEvent::Invalid(invalid) => {
+                ProcessedToDeviceEvent {
+                    processed_type: ProcessedToDeviceEventType::Invalid,
+                    wire_event: invalid.json().get().to_owned().into(),
+                }
+            }
+        }
+    }
+}

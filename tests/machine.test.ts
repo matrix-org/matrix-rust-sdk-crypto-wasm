@@ -20,6 +20,7 @@ import {
     MegolmDecryptionError,
     OlmMachine,
     OwnUserIdentity,
+    ProcessedToDeviceEventType,
     RequestType,
     RoomId,
     RoomKeyWithheldInfo,
@@ -306,8 +307,11 @@ describe(OlmMachine.name, () => {
         const oneTimeKeyCounts = new Map();
         const unusedFallbackKeys = new Set();
 
-        const receiveSyncChanges = JSON.parse(
-            await m.receiveSyncChanges(toDeviceEvents, changedDevices, oneTimeKeyCounts, unusedFallbackKeys),
+        const receiveSyncChanges = await m.receiveSyncChanges(
+            toDeviceEvents,
+            changedDevices,
+            oneTimeKeyCounts,
+            unusedFallbackKeys,
         );
 
         expect(receiveSyncChanges).toEqual([]);
@@ -319,8 +323,11 @@ describe(OlmMachine.name, () => {
         const changedDevices = new DeviceLists();
         const oneTimeKeyCounts = new Map();
 
-        const receiveSyncChanges = JSON.parse(
-            await m.receiveSyncChanges(toDeviceEvents, changedDevices, oneTimeKeyCounts, undefined),
+        const receiveSyncChanges = await m.receiveSyncChanges(
+            toDeviceEvents,
+            changedDevices,
+            oneTimeKeyCounts,
+            undefined,
         );
 
         expect(receiveSyncChanges).toEqual([]);
@@ -333,8 +340,11 @@ describe(OlmMachine.name, () => {
         const oneTimeKeyCounts = new Map();
         const unusedFallbackKeys = new Set();
 
-        const receiveSyncChanges = JSON.parse(
-            await m.receiveSyncChanges(toDeviceEvents, changedDevices, oneTimeKeyCounts, unusedFallbackKeys),
+        const receiveSyncChanges = await m.receiveSyncChanges(
+            toDeviceEvents,
+            changedDevices,
+            oneTimeKeyCounts,
+            unusedFallbackKeys,
         );
 
         expect(receiveSyncChanges).toEqual([]);
@@ -1629,11 +1639,11 @@ describe(OlmMachine.name, () => {
                 undefined,
             );
 
-            const receivedToDevices = JSON.parse(received);
-            expect(receivedToDevices).toBeInstanceOf(Array);
-            const receivedToDeviceArray: Array<any> = receivedToDevices;
-            expect(receivedToDeviceArray.length).toBe(1);
-            const toDeviceEvent = receivedToDeviceArray[0];
+            expect(received.length).toBe(1);
+            const processed = received[0];
+            expect(processed.type).toEqual(ProcessedToDeviceEventType.PlainText);
+
+            let toDeviceEvent = JSON.parse(processed.wireEvent);
 
             expect(toDeviceEvent.sender).toEqual("@alice:example.com");
             expect(toDeviceEvent.type).toEqual("custom.type");
@@ -1649,7 +1659,7 @@ describe(OlmMachine.name, () => {
                 content: {
                     "algorithm": "m.olm.v1.curve25519-aes-sha2",
                     "ciphertext": {
-                        aliceCurve: {
+                        [aliceCurve]: {
                             // this payload is just captured from a sync of some other element web with other users
                             body: "Awogjvpx458CGhuo77HX/+tp1sxgRoCi7iAlzMvfrpbWoREQAiKACysX/p+ojr5QitCi9WRXNyamW2v2LTvoyWKtVaA2oHnYGR5s5RYhDfnIgh5MMSqqKlAbfqLvrbLovTYcKagCBbFnbA43f6zYM44buGgy8q70hMVH5WP6aK1E9Z3DVZ+8PnXQGpsrxvz2IsL6w0Nzl/qUyBEQFcgkjoDPawbsZRCllMgq2LQUyqlun6IgDTCozqsfxhDWpdfYGde4z16m34Ang7f5pH+BmPrFs6E1AO5+UbhhhS6NwWlfEtA6/9yfMxWLz1d2OrLh+QG7lYFAU9/CzIoPxaHKKr4JxgL9CjsmUPyDymWOWHP0jLi1NwpOv6hGpx0FgM7jJIMk6gWGgC5rEgEeTIwdrJh3F9OKTNSva5hvD9LomGk6tZgzQG6oap1e3wiOUyTt6S7BlyMppIu3RlIiNihZ9e17JEGiGDXOXzMJ6ISAgvGVgTP7+EvyEt2Wt4du7uBo/UvljRvVNu3I8tfItizPAOlvz460+aBDxk+sflJWt7OnhiyPnOCfopb+1RzqKVCnnPyVaP2f4BPf8qpn/f5YZk+5jJgBrGPiHzzmb3sQ5pC470s6+U3MpVFlFTG/xPBtMRMwPsbKoHfnRPqIqGu5dQ1Sw7T6taDXWjP450TvjxgHK5t2z1rLA2SXzAB1P8xbi6YXqQwxL6PvMNHn/TM0jiIQHYuqg5/RKLyhHybfP8JAjgNBw9z16wfKR/YoYFr7c+S4McQaMNa8v2SxGzhpCC3duAoK2qCWLEkYRO5cMCsGm/9bf8Q+//OykygBU/hdkT1eHUbexgALPLdfhzduutU7pbChg4T7SH7euh/3NLmS/SQvkmPfm3ckbh/Vlcj9CsXws/7MX/VJbhpbyzgBNtMnbG6tAeAofMa6Go/yMgiNBZIhLpAm31iUbUhaGm2IIlF/lsmSYEiBPoSVfFU44tetX2I/PBDGiBlzyU+yC2TOEBwMGxBE3WHbIe5/7sKW8xJF9t+HBfxIyW1QRtY3EKdEcuVOTyMxYzq3L5OKOOtPDHObYiiXg00mAgdQqgfkEAIfoRCOa2NYfTedwwo0S77eQ1sPvW5Hhf+Cm+bLibkWzaYHEZF+vyE9/Tn0tZGtH07RXfUyhp1vtTH49OBZHGkb/r+L8OjYJTST1dDCGqeGXO3uwYjoWHXtezLVHYgL+UOwcLJfMF5s9DQiqcfYXzp2kEWGsaetBFXcUWqq4RMHqlr6QfbxyuYLlQzc/AYA/MrT3J6nDpNLcvozH3RcIs8NcKcjdtjvgL0QGThy3RcecJQEDx3STrkkePL3dlyFCtVsmtQ0vjBBCxUgdySfxiobGGnpezZYi7q+Xz61GOZ9QqYmkcZOPzfNWeqtmzB7gqlH1gkFsK2yMAzKq2XCDFHvA7YAT3yMGiY06FcQ+2jyg7Bk2Q+AvjTG8hlPlmt6BZfW5cz1qx1apQn1qHXHrgfWcI52rApYQlNPOU1Uc8kZ8Ee6XUhhXBGY1rvZiKjKFG0PPuS8xo4/P7/u+gH5gItmEVDFL6giYPFsPpqAQkUN7hFoGiVZEjO4PwrLOmydsEcNOfACqrnUs08FQtvPg0sjHnxh6nh6FUQv93ukKl6+c9d+pCsN2xukrQ7Dog3nrjFZ6PrS5J0k9rDAOwTB55sfGXPZ2rATOK1WS4XcpsCtqwnYm4sGNc8ALMQkQ97zCnw8TcQwLvdUMlfbqQ5ykDQpQD68fITEDDHmBAeTCjpC713E6AhvOMwTJvjhd7hSkeOTRTmn9zXIVGNo1jSr8u0xO9uLGeWsV0+UlRLgp7/nsgfermjwNN8wj6MW3DHGS8UzzYfe9TGCeywqqIUTqgfXY48leGgB7twh4cl4jcOQniLATTvigIAQIvq/Uv8L45BGnkpKTdQ5F73gehXdVA",
                             type: 1,
@@ -1671,15 +1681,72 @@ describe(OlmMachine.name, () => {
                 undefined,
             );
 
-            const receivedToDevices = JSON.parse(received);
-            expect(receivedToDevices).toBeInstanceOf(Array);
-            const receivedToDeviceArray: Array<any> = receivedToDevices;
-            expect(receivedToDeviceArray.length).toBe(1);
-            const toDeviceEvent = receivedToDeviceArray[0];
+            expect(received.length).toBe(1);
+            const processed = received[0];
+            expect(processed.type).toEqual(ProcessedToDeviceEventType.UnableToDecrypt);
+
+            let toDeviceEvent = JSON.parse(processed.wireEvent);
 
             expect(toDeviceEvent.sender).toEqual("@bob:example.org");
             expect(toDeviceEvent.type).toEqual("m.room.encrypted");
             expect(toDeviceEvent.content.ciphertext).toBeDefined();
+        });
+
+        test("Should return invalid event properly", async () => {
+            const m = await machine();
+
+            let eventWithNoType = {
+                sender: "@alice:example.com",
+                content: {
+                    algorithm: "m.megolm.v1.aes-sha2",
+                    code: "m.unverified",
+                    reason: "Device not verified",
+                    room_id: "!Cuyf34gef24t:localhost",
+                    sender_key: "RF3s+E7RkTQTGF2d8Deol0FkQvgII2aJDf3/Jp5mxVU",
+                    session_id: "X3lUlvLELLYxeTx4yOVu6UDpasGEVO0Jbu+QFnm0cKQ",
+                },
+            };
+
+            const eventWithMalformedCurveKey = {
+                content: {
+                    "algorithm": "m.olm.v1.curve25519-aes-sha2",
+                    "ciphertext": {
+                        INVALID_CURVE: {
+                            // this payload is just captured from a sync of some other element web with other users
+                            body: "Awogjvpx458CGhuo77HX/",
+                            type: 1,
+                        },
+                    },
+                    "org.matrix.msgid": "93ee0170aa7740d0ac9ee137e820302d",
+                    "sender_key": "WJ6Ce7U67a6jqkHYHd8o0+5H4bqdi9hInZdk0+swuXs",
+                },
+                type: "m.room.encrypted",
+                sender: "@bob:example.org",
+            };
+
+            let toDeviceEvents = [eventWithNoType, eventWithMalformedCurveKey];
+
+            const received = await m.receiveSyncChanges(
+                JSON.stringify(toDeviceEvents),
+                new DeviceLists(),
+                new Map<string, number>(),
+                undefined,
+            );
+
+            expect(received.length).toBe(2);
+            const processed0 = received[0];
+            expect(processed0.type).toEqual(ProcessedToDeviceEventType.Invalid);
+            const processed1 = received[1];
+            expect(processed1.type).toEqual(ProcessedToDeviceEventType.Invalid);
+
+            let toDeviceEvent0 = JSON.parse(processed0.wireEvent);
+            expect(toDeviceEvent0.sender).toEqual("@alice:example.com");
+            expect(toDeviceEvent0.content).toBeDefined();
+            expect(toDeviceEvent0.type).toBeUndefined();
+
+            let toDeviceEvent1 = JSON.parse(processed1.wireEvent);
+            expect(toDeviceEvent1.sender).toEqual("@bob:example.org");
+            expect(toDeviceEvent1.type).toEqual("m.room.encrypted");
         });
 
         test("Should return the clear text version of decrypted events", async () => {
@@ -1776,12 +1843,11 @@ describe(OlmMachine.name, () => {
                 undefined,
             );
 
-            const receivedToDevices = JSON.parse(received);
-            expect(receivedToDevices).toBeInstanceOf(Array);
-            const receivedToDeviceArray: Array<any> = receivedToDevices;
-            expect(receivedToDeviceArray.length).toBe(1);
-            const toDeviceEvent = receivedToDeviceArray[0];
+            expect(received.length).toBe(1);
+            const processed = received[0];
+            expect(processed.type).toEqual(ProcessedToDeviceEventType.Decrypted);
 
+            let toDeviceEvent = JSON.parse(processed.wireEvent);
             expect(toDeviceEvent.sender).toEqual("@alice:example.org");
             expect(toDeviceEvent.type).toEqual("custom.type");
             expect(toDeviceEvent.content.foo).toEqual("bar");
